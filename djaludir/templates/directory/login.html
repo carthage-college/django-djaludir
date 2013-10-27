@@ -1,0 +1,39 @@
+{% extends "alumniapps/base.html" %}
+
+{% block styles %}
+    <style type="text/css">
+        fieldset {border:0;width:30em;}
+        label {float:left;width:6em;}
+        .form-row {clear:both;margin-bottom:.3em;}
+        .achtung {background-color:#FFFF00;color:#CC0000;font-weight:bold;padding:.5em;}
+    </style>
+{% endblock %}
+
+{% block second %}
+    {% if message %}<div class="achtung">{{message}}</div>{% endif %}
+    <form action="/alumni/apps/login/" method="post">
+        <fieldset>
+            <div class="form-row">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" />
+            </div>
+            <div class="form-row">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" />
+            </div>
+            <div class="form-row">
+                <input type="submit" name="submit" value="Login" />
+            </div>
+        </fieldset>
+    </form>
+    <p>If you do not already have an account, please <a href="directory/newacct/">create one</a>.</p>
+{% endblock %}
+
+{% block rightblockcontent %}
+    <p>If you have any questions about the Alumni Directory, please contact <a href="mailto:lhansen@carthage.edu">lhansen@carthage.edu</a></p>
+    <p>As always, you may contact the Alumni Office by email at <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>, by phone at 800-551-1518, or by stopping in to see us in Lentz Hall, #414.</p>
+    <p>The <a href="/alumni/distinguished-alumni/nomination/">Distinguished Alumni Nomination Form</a> is now on-line!</p>
+
+    <p>The new <a href="/alumni/apps/">Alumni Directory</a> is now on-line!</p>
+    <p>Visit the <a href="/giving">online giving</a> pages</p>
+{% endblock %}

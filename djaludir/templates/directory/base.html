@@ -1,0 +1,79 @@
+{% extends "carthage/douglasfir.html" %}
+
+{% block pagetitle %} Directory :: Alumni :: Carthage{% endblock %}
+
+{% block styles %}
+    <style type="text/css">
+        fieldset {border:0;padding:0;margin-bottom:1em;width:30em;}
+        label {float:left;width:11em;padding-right:.5em;}
+        option {font-size:.8em;}
+        select {font-size:1em;}
+        th {text-align:left;}
+        td, th {padding:5px;}
+        .clear {clear:both;}
+        .form-row {clear:both;padding-left:.2em;padding-bottom:.3em;}
+        .header {
+            background-color:#CAD29F;
+            color:#CC0000;
+            font-weight:bold;
+            padding:.2em;
+            font-size:1.3em;
+            border-bottom:.05em solid #000000;
+            margin-bottom:.4em;
+            text-indent:.2em;
+        }
+        .message {background-color:#FFFF00;color:#CC0000;font-weight:bold;padding:.5em;}
+        #rightlinks {list-style-type:none;margin:0;padding:0;}
+            #rightlinks li {padding-bottom:1em;}
+    </style>
+{% endblock %}
+
+{% block leftnav %}
+<ul class="sf-vertical" id="nav">
+    <li><a href="/alumni/">Alumni</a></li>
+    <li><a href="http://www.carthage.edu/alumni/apps/">Alumni Directory</a></li>
+    <li><a href="/alumni/social/">Stay Connected</a></li>
+    <li class="last-featured"><a href="/alumni/calendar/">Upcoming Events</a></li>
+    <li><a href="http://www.carthage.edu/alumni/110/">1-10 Club</a></li>
+    <li><a href="/alumni/ambassadors/">Alumni Ambassadors</a></li>
+    <li><a href="/alumni/mission/">Alumni Association</a>
+        <ul>
+            <li><a href="/alumni/mission/">Mission</a></li>
+            <li><a href="/alumni/alumnicouncil/">Alumni Council</a></li>
+            <li><a href="/alumni/bylaws/">Bylaws</a></li>
+        </ul>
+    </li>
+    <li><a href="/alumni/credit-card/">Carthage Credit Card</a></li>
+    <li><a href="http://www.carthage.edu/alumni/apps/classnotes/">Class Notes</a></li>
+    <li><a href="/alumni/distinguished-alumni/">Distinguished Alumni Awards</a></li>
+    <li><a href="/give/">Gifts to Carthage</a></li>
+    <li><a href="http://www.alumnilabels.com/session.php?sel_univ=00008">Order Alumni Address Labels</a></li>
+    <li><a href="/alumni/galleries/">Photo Gallery</a>
+        <ul>
+            <li><a href="/alumni/galleries/2010-brewer-game/">Brewer/Cubs Game September 2010</a></li>
+            <li><a href="/alumni/galleries/homecoming-2010">Homecoming October 2010</a></li>
+        </ul>
+    </li>
+    <li><a href="/academics/registrar/transcripts/">Transcripts</a></li>
+    <li><a href="/alumni/travel/">Travel</a></li>
+</ul>
+{% endblock %}
+
+{% block sitetitle %}Alumni - Directory{% endblock %}
+
+{% block second %}{{maincontent}}{% endblock %}
+
+{% block third %}
+    <div id="third">
+        <div class="buffer">
+            <ul id="rightlinks">
+                <li>{% if session.loggedin %}<a href="/alumni/apps/logout/">Logout</a></li>{% else %}<a href="/alumni/apps/">Login</a></li>{% endif %}
+                <li><a href="/alumni/apps/directory/search/">Search Users</a></li>
+                <li><a href="/alumni/apps/directory/listing/">Alphabetical List</a></li>
+                {% if not session.is_superuser %}<li><a href="/alumni/apps/directory/edit/">Edit my personal info</a></li>{% endif %}
+                {% if session.is_superuser %}<li><a href="/alumni/apps/directory/passsearch/">Password Administrator</a></li>{% endif %}
+            </ul>
+            {% block rightblockcontent %}{{rightblockcontent}}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

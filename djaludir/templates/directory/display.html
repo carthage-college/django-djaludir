@@ -1,0 +1,111 @@
+{% extends "alumniapps/base.html" %}
+{% load directory_functions %}
+
+{% block styles %}
+    {{block.super}}
+    <style type="text/css">
+            fieldset {border:.1em solid #000000;}
+            label {width:auto;font-weight:bold;}
+            .business_address {width:9em;}
+            .home_address {width:7.2em;}
+            .relative {width:4em;}
+    </style>
+{% endblock %}
+
+{% block second %}
+    <fieldset>
+            <div class="form-row header">Personal Information</div>
+            <div class="form-row">
+                    <label>Name:</label>{{person.prefix}} {{person.fname}} {% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %} {{person.lname}} {{person.s$
+            </div>
+            {% if person.email and person|may_display:"email" %}<div class="form-row"><label>Email:</label><a href="mailto:{{person.email}}">{{person.email}}</a></div>{% endif %}
+    </fieldset>
+    {% if relatives %}
+    <fieldset>
+            <div class="form-row header">Family</div>
+            {% if person.relation_name1 %}
+            <div class="form-row">
+                    <label>Relative:</label>{{person.relation_name1}}
+                            {% if person.relation_type1 and person|may_display:"relation_type1" %}({{person.relation_type1}}){% endif %}<br />
+                    <label class="relative">&nbsp;</label>
+                    {% ifnotequal person.relation_birth1 olddate %}
+                            {% if person|may_display:"relation_birth1" %}DOB: {{person.relation_birth1|date:"F j, Y"}}{% endif %}
+                    {% endifnotequal %}
+            </div>
+            {% endif %}
+    </fieldset>
+
+    <fieldset>
+            <div class="form-row header">Academics</div>
+            {% if person.degree and person|may_display:"degree" %}<div class="form-row"><label>Degree:</label>{{person.degree}}</div>{% endif %}
+            {% if person.class_year and person|may_display:"class_year" %}<div class="form-row"><label>Class year:</label>{{person.class_year}}</div>{% endif %}
+            {% if person.major1 and person|may_display:"major1" %}<div class="form-row"><label>Major 1:</label>{{person.major1}}</div>{% endif %}
+            {% if person.major2 and person|may_display:"major2" %}<div class="form-row"><label>Major 2:</label>{{person.major2}}</div>{% endif %}
+            {% if person.major3 and person|may_display:"major3" %}<div class="form-row"><label>Major 3:</label>{{person.major3}}</div>{% endif %}
+            {% if person.honorary_degree and person|may_display:"honorary_degree" %}<div class="form-row"><label>Honorary Degree Received:</label>{{person.honorary_degree}}</div>{% endif %}
+            {% if person.distinguished_alumni and person|may_display:"distinguished_alumni" %}<div class="form-row"><label>Distinguished Alumni Award Received:</label>{{person.distinguished_alumni}}</div>{% endif %}
+            {% if person.masters_grad_year and person|may_display:"masters_grad_year" %}<div class="form-row"><label>Masters Graduation Year:</label>{{person.masters_grad_year}}</div>{% endif %}
+            {% if person|show_orgs %}
+            <div class="form-row">
+                    <label>Student Organization{{orgs|pluralize}}:</label><br />
+                    <ul>
+                            {% if person.student_organization1 and person|may_display:"student_organization1" %}<li>{{person.student_organization1}}</li>{% endif %}
+                            {% if person.student_organization2 and person|may_display:"student_organization2" %}<li>{{person.student_organization2}}</li>{% endif %}
+                            {% if person.student_organization3 and person|may_display:"student_organization3" %}<li>{{person.student_organization3}}</li>{% endif %}
+                            {% if person.student_organization4 and person|may_display:"student_organization4" %}<li>{{person.student_organization4}}</li>{% endif %}
+                            {% if person.student_organization5 and person|may_display:"student_organization5" %}<li>{{person.student_organization5}}</li>{% endif %}
+                    </ul>
+            </div>
+            {% endif %}
+            {% if person|show_teams %}
+            <div class="form-row">
+                    <label>Athletic Team{{teams|pluralize}}:</label><br />
+                    <ul>
+                            {% if person.athletic_team1 and person|may_display:"athletic_team1" %}<li>{{person.athletic_team1}}</li>{% endif %}
+                            {% if person.athletic_team2 and person|may_display:"athletic_team2" %}<li>{{person.athletic_team2}}</li>{% endif %}
+                            {% if person.athletic_team3 and person|may_display:"athletic_team3" %}<li>{{person.athletic_team3}}</li>{% endif %}
+                            {% if person.athletic_team4 and person|may_display:"athletic_team4" %}<li>{{person.athletic_team4}}</li>{% endif %}
+                            {% if person.athletic_team5 and person|may_display:"athletic_team5" %}<li>{{person.athletic_team5}}</li>{% endif %}
+                    </ul>
+            </div>
+            {% endif %}
+    </fieldset>
+    {% if person|has_professional %}
+    <fieldset>
+            <div class="form-row header">Professional Information</div>
+            {% if person.job_title and person|may_display:"job_title" %}<div class="form-row"><label>Job title:</label>{{person.job_title}}</div>{% endif %}
+            {% if person.business_name and person|may_display:"business_name" %}<div class="form-row"><label>Business name:</label>{{person.business_name}}</div>{% endif %}
+            {% if person|show_work_add %}
+            <div class="form-row">
+                    <label>Business address:</label>{% if person.business_address and person|may_display:"business_address" %}{{person.business_address}}<br />{% endif %}
+                    {% if pseron.business_address and person|may_display:"business_address" and person|has_business_location %}<label class="business_address">&nbsp;</label>
+                            {% if person.business_city and person|may_display:"business_city" %}{{person.business_city}}, {% endif %}
+                            {% if person.business_state and person|may_display:"business_state" %}{{person.business_state}} {% endif %}
+                            {% if person.business_zip and person|may_display:"business_zip" %} {{person.business_zip}}{% endif %}
+                    {% endif %}
+            </div>
+            {% endif %}
+            {% if person.business_phone and person|may_display:"business_phone" %}
+            <div class="form-row">
+                    <label>Business phone:</label>{{person.business_phone}}
+            </div>
+            {% endif %}
+    </fieldset>
+    {% endif %}
+    <fieldset>
+            <div class="form-row header">Address</div>
+            {% if person.home_phone and person|may_display:"home_phone" %}
+            <div class="form-row">
+                    <label>Home phone:</label>{{person.home_phone}}
+            </div>
+            {% endif %}
+            <div class="form-row">
+                    {% if person.home_address1 or person.home_address2 or person.home_address3 %}
+                            {% if person|may_display:"home_address1" %}<label>Home address:</label>{{person.home_address1}}<br />{% endif %}
+                            {% if person.home_address2 and person|may_display:"home_address2" %}<label class="home_address">&nbsp;</label>{{person.home_address2}}<br />{% endif %}
+                            {% if person.home_address3 and person|may_display:"home_address3" %}<label class="home_address">&nbsp;</label>{{person.home_address3}}<br />{% endif %}
+                    {% endif %}
+                    {% if person|may_display:"home_address1" %}<label class="home_address">&nbsp;</label>{{person.home_city}}, {{person.home_state}} {{person.home_zip}}{% endif %}
+            </div>
+    </fieldset>
+{% endblock %}

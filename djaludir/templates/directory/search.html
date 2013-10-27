@@ -1,0 +1,84 @@
+{% extends "alumniapps/base.html" %}
+
+{% block styles %}
+    {{block.super}}
+    <style type="text/css">
+        .center {text-align:center;font-size:14px;font-weight:bold;}
+    </style>
+    <script type="text/javascript">
+        var MAX_CRITERIA = 5;
+        var criteria = 1;
+
+        function createOption(value, text){
+            var obj = document.createElement('OPTION');
+            obj.value = value;
+            obj.text = text;
+            return obj;
+        }
+
+        function createBlock(){
+            if(criteria <= MAX_CRITERIA){
+                var divObj = document.createElement('DIV');
+                divObj.className = 'form-row';
+                divObj.id = 'search' + criteria;
+                var selectObj = document.createElement('SELECT');
+                selectObj.name = 'within' + criteria;
+                var optionArr = new Array();
+                optionArr[0] = createOption('fname','First Name');
+                optionArr[1] = createOption('lname','Last Name');
+                optionArr[2] = createOption('class_year','Class year');
+                optionArr[3] = createOption('home_state','Home State');
+                optionArr[4] = createOption('home_city','Home City');
+                optionArr[5] = createOption('carthage_id','ID Number');
+                optionArr[6] = createOption('birth_lname','Maiden Name');
+                optionArr[7] = createOption('activity','Activity/Sport');
+                optionArr[8] = createOption('major1','Primary Major');
+                optionArr[9] = createOption('major2','Secondary Major');
+                optionArr[10] = createOption('job_title','Job Title');
+
+                for(var i = 0; i < optionArr.length; i++)
+                    selectObj.options[selectObj.options.length] = optionArr[i];
+                divObj.appendChild(selectObj);
+                divObj.appendChild(document.createTextNode(' contains '));
+                var txtInputObj = document.createElement('INPUT');
+                txtInputObj.type = 'text';
+                txtInputObj.name = 'term' + criteria;
+                txtInputObj.size = '15';
+                divObj.appendChild(txtInputObj);
+                if(criteria < MAX_CRITERIA){
+                    divObj.appendChild(document.createTextNode(' '));
+                    var addObj = document.createElement('INPUT');
+                    addObj.type = 'button';
+                    addObj.name = 'add_search' + criteria;
+                    addObj.value = 'ADD';
+                    addObj.onclick = createBlock;
+                    divObj.appendChild(addObj);
+                }
+                document.getElementById('formfieldset').insertBefore(divObj,document.getElementById('submitrow'));
+                criteria++;
+            }
+        }
+        window.onload = createBlock;
+    </script>
+{% endblock %}
+{% block second %}
+        {% if message %}<div class="message">{{message}}</div>{% endif %}
+        <p>Search:</p>
+        <form action="." method="post">
+            <fieldset id="formfieldset">
+                <div id="submitrow" class="form-row">
+                    <input type="submit" name="submit" value="Search" />
+                </div>
+            </fieldset>
+        </form>
+
+        {% if matches %}
+        <table>
+            <tr><td colspan="5" class="center">{{matches|length}} match{{ matches|length|pluralize:"es"}}</td></tr>
+            <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Deceased</th><th>Action</th></tr>
+            {% for person in matches %}
+            <tr><td>{{person.class_year}}</td><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{% if person.is_deceased %}deceased{% endif %}</td><td><a href="/alumni/apps/directory/display/{{person.id}}/">Details</a>{% if sess$
+            {% endfor %}
+        </table>
+        {% endif %}
+{% endblock %}

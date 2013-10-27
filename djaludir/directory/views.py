@@ -5,6 +5,7 @@ from django.template import RequestContext, loader, Context
 
 from djtools.utils.mail import send_mail
 
+"""
 if settings.DEBUG:
     TO_LIST = ["larry@carthage.edu",]
 else:
@@ -26,3 +27,11 @@ def myview(request):
         form = MyForm()
     return render_to_response("myapp/form.html",
         {"form": form,}, context_instance=RequestContext(request))
+"""
+
+if settings.DEBUG:
+    TO_LIST = ["mkishline@carthage.edu",]
+else:
+    TO_LIST = ["mkishline@carthage.edu",]
+
+def edit(request):

@@ -1,0 +1,19 @@
+{% extends "alumniapps/base.html" %}
+{% block second %}
+        <h2>Listing people ({{records}} total)</h2>
+        {% if has_prev %}<a href='/alumni/apps/directory/listing/{{people.previous_page_number}}/'>Previous</a> | {% endif %}
+        {% ifequal firstpage 1 %}<a href='/alumni/apps/directory/listing/{{firstpage}}'>First</a> . . . {% endifequal %}
+        {% for pagenum in pagelist %}
+                {% ifnotequal pagenum page %}<a href='/alumni/apps/directory/listing/{{pagenum|add:"1"}}/'>{{pagenum|add:"1"}}</a>{% else %}{{pagenum|add:"1"}}{% endifnotequal %}
+        {% endfor %}
+        {% if has_next %}<a href="/alumni/apps/directory/listing/{{lastpage}}">Last</a> | <a href='/alumni/apps/directory/listing/{{page|add:"1"}}/'>Next</a>
+        {% else %}
+        <a href='/alumni/apps/directory/listing/{{firstpage}}'>First</a>
+        {% endif %}
+        <table>
+                <tr><th>First Name</th><th>Last Name</th><th>Year</th><th>Action</th></tr>
+        {% for person in people.object_list %}
+                <tr><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{{person.class_year}}</td><td><a href="/alumni/apps/directory/display/{{person.id}}">Details</a></td></tr>
+        {% endfor %}
+        </table>
+{% endblock %}

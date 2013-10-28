@@ -3,33 +3,10 @@ from django.conf import settings
 from django.db import models, connection
 from django.contrib.auth.models import User
 
-"""
-Model: ...
-"""
-
-"""
-class MyModel(models.Model):
-created_by = models.ForeignKey(User,verbose_name="Created by",related_name="created_by",editable=False,null=True,blank=True)
-updated_by = models.ForeignKey(User,verbose_name="Updated by",related_name="updated_by",editable=False,null=True,blank=True)
-created_at = models.DateTimeField("Date Created",auto_now_add=True)
-updated_at = models.DateTimeField("Date Updated",auto_now=True)
-
-class Meta:
-ordering = ['-created_at']
-get_latest_by = 'created_at'
-
-def __unicode__(self):
-"""
-        Default data for display
-        """
-return self.created_by.username
-
-@models.permalink
-def get_absolute_url(self):
-return ('myapp_detail', [str(self.id)])
-"""
-
 class Alumni(models.Model):
+    """
+    Model: Alumni
+    """
     carthage_id = models.IntegerField(verbose_name="Carthage ID#")
     fname = models.CharField(max_length=32, verbose_name="First name")
     lname = models.CharField(max_length=50, verbose_name="Last name")
@@ -66,8 +43,17 @@ class Alumni(models.Model):
     student_organizations = models.ManyToManyField(Organizations, related_name="org+")
     athletic_teams = models.ManyToManyField(Athletics, related_name="team+")
     user = models.ForeignKey(User, blank=False, null=False)
+    # meta
+    created_by = models.ForeignKey(User,verbose_name="Created by",related_name="created_by",editable=False,null=True,blank=True)
+    updated_by = models.ForeignKey(User,verbose_name="Updated by",related_name="updated_by",editable=False,null=True,blank=True)
+    created_at = models.DateTimeField("Date Created",auto_now_add=True)
+    updated_at = models.DateTimeField("Date Updated",auto_now=True)
 
-    def __str__(self):
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+
+    def __unicode__(self):
         return ("%s %s") % (self.fname, self.lname)
 
     def get_privacy(self):
@@ -141,7 +127,7 @@ class Organizations(model.Model):
     name = models.CharField(max_length="32", blank=False, null=False)
     active_date = models.DateField(blank=True, null=True)
     inactive_date = models.DateField(blank=True, null=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -151,7 +137,7 @@ class Athletics(model.Model):
     name = models.CharField(max_length="32", blank=False, null=False)
     active_date = models.DateField(blank=True, null=True)
     inactive_date = models.DateField(blank=True, null=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -174,7 +160,7 @@ class Relatives(model.Model):
     fname = models.CharField(max_length="32", verbose_name="Relation First Name", blank=False, null=False)
     lname = models.CharField(max_length="50", verbose_name="Relation Last Name", blank=True, null=True)
     dob = models.DateField(verbose_name="Relation Date of Birth", blank=True, null=True)
-    
+
     def __str__(self):
         return ("%s %s") % (self.fname, self.lname)
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Directory &mdash; Alumni &mdash; Carthage College{% endblock %}
+{% block extra_javascript %}
+<script type="text/javascript" charset="utf-8">
+$(function() {
+});
+</script>
+{% endblock %}
+{% block extra_style %}
+<style type="text/css">
+</style>
+{% endblock %}
+{% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
+{% block left_nav %}
+    {% include "left_nav.html" %}
+{% endblock %}
+{% block content %}
+<div id="second">
+    <div class="buffer">
+        <h1>Carthage Alumni Directory</h1>
+    </div>
+</div>
+{% endblock %}
+{% block sidebar %}
+    {% include "bridge/sidebar.html" %}
+{% endblock %}
+

@@ -7,8 +7,13 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    # my app
-    url(r'^directory/', include(djaludir.directory.urls)),
-    # redirect
-    url(r'^$', RedirectView.as_view(url="/foobar/")),
+    # alumni directory authentication
+    url(r'^authentication/', include(djaludir.authentication.urls)),
+    # alumni directory manager
+    url(r'^manager/', include(djaludir.manager.urls)),
+    # alumni registration
+    url(r'^registration/', include(djaludir.registration.urls)),
+    # home
+    #url(r'^$', RedirectView.as_view(url="/alumni/directory/home/")),
+    url(r'^$', "djaludir.core.views.home" name="alumni_directory_home"),
 )

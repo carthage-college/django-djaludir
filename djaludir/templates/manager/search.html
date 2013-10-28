@@ -1,10 +1,11 @@
-{% extends "alumniapps/base.html" %}
-
-{% block styles %}
+{% extends "core/home.html" %}
+{% block extra_styles %}
     {{block.super}}
     <style type="text/css">
         .center {text-align:center;font-size:14px;font-weight:bold;}
     </style>
+{% endblock %}
+{% block extra_javascript %}
     <script type="text/javascript">
         var MAX_CRITERIA = 5;
         var criteria = 1;
@@ -61,24 +62,24 @@
         window.onload = createBlock;
     </script>
 {% endblock %}
-{% block second %}
-        {% if message %}<div class="message">{{message}}</div>{% endif %}
-        <p>Search:</p>
-        <form action="." method="post">
-            <fieldset id="formfieldset">
-                <div id="submitrow" class="form-row">
-                    <input type="submit" name="submit" value="Search" />
-                </div>
-            </fieldset>
-        </form>
+{% block content %}
+    {% if message %}<div class="message">{{message}}</div>{% endif %}
+    <p>Search:</p>
+    <form action="." method="post">
+        <fieldset id="formfieldset">
+            <div id="submitrow" class="form-row">
+                <input type="submit" name="submit" value="Search" />
+            </div>
+        </fieldset>
+    </form>
 
-        {% if matches %}
-        <table>
-            <tr><td colspan="5" class="center">{{matches|length}} match{{ matches|length|pluralize:"es"}}</td></tr>
-            <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Deceased</th><th>Action</th></tr>
-            {% for person in matches %}
-            <tr><td>{{person.class_year}}</td><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{% if person.is_deceased %}deceased{% endif %}</td><td><a href="/alumni/apps/directory/display/{{person.id}}/">Details</a>{% if sess$
-            {% endfor %}
-        </table>
-        {% endif %}
+    {% if matches %}
+    <table>
+        <tr><td colspan="5" class="center">{{matches|length}} match{{ matches|length|pluralize:"es"}}</td></tr>
+        <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Deceased</th><th>Action</th></tr>
+        {% for person in matches %}
+        <tr><td>{{person.class_year}}</td><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{% if person.is_deceased %}deceased{% endif %}</td><td><a href="/alumni/apps/directory/display/{{person.id}}/">Details</a>{% if sess$
+        {% endfor %}
+    </table>
+    {% endif %}
 {% endblock %}

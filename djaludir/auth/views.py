@@ -2,8 +2,14 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-def home(request):
+def login(request):
     return render_to_response(
-        "core/home.html",
+        "auth/login.html",
+        context_instance=RequestContext(request)
+    )
+
+def logout(request):
+    return render_to_response(
+        "auth/logout.html",
         context_instance=RequestContext(request)
     )

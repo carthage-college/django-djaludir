@@ -1,10 +1,6 @@
-from django.conf.urls.defaults import *
-from django.contrib import admin
+from django.conf.urls import patterns, url
 
-#django discovery
-admin.autodiscover()
-
-urlpatterns = patterns('',
-    (r'^alumni/directory/display/(?P<student_id>\d+)/$','djaludir.directory.views.display'),
-    (r'^alumni/directory/search/$','djaludir.directory.views.search'),
+urlpatterns = patterns('djaludir.manager.views',
+    url(r'^display/(?P<student_id>\d+)/$','display', name="alumna_display"),
+    url(r'^search/$','search', name="manager_search"),
 )

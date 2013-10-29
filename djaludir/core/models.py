@@ -3,6 +3,25 @@ from django.conf import settings
 from django.db import models, connection
 from django.contrib.auth.models import User
 
+class Organizations(models.Model):
+    abbr = models.CharField(max_length="4", blank=False, null=False)
+    name = models.CharField(max_length="32", blank=False, null=False)
+    active_date = models.DateField(blank=True, null=True)
+    inactive_date = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Athletics(models.Model):
+    abbr = models.CharField(max_length="4", blank=False, null=False)
+    name = models.CharField(max_length="32", blank=False, null=False)
+    active_date = models.DateField(blank=True, null=True)
+    inactive_date = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 class Alumni(models.Model):
     """
     Model: Alumni
@@ -121,28 +140,7 @@ class Alumni(models.Model):
             num_teams = num_teams + 1
         return num_teams
 
-
-class Organizations(model.Model):
-    abbr = models.CharField(max_length="4" blank=False, null=False)
-    name = models.CharField(max_length="32", blank=False, null=False)
-    active_date = models.DateField(blank=True, null=True)
-    inactive_date = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Athletics(model.Model):
-    abbr = models.CharField(max_length="4", blank=False, null=False)
-    name = models.CharField(max_length="32", blank=False, null=False)
-    active_date = models.DateField(blank=True, null=True)
-    inactive_date = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Relatives(model.Model):
+class Relatives(models.Model):
     alum = models.ForeignKey(Alumni, blank=False, null=False)
     RELATION_CHOICES = (
         ('HW1','Wife'),
@@ -164,9 +162,17 @@ class Relatives(model.Model):
     def __str__(self):
         return ("%s %s") % (self.fname, self.lname)
 
+
 class Privacy(models.Model):
-    person = models.ForeignKey(Person, blank=False, null=False)
+    alumna = models.ForeignKey(Alumni, blank=False, null=False)
     info = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return "%s hiding %s" % (self.person, self.info)
+        return "%s hiding %s" % (self.alumna, self.info)
+
+# Globals
+
+import datetime
+
+YEARS =  [(x, x) for x in reversed(xrange(1926,datetime.date.today().year +1))]
+

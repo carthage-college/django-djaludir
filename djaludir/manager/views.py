@@ -34,4 +34,21 @@ if settings.DEBUG:
 else:
     TO_LIST = ["mkishline@carthage.edu",]
 
-def edit(request):
+def display(request):
+    return render_to_response(
+        "manager/display.html",
+        context_instance=RequestContext(request)
+    )
+
+def update(request):
+    return render_to_response(
+        "manager/update.html",
+        context_instance=RequestContext(request)
+    )
+
+def search(request):
+    return render_to_response(
+        "manager/search.html",
+        context_instance=RequestContext(request)
+    )
+

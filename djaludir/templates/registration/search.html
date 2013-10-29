@@ -1,0 +1,107 @@
+{% extends "core/home.html" %}
+{% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/2_column.css" rel="stylesheet" type="text/css" />{% endblock %}
+{% block extra_style %}
+<style type="text/css" media="screen, projection">
+#id_dob,#id_college_id {
+    width: 100px;
+}
+</style>
+{% endblock %}
+{% block extra_javascript %}
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    $("#last_name").blur(function(){
+        $.ajax({url: '{{ajax_url}}', type: 'POST'})
+        .done(function(response){
+            $("#ldap-results").html(response);
+        })
+    })
+});
+</script>
+{% endblock %}
+{% block content %}
+<div id="second">
+    <div class="buffer">
+        <h1>Carthage Alumni Directory Registration: Step 1</h1>
+        {% if form.errors %}
+            <p class="error">There were errors with the data submitted, see below.</p>
+        {% endif %}
+        <div class="span-10">
+        <form method="post" action="." class="form" id="profile">{% csrf_token %}
+            {% if prospect_status %}
+            <input type="hidden" name="prospect_status" value="{{prospect_status}}" />
+            {% endif %}
+            <fieldset class="blockLabels">
+                <ol>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_first_name">First name</label></h3>
+                        <div class="required">
+                            <input type="text" name="first_name" id="id_first_name" required="required" />
+                        </div>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_last_name">Last name</label></h3>
+                        <div class="required">
+                            <input type="text" name="last_name" id="id_last_name" required="required" />
+                        </div>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_previous_name">Previous name</label></h3>
+                        <input type="text" name="previous_name" id="id_previous_name" />
+                        <p class="help">e.g. Mainden name</p>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_email">Carthage Email address</label></h3>
+                        <input type="text" name="email" id="id_email" />
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_college_id">Carthage ID</label></h3>
+                        <input id="id_college_id" class="required" type="text" name="college_id">
+                        <p class="help">You can find it on the Alumni magazine mailing label.</p>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_dob">Date of birth</label></h3>
+                        <input id="id_dob" class="required" type="text" name="dob">
+                        <p class="help">Format: mm/dd/yyyy</p>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_start_year">Year you entered Carthage</label></h3>
+                        <select id="id_start_year" class="required" name="start_year">
+                            <option value="">-----</option>
+                            {% for y in years %}
+                            <option value="{{y.0}}">{{y.0}}</option>
+                            {% endfor %}
+                        </select>
+                    </li>
+                    <li class="ctrlHolder">
+                        <h3><label for="id_end_year">Year you left Carthage</label></h3>
+                        <select id="id_end_year" class="required" name="end_year">
+                            <option value="">-----</option>
+                            {% for y in years %}
+                            <option value="{{y.0}}">{{y.0}}</option>
+                            {% endfor %}
+                        </select>
+                    </li>
+                </ol>
+            </fieldset>
+            <fieldset class="blockLabels">
+                <ol>
+                    <li class="btnHolder">
+                        <label for="id_submit">&nbsp;&nbsp;</label>
+                        <input type="submit" value="Submit" class="button" />
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+        </div>
+        <div id="ldap-results" class="span-9">
+        Results
+        </div>
+        <div class="clear buffer-top">&nbsp;</div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_content %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}

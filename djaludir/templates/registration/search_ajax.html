@@ -1,6 +1,14 @@
 {% autoescape off %}
-<div style="width:100%;background-color: #FCFAEB;border: 1px solid #CCCCCC;padding:6px;border-radius: 3px 3px 3px 3px;">
-<h4>Search Results</h4>
-{{results}}
+<h4 class="buffer-left" style="padding-top:5px;">Search Results</h4>
+<div class="buffer">
+<ol>
+{% if results %}
+    {% for r in results %}
+        <li>{{r.firstname}} {{r.lastname}} [{{r.id}}] {{r.email}}</li>
+    {% endfor %}
+{% else %}
+    <h1>No records found</h1>
+{% endif %}
+</ol>
 </div>
 {% endautoescape %}

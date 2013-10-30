@@ -24,7 +24,12 @@ AUTH_LDAP_BASE = "o=CARTHAGE"
 AUTH_LDAP_SCOPE = ldap.SCOPE_SUBTREE
 
 """
-Shell script...
+Notes:
+
+password is MD5 hash?
+http://www.openldap.org/lists/openldap-software/200011/msg00268.html
+
+userpassword: {MD5}X03MO1qnZdYdgyfeuILPmQ==
 """
 
 # set up command-line options

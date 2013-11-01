@@ -20,6 +20,8 @@ def search(request):
 
 def search_informix_ajax(request):
     if request.method == "POST":
+        results = None
+        error = None
         form = RegistrationSearchForm(request.POST)
         if form.is_valid():
             # data dictionary
@@ -42,22 +44,39 @@ def search_informix_ajax(request):
                 (id_rec.id = email_rec.id AND email_rec.aa = "EML1")
             WHERE
             """
-            where =  ' lower(id_rec.firstname)="%s"' % data['first_name'].lower()
+            where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
+                     ' lower(aname_rec.line1) like "%%%s%%" )'
+                     % (data["first_name"],data["first_name"]))
             where += ' AND'
-            where += ' lower(id_rec.lastname)="%s"' % data['last_name'].lower()
+            where += ' lower(id_rec.lastname) = "%s"' % data['last_name'].lower()
+            if data["email"]:
+                where+= ' AND'
+                where+= ' email_rec.line1 = "%s"' % data["email"]
+            if data["college_id"]:
+                where+= ' AND'
+                where+= ' id_rec.id = "%s"' % data["college_id"]
+            if data["dob"]:
+                where+= ' AND'
+                where+= ' profile_rec.birth_date = "%s"' % data["dob"]
             xsql = sql + where
-            xsql += 'ORDER BY id_rec.lastname'
+            xsql += ' ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date'
             results = do_sql(xsql)
             objects = []
-            for r in results:
-                objects.append(r)
-            if len(objects) < 1:
-                results = None
-            else:
-                results = objects
+            if results:
+                for r in results:
+                    objects.append(r)
+                if len(objects) < 1:
+                    results = None
+                    error = "No results returned."
+                elif len(objects) > 5:
+                    results = None
+                    error = "Too many results returned. Narrow your search."
+                else:
+                    results = objects
         else:
-            results = form.errors
-        extra_context = {'results':results,}
+            error = form.errors
+            xsql = None
+        extra_context = {'form':form,'error':error,'results':results,'sql':xsql,}
         return render_to_response(
             "registration/search_ajax.html", extra_context,
             context_instance=RequestContext(request)

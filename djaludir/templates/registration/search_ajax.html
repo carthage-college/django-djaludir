@@ -1,14 +1,27 @@
 {% autoescape off %}
-<h4 class="buffer-left" style="padding-top:5px;">Search Results</h4>
-<div class="buffer">
-<ol>
-{% if results %}
-    {% for r in results %}
-        <li>{{r.firstname}} {{r.lastname}} [{{r.id}}] {{r.email}}</li>
-    {% endfor %}
+<div class="buffer" style="background-color:#FCFAEB;border-radius: 3px 3px 3px 3px;width:320px;">
+{% if not error %}
+    {% if results %}
+        <ol>
+        {% for r in results %}
+            <li>{{r.firstname}} {{r.lastname}}
+                <ol>
+                <li>{{r.id}}</li>
+                <li>{{r.email}}</li>
+                <li>{{r.birth_date}}</li>
+                </ol>
+            </li>
+        {% endfor %}
+        </ol>
+        <div class="debug buffer">
+        {{sql}}
+        </div>
+    {% else %}
+        <h1>{{error}}</h1>
+    {% endif %}
 {% else %}
-    <h1>No records found</h1>
+    <h1>Error</h1>
+    <strong>{{error}}</strong>
 {% endif %}
-</ol>
 </div>
 {% endautoescape %}

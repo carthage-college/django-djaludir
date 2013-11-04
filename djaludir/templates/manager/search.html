@@ -25,16 +25,16 @@
                 var selectObj = document.createElement('SELECT');
                 selectObj.name = 'within' + criteria;
                 var optionArr = new Array();
-                optionArr[0] = createOption('fname','First Name');
-                optionArr[1] = createOption('lname','Last Name');
-                optionArr[2] = createOption('class_year','Class year');
+                optionArr[0] = createOption('firstname','First Name');
+                optionArr[1] = createOption('lastname','Last Name');
+                optionArr[2] = createOption('cl_yr','Class year');
                 optionArr[3] = createOption('home_state','Home State');
                 optionArr[4] = createOption('home_city','Home City');
-                optionArr[5] = createOption('carthage_id','ID Number');
-                optionArr[6] = createOption('birth_lname','Maiden Name');
+                optionArr[5] = createOption('id_rec.id','ID Number');
+                optionArr[6] = createOption('maiden.lastname','Maiden Name');
                 optionArr[7] = createOption('activity','Activity/Sport');
-                optionArr[8] = createOption('major1','Primary Major');
-                optionArr[9] = createOption('major2','Secondary Major');
+                optionArr[8] = createOption('major1.txt','Primary Major');
+                optionArr[9] = createOption('major2.txt','Secondary Major');
                 optionArr[10] = createOption('job_title','Job Title');
 
                 for(var i = 0; i < optionArr.length; i++)
@@ -60,12 +60,18 @@
             }
         }
         window.onload = createBlock;
+        
+        $(document).ready(function(){
+            $('input[name="maxCriteria"]').val(MAX_CRITERIA);
+        });
     </script>
 {% endblock %}
 {% block content %}
     {% if message %}<div class="message">{{message}}</div>{% endif %}
     <p>Search:</p>
     <form action="." method="post">
+        <input type="hidden" name="maxCriteria" value="0" />
+        {% csrf_token %}
         <fieldset id="formfieldset">
             <div id="submitrow" class="form-row">
                 <input type="submit" name="submit" value="Search" />
@@ -78,8 +84,25 @@
         <tr><td colspan="5" class="center">{{matches|length}} match{{ matches|length|pluralize:"es"}}</td></tr>
         <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Deceased</th><th>Action</th></tr>
         {% for person in matches %}
-        <tr><td>{{person.class_year}}</td><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{% if person.is_deceased %}deceased{% endif %}</td><td><a href="/alumni/apps/directory/display/{{person.id}}/">Details</a>{% if sess$
+            <tr>
+                <td>{{person.class_year}}</td>
+                <td>{{person.firstname}}</td>
+                <td>{% if person.maiden_name %}({{person.maiden_name}}) {% endif %}{{person.lastname}}</td>
+                <td>{% comment %}{% if person.is_deceased %}deceased{% endif %}{% endcomment %}</td>
+                <td><a href="/alumni/directory/manager/display/{{person.id}}/">Details</a>
+                    {% if session.is_superuser %} &nbsp; <a href="/alumni/apps/directory/edit/{{person.id}}">Edit</a>{% endif %}
+                </td>
+            </tr>
         {% endfor %}
     </table>
     {% endif %}
+
+    <h3>Fields</h3>
+    <p>{{fields}}</p>
+    
+    <h3>Terms</h3>
+    <p>{{terms}}</p>
+    
+    <h1>Debug</h1>
+    <p>{{debug}}</p>
 {% endblock %}

@@ -16,6 +16,10 @@ div.growlUI h1, div.growlUI h2 {
 <script src="/static/djaludir/js/spin.min.js" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
 $(function() {
+    $('#submit').attr("disabled", true);
+    $("input[name='alumna']").change(function(){
+        $('#submit').attr("disabled", false);
+    });
     var pause = false;
     $(".el-blur").blur(function(){
         var opts = {
@@ -53,8 +57,8 @@ $(function() {
                 },
                 success: function(data){
                     spinner.stop(target);
+                    $.growlUI('Search Results', 'Did we find you...?');
                     $('#search-results').html(data);
-                    //$.growlUI('Search Results', 'Did we find you...?');
                     pause = false;
                 },
                 error: function (){
@@ -143,7 +147,8 @@ $(function() {
             <ol>
                 <li class="btnHolder">
                     <label for="id_submit">&nbsp;&nbsp;</label>
-                    <input type="submit" value="Submit" class="button" />
+                    <input type="submit" value="Submit" id="submit" class="button" />
+                    <input type="reset" value="Clear" class="button" />
                 </li>
             </ol>
         </div>

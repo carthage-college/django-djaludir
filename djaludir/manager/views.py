@@ -36,9 +36,8 @@ else:
     TO_LIST = ["mkishline@carthage.edu",]
 
 def display(request, student_id):
-    """
     sql = ('SELECT DISTINCT'
-           '    ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(ids.title) AS prefix, TRIM(email.line1) email,'
+           '    ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(INITCAP(ids.title)) AS prefix, TRIM(email.line1) email,'
            '    CASE'
            '        WHEN	NVL(ids.decsd, "N")	=	"Y" 	    THEN	1'
            '        										    ELSE	0'
@@ -63,11 +62,17 @@ def display(request, student_id):
            '           											ELSE	conc2.txt'
            '    	END'
            '    )	AS	major2,'
+           '    TRIM('
+           '        CASE'
+           '           	WHEN	TRIM(progs.deg)	IN	("BA","BS")	THEN	major3.txt'
+           '           											ELSE	""'
+           '    	END'
+           '    )	AS	major3,'
            '    CASE'
            '    	WHEN	TRIM(progs.deg)	NOT IN ("BA","BS")	THEN	alum.cl_yr'
            '    												    ELSE	0'
            '    END	AS	masters_grad_year'
-           'FROM	alum_rec	alum	INNER JOIN	id_rec			ids		ON	alum.id				=	    ids.id'
+           ' FROM	alum_rec	alum	INNER JOIN	id_rec			ids		ON	alum.id				=	    ids.id'
            '							LEFT JOIN	('
            '								SELECT prim_id, MAX(active_date) active_date'
            '								FROM addree_rec'
@@ -87,71 +92,14 @@ def display(request, student_id):
            '																AND	progs.acst			=	    "GRAD"'
            '							LEFT JOIN	major_table		major1	ON	progs.major1		=   	major1.major'
            '							LEFT JOIN	major_table		major2	ON	progs.major2		=	    major2.major'
+           '                            LEFT JOIN   major_table     major3  ON  progs.major3        =       major3.major'
            '							LEFT JOIN	conc_table		conc1	ON	progs.conc1			=	    conc1.conc'
            '							LEFT JOIN	conc_table		conc2	ON	progs.conc2			=	    conc2.conc'
-           'WHERE   NVL(ids.decsd, "N") =   "N"'
-           'AND     ids.id              =   %s' %   (student_id)
+           ' WHERE   NVL(ids.decsd, "N") =   "N"'
+           ' AND     ids.id              =   %s' %   (student_id)
     )
-    """
-    sql = ('SELECT DISTINCT'
-           ' ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(ids.title) AS prefix, TRIM(email.line1) email,'
-           ' CASE'
-           ' WHEN NVL(ids.decsd, "N") = "Y" THEN 1'
-           ' ELSE 0'
-           ' END AS is_deceased,'
-           ' TRIM(maiden.lastname) AS birth_lname, TRIM(progs.deg) AS degree,'
-           ' CASE'
-           ' WHEN TRIM(progs.deg) IN ("BA","BS") THEN alum.cl_yr'
-           ' ELSE 0'
-           ' END AS class_year, TRIM(aawork.line1) AS business_name, TRIM(aawork.line2) AS business_address, TRIM(aawork.city) AS business_city, TRIM(aawork.st) AS business_state,'
-           ' TRIM(aawork.zip) AS business_zip, TRIM(aawork.ctry) AS business_country, TRIM(aawork.phone) AS business_phone, TRIM(ids.addr_line1) AS home_address1,'
-           ' TRIM(ids.addr_line2) AS home_address2, TRIM(ids.addr_line3) AS home_address3, TRIM(ids.city) AS home_city, TRIM(ids.st) AS home_state,'
-           ' TRIM(ids.zip) AS home_zip, TRIM(ids.ctry) AS home_country, TRIM(ids.phone) AS home_phone,'
-           ' TRIM('
-           ' CASE'
-           ' WHEN TRIM(progs.deg) IN ("BA","BS") THEN major1.txt'
-           ' ELSE conc1.txt'
-           ' END'
-           ' ) AS major1,'
-           ' TRIM('
-           ' CASE'
-           ' WHEN TRIM(progs.deg) IN ("BA","BS") THEN major2.txt'
-           ' ELSE conc2.txt'
-           ' END'
-           ' ) AS major2,'
-           ' CASE'
-           ' WHEN TRIM(progs.deg) NOT IN ("BA","BS") THEN alum.cl_yr'
-           ' ELSE 0'
-           ' END AS masters_grad_year'
-           ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id'
-           ' LEFT JOIN ('
-           ' SELECT prim_id, MAX(active_date) active_date'
-           ' FROM addree_rec'
-           ' WHERE style = "M"'
-           ' GROUP BY prim_id'
-           ' ) prevmap ON ids.id = prevmap.prim_id'
-           ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id'
-           ' AND maiden.active_date = prevmap.active_date'
-           ' AND maiden.style = "M"'
-           ' LEFT JOIN aa_rec email ON ids.id = email.id'
-           ' AND email.aa = "EML2"'
-           ' AND TODAY BETWEEN email.beg_date AND NVL(email.end_date, TODAY)'
-           ' LEFT JOIN aa_rec aawork ON ids.id = aawork.id'
-           ' AND aawork.aa = "WORK"'
-           ' AND TODAY BETWEEN aawork.beg_date AND NVL(aawork.end_date, TODAY)'
-           ' LEFT JOIN prog_enr_rec progs ON ids.id = progs.id'
-           ' AND progs.acst = "GRAD"'
-           ' LEFT JOIN major_table major1 ON progs.major1 = major1.major'
-           ' LEFT JOIN major_table major2 ON progs.major2 = major2.major'
-           ' LEFT JOIN conc_table conc1 ON progs.conc1 = conc1.conc'
-           ' LEFT JOIN conc_table conc2 ON progs.conc2 = conc2.conc'
-           ' WHERE NVL(ids.decsd, "N") = "N"'
-           ' AND ids.id = %s' %   (student_id)
-    )
+
     alumni = do_sql(sql, key="debug")
-    alum = ''
-    for student in alumni:
-        alum = student
 
     athleticIDs = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','S073','S079','S080','S083','S090','S095','S220','S100','S101','S109','S126','S131','S156','S161','S172','S173','S176','S186','S187','S196','S197','S204','S205','S207','S208','S253','S215','S216'"
     activities_sql = (
@@ -203,7 +151,7 @@ def display(request, student_id):
 
     return render_to_response(
         "manager/display.html",
-        {'studentID':student_id, 'person':alum, 'activities':activities, 'athletics':athletics, 'relatives':relatives, 'debug':sql},
+        {'studentID':student_id, 'person':alumni.fetchone(), 'activities':activities.fetchall(), 'athletics':athletics.fetchall(), 'relatives':relatives.fetchall(), 'debug':sql},
         context_instance=RequestContext(request)
     )
 
@@ -219,11 +167,11 @@ def search(request):
     matches = []
     sql = ''
     if request.method == 'POST':
-        #sql = 'SELECT cl_yr, fname, lname, id FROM alum_rec WHERE '
         sql = ''
         orSQL = ''
+        andSQL = ''
         #Sport/activities are searched via "OR", all other fields are "AND" so assemble the list of fields to run through the logic to create the appropriate filters
-        for rowNum in range (1, int(request.POST.get('maxCriteria')) + 1):
+        for rowNum in range (0, int(request.POST.get('maxCriteria')) + 1):
             fieldname = request.POST.get('within' + str(rowNum))
             searchterm = request.POST.get('term' + str(rowNum))
             
@@ -232,15 +180,15 @@ def search(request):
                 terms += (searchterm,)
                 
                 if fieldname == 'activity':
-                    #do "OR" thing
                     if len(orSQL) > 0:
                         orSQL += 'OR '
-                    orSQL += 'invl_table.txt LIKE "%%%s%%" ' % (searchterm)
+                    orSQL += 'LOWER(invl_table.txt) LIKE LOWER("%%%s%%") ' % (searchterm)
                 else:
-                    if len(sql) > 0:
-                        sql += 'AND '
-                    sql += '%s LIKE "%%%s%%" ' % (fieldname, searchterm)
+                    if len(andSQL) > 0:
+                        andSQL += 'AND '
+                    andSQL += 'LOWER(TRIM(%s::varchar(250))) LIKE "%%" || LOWER("%s") || "%%" ' % (fieldname, searchterm)
         
+        #Based on the criteria specified by the user, add the necessary tables to the search query
         selectFromSQL = ('SELECT DISTINCT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id '
                      'FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
@@ -257,19 +205,19 @@ def search(request):
                 selectFromSQL += (' LEFT JOIN major_table major2 ON progs.major2 = major2.major')
 
 
-        if len(sql + orSQL) > 0:
+        if len(andSQL + orSQL) > 0:
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
-            if len(sql) > 0 and len(orSQL) > 0:
-                sql = 'AND %s' % (sql)
-            sql = '%s WHERE %s %s ORDER BY ids.lastname, ids.firstname, alum.cl_yr' % (selectFromSQL, orSQL, sql)
+            if len(andSQL) > 0 and len(orSQL) > 0:
+                andSQL = 'AND %s' % (andSQL)
+            sql = '%s WHERE %s %s ORDER BY ids.lastname, ids.firstname, alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
             
         if len(sql) > 0:
             matches = do_sql(sql, key="debug")
     
     return render_to_response(
         "manager/search.html",
-        {'fields':fieldlist, 'terms':terms, 'matches':matches, 'debug':sql},
+        #{'fields':fieldlist, 'terms':terms, 'matches':matches, 'debug':sql},
+        {'searching':dict(zip(fieldlist, terms)), 'matches':matches.fetchall(), 'debug':matches},
         context_instance=RequestContext(request)
     )
-

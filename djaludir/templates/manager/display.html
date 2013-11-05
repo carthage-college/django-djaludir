@@ -8,7 +8,7 @@
     {{block.super}}
     <style type="text/css">
         fieldset {border:.1em solid #000000;}
-        label {width:auto;font-weight:bold;}
+        label {width:auto;padding-right:5px;font-weight:bold;}
         .business_address {width:9em;}
         .home_address {width:7.2em;}
         .relative {width:4em;}
@@ -28,7 +28,7 @@
         <div class="form-row header">Family</div>
         {% for relative in relatives %}
             <div class="form-row">
-                <label>Relative:</label>{{relative.firstname}}
+                <label>Relative:</label>{{relative.firstname}} {{relative.lastname}}
                 {% if relative.relText %}({{relative.relText}}){% endif %}<br />
                 <label class="relative">&nbsp;</label>
                 {% comment %}placeholder for DOB{% endcomment %}
@@ -196,4 +196,6 @@
             <label class="home_address">&nbsp;</label>{{person.home_city}}, {{person.home_state}} {{person.home_zip}}
         </div>
     </fieldset>
+    
+    <p><a href="../../search/">Return to Search</a></p>
 {% endblock %}

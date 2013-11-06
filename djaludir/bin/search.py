@@ -9,16 +9,23 @@ SELECT
     id_rec.lastname, aname_rec.line1 as alt_name,id_rec.addr_line1,
     id_rec.addr_line2, id_rec.city, id_rec.st, id_rec.zip,
     id_rec.phone as homephone,
-    email_rec.line1 as email
+
+    MIN(stu_acad_rec.yr) AS start_year,
+    MAX(stu_acad_rec.yr) AS end_year,
+    email_rec.line1 AS email
 FROM
     id_rec
 LEFT JOIN
     profile_rec on id_rec.id = profile_rec.id
+LEFT JOIN
+    stu_acad_rec on id_rec.id = stu_acad_rec.id
 LEFT JOIN aa_rec as aname_rec on
     (id_rec.id = aname_rec.id AND aname_rec.aa = "ANDR")
 LEFT JOIN aa_rec as email_rec on
     (id_rec.id = email_rec.id AND email_rec.aa = "EML1")
 WHERE
+    stu_acad_rec.yr > 0
+AND
 """
 where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
          ' lower(aname_rec.line1) like "%%%s%%" )'

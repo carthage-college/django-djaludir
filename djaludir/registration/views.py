@@ -49,12 +49,14 @@ def search_informix_ajax(request):
                      % (data["first_name"],data["first_name"]))
             where += ' AND'
             where += ' lower(id_rec.lastname) = "%s"' % data['last_name'].lower()
+            """
             if data["email"]:
                 where+= ' AND'
                 where+= ' email_rec.line1 = "%s"' % data["email"]
             if data["college_id"]:
                 where+= ' AND'
                 where+= ' id_rec.id = "%s"' % data["college_id"]
+            """
             if data["dob"]:
                 where+= ' AND'
                 where+= ' profile_rec.birth_date = "%s"' % data["dob"].strftime("%m/%d/%Y")
@@ -71,9 +73,9 @@ def search_informix_ajax(request):
                 if len(objects) < 1:
                     results = None
                     error = "No results returned."
-                #elif len(objects) > 5:
-                #    results = None
-                #    error = "Too many results returned. Narrow your search."
+                elif len(objects) > 5:
+                    results = None
+                    error = "Too many results returned. Narrow your search."
                 else:
                     results = objects
             else:

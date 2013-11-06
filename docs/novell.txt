@@ -1,0 +1,16 @@
+The attributes we use in LDAP are:
+
+carthageDob - date of birth
+carthageFacultyStatus - populated with an A if the user is a faculty member
+carthageStaffStatus - populated with an A if the user is a staff member
+carthageStudentStatus - populated with an A if the user is a student
+carthageNameID - ID#
+carthageSSN - social security number (only last four digits, all others are Xs)
+cn = username
+givenName  = First Name
+sn = Last Name
+mail = e-mail address
+
+To have the carthage specific attributes, a user must have an objectClass of carthageUser.
+
+

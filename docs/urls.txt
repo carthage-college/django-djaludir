@@ -1,0 +1,4 @@
+http://www.grotan.com/ldap/python-ldap-samples.html
+http://d.palmtb.net/2012/11/27/python_ldap.html
+http://www.ibm.com/developerworks/aix/library/au-ldap_crud/
+http://www.packtpub.com/article/python-ldap-applications-more-ldap-operations-and-the-ldap-url-library

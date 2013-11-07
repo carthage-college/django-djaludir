@@ -49,15 +49,20 @@ def search_informix_ajax(request):
                      % (data["first_name"],data["first_name"]))
             where += ' AND'
             where += ' lower(id_rec.lastname) = "%s"' % data['last_name'].lower()
+            """
             if data["email"]:
                 where+= ' AND'
                 where+= ' email_rec.line1 = "%s"' % data["email"]
             if data["college_id"]:
                 where+= ' AND'
                 where+= ' id_rec.id = "%s"' % data["college_id"]
+            """
             if data["dob"]:
                 where+= ' AND'
-                where+= ' profile_rec.birth_date = "%s"' % data["dob"]
+                where+= ' profile_rec.birth_date = "%s"' % data["dob"].strftime("%m/%d/%Y")
+            #if data["start_year"]:
+            #    where+= ' AND'
+            #    where+= ' MIN(yr) AS start_year, MAX(yr) AS end_year FROM stu_acad_rec WHERE id = [student_id] AND yr > 0
             xsql = sql + where
             xsql += ' ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date'
             results = do_sql(xsql)
@@ -73,6 +78,8 @@ def search_informix_ajax(request):
                     error = "Too many results returned. Narrow your search."
                 else:
                     results = objects
+            else:
+                error = xsql
         else:
             error = form.errors
             xsql = None

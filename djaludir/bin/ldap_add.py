@@ -61,9 +61,10 @@ def main():
     # the value can be just a string – it need not be a list.
     # Example: ('ou', 'user') is an acceptable alternative to
     # ('ou', ['user']).
+    #    "objectclass":["User","carthageUser"],
 
     person = {
-        "objectclass":["carthageUser"],
+        "objectclass":["User","carthageUser"],
         "givenName":givenName,"sn":sn,"cn":cn,
         "carthageDob":carthageDob,"carthageNameID":carthageNameID,
         "mail":mail,"userPassword":userPassword
@@ -76,7 +77,7 @@ def main():
     elif group.lower()=="student":
         person["carthageStudentStatus"] = "A"
     elif group.lower()=="alumni":
-        person["carthageAlumniStatus"] = "A"
+        person["carthageFormerStudentStatus"] = "A"
     else:
         person["carthageOtherStatus"] = "A"
 
@@ -85,7 +86,7 @@ def main():
     user = modlist.addModlist(person)
     print user
 
-    dn = 'cn=%s,ou=USERS,o=CARTHAGE' % (cn)
+    dn = 'cn=%s,o=USERS' % (cn)
     l.add_s(dn, user)
 
 ######################

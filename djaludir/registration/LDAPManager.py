@@ -43,7 +43,7 @@ class LDAPManager:
         elif group.lower()=="student":
             person["carthageStudentStatus"] = "A"
         elif group.lower()=="alumni":
-            person["carthageAlumniStatus"] = "A"
+            person["formerStudents"] = "A"
         else:
             person["carthageOtherStatus"] = "A"
 

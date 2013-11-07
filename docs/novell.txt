@@ -14,3 +14,14 @@ mail = e-mail address
 To have the carthage specific attributes, a user must have an objectClass of carthageUser.
 
 
+http://support.novell.com/techcenter/articles/dnd20030504.html
+
+Also note the special userPassword attribute. This is an attribute that can only be written to or deleted, never read from. You can change a password with LDAP by first doing a delete on the userPassword with a value of the old password, and then an add with the new password-something like this PHP:
+
+$result=$ldap->modify($dn
+      changes => [
+            delete => [ userPassword => "$oldpass"],
+            add => [userPassword => "$newpass"],
+      ]
+      );
+

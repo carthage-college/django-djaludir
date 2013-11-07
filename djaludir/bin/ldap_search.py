@@ -61,6 +61,7 @@ def main():
     #username = "eyoung"
     #philter = "(&(objectclass=person) (cn=%s))" % username
     philter = "(&(objectclass=carthageUser) (cn=%s))" % d
+    #philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % d
     #ret = ['userpassword']
     ret = ['cn','givenName','sn','mail','carthageDob','carthageStaffStatus','carthageFacultyStatus','carthageNameID','carthageSSN','userPassword']
 

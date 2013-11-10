@@ -1,0 +1,35 @@
+<fieldset class="blockLabels">
+    <ol>
+        <li class="ctrlHolder">
+            <h3><label for="id_first_name">First name</label></h3>
+            <div class="required">
+                <input type="text" name="first_name" id="id_first_name" value="{{form.data.first_name}}" required="required" />
+            </div>
+        </li>
+        <li class="ctrlHolder">
+            <h3><label for="id_last_name">Last name</label></h3>
+            <div class="required">
+                <input type="text" name="last_name" id="id_last_name" value="{{form.data.last_name}}" required="required" />
+            </div>
+        </li>
+        <li class="ctrlHolder">
+            <h3><label for="id_dob">Date of birth</label></h3>
+            <input type="date" name="dob" id="id_dob" value="{{form.data.dob}}" />
+            <p class="help">Format: mm/dd/yyyy</p>
+        </li>
+        <li class="ctrlHolder">
+            <h3><label for="id_postal_code">Postal code</label></h3>
+            <input type="text" name="postal_code" id="id_postal_code" maxlength="10" value="{{form.data.postal_code}}" />
+        </li>
+        <li class="ctrlHolder">
+            <h3><label for="id_college_id">Carthage ID</label></h3>
+            <input type="text" name="college_id" id="id_college_id" value="{{form.data.college_id}}" />
+            <p class="help">You can find it on the Alumni magazine mailing label.</p>
+        </li>
+        <li class="btnHolder">
+            <label for="id_submit">&nbsp;&nbsp;</label>
+            <input type="submit" value="Submit" id="submit" class="button" />
+            <input type="reset" value="Clear" class="button" />
+        </li>
+    </ol>
+</fieldset>

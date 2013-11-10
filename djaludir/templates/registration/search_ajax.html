@@ -1,27 +1,37 @@
 {% autoescape off %}
-<div class="buffer" style="background-color:#FCFAEB;border-radius: 3px 3px 3px 3px;width:320px;">
-{% if not error %}
-    {% if results %}
-        <ol>
-        {% for r in results %}
-            <li><input type="radio" name="alumna" value="{{r.id}}" /> {{r.firstname}} {{r.lastname}}
-                <ol>
-                <li>{{r.id}}</li>
-                <li>{{r.email}}</li>
-                <li>{{r.birth_date}}</li>
-                </ol>
-            </li>
-        {% endfor %}
-        </ol>
-        <div class="debug buffer">
-        {#sql#}
+<div id="form-container">
+    <div class="span-10">
+        {% include "registration/search.inc.html" %}
+    </div>
+    <div class="span-9" style="background-color: #FCFAEB;border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;">
+        <h4 class="buffer-left" style="padding-top:5px;">Search Results</h4>
+        <div id="search-results" class="search-results">
+            <div class="buffer" style="background-color:#FCFAEB;border-radius: 3px 3px 3px 3px;width:320px;">
+            {% if not error %}
+                {% if results %}
+                    <ol>
+                    {% for r in results %}
+                        <li><input type="radio" name="alumna" value="{{r.id}}" /> {{r.firstname}} {{r.lastname}}
+                            <ol>
+                            <li>{{r.id}}</li>
+                            <li>{{r.email}}</li>
+                            <li>{{r.birth_date}}</li>
+                            </ol>
+                        </li>
+                    {% endfor %}
+                    </ol>
+                    <div class="debug buffer">
+                    {#sql#}
+                    </div>
+                {% else %}
+                    <h1>{{error}}</h1>
+                {% endif %}
+            {% else %}
+                <h1>Error</h1>
+                <strong>{{error}}</strong>
+            {% endif %}
+            </div>
         </div>
-    {% else %}
-        <h1>{{error}}</h1>
-    {% endif %}
-{% else %}
-    <h1>Error</h1>
-    <strong>{{error}}</strong>
-{% endif %}
+    </div>
 </div>
 {% endautoescape %}

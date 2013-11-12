@@ -1,0 +1,54 @@
+{% extends "core/home.html" %}
+{% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/2_column.css" rel="stylesheet" type="text/css" />{% endblock %}
+{% block extra_style %}
+<style type="text/css" media="screen, projection">
+#id_postal_code,#id_dob,#id_college_id {
+    width: 100px;
+}
+div.growlUI { background: url(//www.carthage.edu/assets/img/ico/check48.png) no-repeat 10px 10px }
+div.growlUI h1, div.growlUI h2 {
+    color: white; padding: 5px 5px 5px 75px; text-align: left;
+}
+</style>
+{% endblock %}
+{% block extra_javascript %}
+<script src="//www.carthage.edu/assets/js/jquery/plugins/jquery.blockUI.js" type="text/javascript"></script>
+<script src="/static/djaludir/js/spin.min.js" type="text/javascript"></script>
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    var opts = {
+        lines: 13, // The number of lines to draw
+        length: 20, // The length of each line
+        width: 10, // The line thickness
+        radius: 30, // The radius of the inner circle
+        corners: 1, // Corner roundness (0..1)
+        rotate: 0, // The rotation offset
+        direction: 1, // 1: clockwise, -1: counterclockwise
+        color: '#000', // #rgb or #rrggbb or array of colors
+        speed: 1, // Rounds per second
+        trail: 60, // Afterglow percentage
+        shadow: false, // Whether to render a shadow
+        hwaccel: false, // Whether to use hardware acceleration
+        className: 'search-results', // The CSS class to assign to the spinner
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+        top: '50px', // Top position relative to parent in px
+        left: 'auto' // Left position relative to parent in px
+    };
+    var target = document.getElementById('search-results');
+    var spinner = new Spinner(opts).spin(target);
+    spinner.stop(target);
+});
+</script>
+{% endblock %}
+{% block content %}
+<div id="second">
+    <div class="buffer">
+        {% include "registration/create_ldap.html" %}
+        <div class="clear buffer-top">&nbsp;</div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_content %}
+{% endblock %}
+{% block sidebar %}
+{% endblock %}

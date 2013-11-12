@@ -1,0 +1,33 @@
+{% autoescape off %}
+<form method="post" action="." class="form" id="ldap-profile">{% csrf_token %}
+    <div style="display:none;">
+    {% include "registration/search.inc.html" %}
+    </div>
+    <div class="buffer" style="background-color:#FCFAEB;border-radius: 3px 3px 3px 3px;width:320px;">
+    {% if not error %}
+        {% if results %}
+            <ol>
+            {% for r in results %}
+                <li>
+                    <input type="radio" name="alumna" value="{{r.id}}" /> {{r.firstname}} {{r.lastname}}
+                    <input type="hidden" name="ldap_name" value="{{r.ldap_name}}" />
+                    <dl>
+                    <dt>Postal code</dt><dd>{{r.postal_code}}</dd>
+                    <dt>Years attended</dt><dd>{{r.start_year}}&mdash;{{r.end_year}}</dd>
+                    </dl>
+                </li>
+            {% endfor %}
+            </ol>
+            <div class="debug buffer">
+            {#sql#}
+            </div>
+        {% else %}
+            <h1>{{error}}</h1>
+        {% endif %}
+    {% else %}
+        <h1>Error</h1>
+        <strong>{{error}}</strong>
+    {% endif %}
+    </div>
+</form>
+{% endautoescape %}

@@ -43,7 +43,7 @@ class LDAPManager:
         elif group.lower()=="student":
             person["carthageStudentStatus"] = "A"
         elif group.lower()=="alumni":
-            person["formerStudents"] = "A"
+            person["carthageFormerStudentStatus"] = "A"
         else:
             person["carthageOtherStatus"] = "A"
 
@@ -69,10 +69,10 @@ class LDAPManager:
         except ldap.LDAPError, e:
             pass
 
-    def search(self, username):
+    def search(self, uid):
         """
         Searches for an LDAP user.
-        Takes as argument a username (cn).
+        Takes as argument a user ID (carthageNameID).
         Returns a dictionary with the following key/value pairs:
 
         givenName               [first name]
@@ -85,10 +85,9 @@ class LDAPManager:
         carthageFacultyStatus   [faculty?]
         carthageStudentStatus   [student?]
         mail                    [email]
-        userPassword            [password]
         """
 
-        philter = "(&(objectclass=carthageUser) (cn=%s))" % username
+        philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % uid
         ret = [
             'cn','givenName','sn','mail','carthageDob','carthageNameID',
             'carthageSSN','carthageStaffStatus','carthageFacultyStatus',
@@ -96,7 +95,7 @@ class LDAPManager:
         ]
 
         result_id = self.l.search(
-            settings.LDAP_BASE,settings.LDAP_SCOPE,philter,ret
+            settings.LDAP_BASE,ldap.SCOPE_SUBTREE,philter,ret
         )
         result_type, result_data = self.l.result(result_id, 0)
 

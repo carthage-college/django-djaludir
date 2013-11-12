@@ -1,0 +1,173 @@
+{% extends "core/home.html" %}
+
+{% block title %}Edit Alumni Information &mdash; {{block.super}}{% endblock %}
+{% block extra_style %}
+    {{block.super}}
+    <style type="text/css">
+        fieldset {border:.1em solid #000000;}
+        label {width:auto;padding-right:5px;font-weight:bold;}
+        .business_address {width:9em;}
+        .home_address {width:7.2em;}
+        .relative {width:4em;}
+    </style>
+{% endblock %}
+{% block extra_javascript %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#advancedSettings').hide();
+            $('#settingsLink').click(function(){ $('#advancedSettings, #generalSettings').toggle(); });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <fieldset>
+        <div class="form-row header">Privacy Settings</div>
+        <ul id="generalSettings">
+            <li><input type="radio" name="privacy" /> Please do not show any of my information in the alumni directory.</li>
+            <li><input type="radio" name="privacy" /> Do not allow others to see information other than my name and class year.</li>
+            <li><input type="radio" name="privacy" /> Allow people to see my academic details but do not share my contact information. (Others will be able to send you an message but your email will remain private.)</li>
+            <li><input type="radio" name="privacy" /> Make my information available.</li>
+        </ul>
+        <div id="advancedSettings">
+            A checked box indicates that the information will be visible to other alumni.
+        </div>
+        <a href="#" id="settingsLink">Toggle advanced privacy settings</a>
+    </fieldset>
+    
+    <fieldset>
+        <div class="form-row header">Personal Information</div>
+        <div class="form-row">
+            <label>Name:</label>
+            <select name="prefix">
+                {% for prefix_code, prefix in prefixes.items %}
+                    <option value="{{prefix_code}}" {% ifequal prefix person.prefix %}selected="selected"{% endifequal %}>{{prefix}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="fname" value="{{person.fname}}" size="10" />
+            <input type="text" name="maidenname" value="{% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %}" size="12" />
+            <input type="text" name="lname" value="{{person.lname}}" size="12" />
+            <select name="suffix">
+                {% for suffix in suffixes %}
+                    <option value="{{suffix}}" {% ifequal suffix person.suffix %}selected="selected"{% endifequal %}>{{suffix}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row"><label>Email:</label><input type="text" name="email" value="{{person.email}}" size="25" /></div>
+    </fieldset>
+
+    <fieldset>
+        <div class="form-row header">Family</div>
+        {% for relative in relatives %}
+            <div class="form-row">
+                <label>Relative:</label>{{relative.firstname}} {{relative.lastname}}
+                {% if relative.relText %}({{relative.relText}}){% endif %}<br />
+                <label class="relative">&nbsp;</label>
+                {% comment %}placeholder for DOB{% endcomment %}
+            </div>
+        {% endfor %}
+    </fieldset>
+
+    <fieldset>
+        <div class="form-row header">Academics</div>
+    
+        <div class="form-row"><label>Degree:</label><input type="text" name="degree" value="{{person.degree}}" /></div>
+        <div class="form-row"><label>Class year:</label>
+            <select name="class_year">
+                <option value=""></option>
+                {% for year in years reversed %}
+                    <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row"><label>Major 1:</label>
+            <select name="major1">
+                <option value=""></option>
+                {% for major_code, major in majors %}
+                    <option value="{{major_code}}" {% ifequal major person.major1 %}selected="selected"{% endifequal %}>{{major}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row"><label>Major 2:</label>
+            <select name="major2">
+                <option value=""></option>
+                {% for major_code, major in majors %}
+                    <option value="{{major_code}}" {% ifequal major person.major2 %}selected="selected"{% endifequal %}>{{major}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row"><label>Major 3:</label>
+            <select name="major3">
+                <option value=""></option>
+                {% for major_code, major in majors %}
+                    <option value="{{major_code}}" {% ifequal major person.major3 %}selected="selected"{% endifequal %}>{{major}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row"><label>Masters Graduation Year:</label>
+            <select name="masters_grad_year">
+                <option value=""></option>
+                {% for year in years reversed %}
+                    <option value="{{year}}" {% ifequal year person.masters_grad_year %}selected="selected"{% endifequal %}>{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if activities %}
+        <div class="form-row">
+            <label>Student Organization{{activities|pluralize}}:</label><br />
+            <ul>
+                {% for org in activities %}
+                    <li><input type="text" name="activity{{for.counter}}" value="{{org.activity}}" /></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if athletics %}
+        <div class="form-row">
+            <label>Athletic Team{{athletics|pluralize}}</label><br />
+            <ul>
+                {% for team in athletics %}
+                    <li><input type="text" name="athletic{{for.counter}}" value="{{team.sport}}" /></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </fieldset>
+
+    <fieldset>
+        <div class="form-row header">Professional Information</div>
+        <div class="form-row"><label>Business name:</label><input type="text" name="business_name" value="{{person.business_name}}" /></div>
+        <div class="form-row">
+            <label>Business address:</label><input type="text" name="business_address" value="{{person.business_address}}" /><br />
+            <label class="business_address">&nbsp;</label>
+                <input type="text" name="business_city" value="{{person.business_city}}" />,
+                <select name="business_state">
+                    <option value="">{{person.business_state}}</option>
+                </select>
+                <input type="text" name="business_zip" value="{{person.business_zip}}" size="5" />
+        </div>
+        <div class="form-row">
+            <label>Business phone:</label><input type="text" name="business_phone" value="{{person.business_phone}}" size="12" />
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <div class="form-row header">Address</div>
+        <div class="form-row">
+            <label>Home phone:</label><input type="text" name="home_phone" value="{{person.home_phone}}" size="12" />
+        </div>
+        <div class="form-row">
+            <label>Home address:</label><input type="text" name="home_address1" value="{{person.home_address1}}" /><br />
+            <label class="home_address">&nbsp;</label><input type="text" name="home_address2" value="{{person.home_address2}}" /><br />
+            <label class="home_address">&nbsp;</label><input type="text" name="home_address3" value="{{person.home_address3}}" /><br />
+            <label class="home_address">City, State Zip</label>
+                <input type="text" name="home_city" value="{{person.home_city}}" />,
+                <select name="home_state">
+                    <option>{{person.home_state}}</option>
+                </select>
+                <input type="text" name="home_zip" value="{{person.home_zip}}" size="5" />
+        </div>
+    </fieldset>
+    
+    <p><a href="../../search/">Return to Search</a></p>
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends "core/home.html" %}
+{% block title %}Search &mdash; {{block.super}}{% endblock %}
 {% block extra_style %}
     {{block.super}}
     <link rel="stylesheet" href="/mkishline/static/djaludir/css/tablesorter_theme/blue/style.css" />
@@ -96,6 +97,17 @@
                     4: { sorter:false }
                 }
             });
+            
+            $('form[name="searchForm"]').submit(function(){
+                var validForm = false;
+                $('#formfieldset div.search input[name^="term"]').each(function(){
+                    if($(this).val() != ''){
+                        validForm = true;
+                    }
+                });
+                return validForm;
+            })
+            
             updateCriteria();
             {% if searching %}
                 {% for field, term in searching.items %}
@@ -110,7 +122,7 @@
 {% block content %}
     {% if message %}<div class="message">{{message}}</div>{% endif %}
     <p>Search:</p>
-    <form action="." method="post">
+    <form action="." name="searchForm" method="post">
         <input type="hidden" name="maxCriteria" value="0" />
         {% csrf_token %}
         <fieldset id="formfieldset">

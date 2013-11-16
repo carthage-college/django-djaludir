@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Add a user to LDAP store
+
+e.g.
+
+# python bin/ldap_add.py --first_name=Larry --last_name=Karthago --user_name=larry --dob=1974-02-02 --group=Alumni --id=90215 --email=larry@carthage.edu --password='xxx'
+
 """
 
 from optparse import OptionParser

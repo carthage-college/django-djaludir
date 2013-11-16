@@ -2,7 +2,7 @@
 {% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/2_column.css" rel="stylesheet" type="text/css" />{% endblock %}
 {% block extra_style %}
 <style type="text/css" media="screen, projection">
-#id_postal_code,#id_dob,#id_college_id {
+#id_postal_code,#id_carthageDob,#id_carthageNameID {
     width: 100px;
 }
 div.growlUI { background: url(//www.carthage.edu/assets/img/ico/check48.png) no-repeat 10px 10px }
@@ -46,11 +46,15 @@ $(function() {
             dataType: 'html',
             beforeSend: function(){
                 spinner.spin(target);
+                // disable form submit button
+                $('#submit').attr('disabled', 'disabled');
             },
             success: function(data){
                 spinner.stop(target);
                 $.growlUI('Search Results', 'Did we find you...?');
                 $('#search-results').html(data);
+                // enable form submit button
+                $('#submit').removeAttr('disabled');
             },
             error: function (){
                 console.log("error");
@@ -67,10 +71,11 @@ $(function() {
             dataType: 'html',
             beforeSend: function(){
                 spinner.spin(target);
+                // disable form submit button
+                $('#submit').attr('disabled', 'disabled');
             },
             success: function(data){
                 spinner.stop(target);
-                //$.growlUI('Search Results', 'Did we find you...?');
                 $('#informix-profile').html(data);
                 $(".required > input").addClass("required");
                 $(".required > select").addClass("required");

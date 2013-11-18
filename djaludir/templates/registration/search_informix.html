@@ -9,18 +9,21 @@
             <ol>
             {% for r in results %}
                 <li>
-                    <input type="radio" name="alumna" value="{{r.id}}" /> {{r.firstname}} {{r.lastname}}
+                    <input type="radio" name="alumna" value="{{r.id}}" id="id_alumna" />
+                    <label for="id_alumna"> {{r.firstname}} {{r.lastname}}</label>
                     <input type="hidden" name="ldap_name" value="{{r.ldap_name}}" />
-                    <dl>
+                    <dl style="margin-left:25px;">
                     <dt>Postal code</dt><dd>{{r.postal_code}}</dd>
+                    {% if r.start_year %}
                     <dt>Years attended</dt><dd>{{r.start_year}}&mdash;{{r.end_year}}</dd>
+                    {% endif %}
+                    {% if r.phone %}
+                    <dt>Last 4 digits of phone</dt><dd>x{{r.phone|slice:"8:12"}}</dd>
+                    {% endif %}
                     </dl>
                 </li>
             {% endfor %}
             </ol>
-            <div class="debug buffer">
-            {#sql#}
-            </div>
         {% else %}
             <h1>{{error}}</h1>
         {% endif %}

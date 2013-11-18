@@ -60,10 +60,10 @@ def main():
     #username = "skirk"
     #username = "eyoung"
     #philter = "(&(objectclass=person) (cn=%s))" % username
-    philter = "(&(objectclass=carthageUser) (cn=%s))" % d
-    #philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % d
+    #philter = "(&(objectclass=carthageUser) (cn=%s))" % d
+    philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % d
     #ret = ['userpassword']
-    ret = ['cn','givenName','sn','mail','carthageDob','carthageStaffStatus','carthageFacultyStatus','carthageNameID','carthageSSN','userPassword']
+    ret = ['dn','cn','givenName','sn','mail','carthageDob','carthageStaffStatus','carthageFacultyStatus','carthageNameID','carthageSSN','userPassword']
 
     result_id = l.search(settings.LDAP_BASE, ldap.SCOPE_SUBTREE , philter, ret)
 
@@ -72,8 +72,17 @@ def main():
     result_type, result_data = l.result(result_id, 0)
 
     print "result_type = %s" % str(result_type)
-    #print "result_data = %s" % str(result_data)
-    print "result_data = %s" % str(result_data[0][1])
+    print "result_data = %s" % str(result_data)
+    #print "result_data = %s" % str(result_data[0][1])
+
+    #group = result_data[0][0].split(',')[1]
+    #group = result_data[0][0].split(',')
+    group = result_data[0][1].get("carthageFormerStudentStatus")
+
+    #result_data = [('cn=skirk,o=users', {'cn': ['skirk'], 'carthageStaffStatus': ['A'], 'sn': ['Kirk'], 'carthageDob': ['1969-04-02'], 'mail': ['skirk@carthage.edu'], 'carthageSSN': ['XXXXX0481'], 'givenName': ['Steven'], 'carthageFacultyStatus': [''], 'carthageNameID': ['1217657']})]
+
+
+    print "group = %s" % group
 
 ######################
 # shell command line

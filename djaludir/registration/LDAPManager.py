@@ -4,7 +4,7 @@ from django.conf import settings
 import ldap
 import ldap.modlist as modlist
 
-class LDAPManager:
+class LDAPManager(object):
 
     def __init__(self):
         # Authenticate the base user so we can search
@@ -24,33 +24,31 @@ class LDAPManager:
         Creates a new LDAP user.
         Takes as argument a dictionary with the following key/value pairs:
 
+        objectclass     ["User","carthageUser"]
         givenName       [first name]
         sn              [last name]
-        cn              [username]
         carthageDob     [date of birth]
-        group           [faculty,staff,student,alumni,other]
         carthageNameID  [college ID]
+        cn              [we use email for username]
         mail            [email]
         userPassword    [password]
         """
-
-        group = person["group"]
-
-        if group.lower()=="faculty":
-            person["carthageFacultyStatus"] = "A"
-        elif group.lower()=="staff":
-            person["carthageStaffStatus"] = "A"
-        elif group.lower()=="student":
-            person["carthageStudentStatus"] = "A"
-        elif group.lower()=="alumni":
-            person["carthageFormerStudentStatus"] = "A"
-        else:
-            person["carthageOtherStatus"] = "A"
+        person["carthageFacultyStatus"] = ""
+        person["carthageStaffStatus"] = ""
+        person["carthageStudentStatus"] = ""
+        person["carthageFormerStudentStatus"] = "A"
+        person["carthageOtherStatus"] = ""
 
         user = modlist.addModlist(person)
 
         dn = 'cn=%s,ou=USERS,o=CARTHAGE' % (cn)
         self.l.add_s(dn, user,)
+
+    def update(self, person):
+        """
+        Updates an LDAP user.
+        """
+        return False
 
     def delete(self, person):
         """
@@ -69,10 +67,11 @@ class LDAPManager:
         except ldap.LDAPError, e:
             pass
 
-    def search(self, uid):
+    def search(self, val, field="carthageNameID"):
         """
         Searches for an LDAP user.
-        Takes as argument a user ID (carthageNameID).
+        Takes as argument a value and a valid unique field from
+        the schema (i.e. carthageNameID, cn, mail).
         Returns a dictionary with the following key/value pairs:
 
         givenName               [first name]
@@ -87,7 +86,10 @@ class LDAPManager:
         mail                    [email]
         """
 
-        philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % uid
+        valid = ["cn","carthageNameID","mail"]
+        if field not in valid:
+            return None
+        philter = "(&(objectclass=carthageUser) (%s=%s))" % (field,val)
         ret = [
             'cn','givenName','sn','mail','carthageDob','carthageNameID',
             'carthageSSN','carthageStaffStatus','carthageFacultyStatus',

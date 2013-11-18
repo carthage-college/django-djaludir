@@ -4,10 +4,8 @@ SEARCH = """
         id_rec.firstname,
         id_rec.lastname, aname_rec.line1 as alt_name,id_rec.addr_line1,
         id_rec.addr_line2, id_rec.city, id_rec.st, NVL(id_rec.zip,"") as postal_code,
-        id_rec.phone as homephone,
-        email_rec.line1 as email,
-        MIN(stu_acad_rec.yr) AS start_year, MAX(stu_acad_rec.yr) AS end_year,
-        cvid_rec.ldap_name
+        id_rec.phone, email_rec.line1 as email, cvid_rec.ldap_name,
+        MIN(stu_acad_rec.yr) AS start_year, MAX(stu_acad_rec.yr) AS end_year
     FROM
         id_rec
     LEFT JOIN

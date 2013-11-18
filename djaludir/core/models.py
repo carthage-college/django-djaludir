@@ -58,7 +58,7 @@ class Alumni(models.Model):
     major3 = models.CharField(max_length=35, verbose_name="Major 3", blank=True, null=True)
     honorary_degree = models.CharField(max_length=255, verbose_name="Honorary Degree Received", blank=True, null=True)
     distinguished_alumni = models.CharField(max_length=255, verbose_name="Distinguished Alumni Award Received", blank=True, null=True)
-    masters_grad_year = models.CharField(verbose_name="Masters Graduation Year", blank=True, null=True)
+    masters_grad_year = models.CharField(max_length=4,verbose_name="Masters Graduation Year", blank=True, null=True)
     student_organizations = models.ManyToManyField(Organizations, related_name="org+")
     athletic_teams = models.ManyToManyField(Athletics, related_name="team+")
     user = models.ForeignKey(User, blank=False, null=False)

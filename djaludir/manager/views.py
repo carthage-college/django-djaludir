@@ -62,7 +62,6 @@ def search(request):
     matches = []
     sql = ''
     if request.method == 'POST':
-        sql = ''
         orSQL = ''
         andSQL = ''
         #Sport/activities are searched via "OR", all other fields are "AND" so assemble the list of fields to run through the logic to create the appropriate filters
@@ -88,10 +87,14 @@ def search(request):
                      'FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
                      ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"')
+        #If search criteria includes activity or sport add the involvement tables
         if 'activity' in fieldlist:
             selectFromSQL += (
                      'LEFT JOIN involve_rec ON ids.id = involve_rec.id '
                      'LEFT JOIN invl_table ON involve_rec.invl = invl_table.invl ')
+
+        #If search criteria includes the student's major
+        #QUESTION - Should we check all three major fields for each major specified or is sequence important?
         if 'major1.txt' in fieldlist or 'major2.txt' in fieldlist:
             selectFromSQL += (' LEFT JOIN prog_enr_rec progs ON ids.id = progs.id AND progs.acst = "GRAD"')
             if 'major1.txt' in fieldlist:
@@ -99,21 +102,19 @@ def search(request):
             if 'major2.txt' in fieldlist:
                 selectFromSQL += (' LEFT JOIN major_table major2 ON progs.major2 = major2.major')
 
-
+        #If search criteria were submitted, flesh out the sql query. Include "and's", "or's" and sorting
         if len(andSQL + orSQL) > 0:
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
             if len(andSQL) > 0 and len(orSQL) > 0:
                 andSQL = 'AND %s' % (andSQL)
             sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
-            
-        if len(sql) > 0:
+
             matches = do_sql(sql, key="debug")
             matches = matches.fetchall()
     
     return render_to_response(
         "manager/search.html",
-        #{'fields':fieldlist, 'terms':terms, 'matches':matches, 'debug':sql},
         {'searching':dict(zip(fieldlist, terms)), 'matches':matches, 'debug':sql},
         context_instance=RequestContext(request)
     )
@@ -130,11 +131,12 @@ def edit(request, student_id):
     prefixes = dict([('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),('MS','Ms'),('REV','Rev')])
     suffixes = ('','II','III','IV','JR','MD','PHD','SR')
     year_range = range(1900, date.today().year + 1)
+    relationships = getRelationships()
     
     return render_to_response(
         "manager/edit.html",
         {'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics, 'relatives':relatives,
-         'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes, 'years':year_range},
+         'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes, 'years':year_range, 'relationships':relationships},
         context_instance=RequestContext(request)
     )
 
@@ -224,32 +226,49 @@ def getRelatives(student_id):
                      '    TRIM('
                      '      CASE'
                      '            WHEN    rel.prim_id    =    %s    THEN    sec.firstname'
-                     '                                        ELSE    prim.firstname'
+                     '                                              ELSE    prim.firstname'
                      '      END'
                      '    )    AS    firstName,'
                      '    TRIM('
                      '        CASE'
                      '            WHEN    rel.prim_id    =    %s    THEN    sec.lastname'
-                     '                                        ELSE    prim.lastname'
+                     '                                              ELSE    prim.lastname'
                      '        END'
                      '    )    AS    lastName,'
                      '    TRIM('
                      '        CASE'
                      '            WHEN    rel.prim_id    =    %s    THEN    reltbl.sec_txt'
-                     '                                        ELSE    reltbl.prim_txt'
+                     '                                              ELSE    reltbl.prim_txt'
                      '        END'
-                     '    )    AS    relText'
-                     ' FROM    relation_rec    rel    INNER JOIN    id_rec        prim    ON    rel.prim_id    =    prim.id'
-                     '                            INNER JOIN    id_rec        sec        ON    rel.sec_id    =    sec.id'
-                     '                            INNER JOIN    rel_table    reltbl    ON    rel.rel        =    reltbl.rel'
+                     '    )    AS    relText,'
+                     '    TRIM(reltbl.rel) ||'
+                     '    CASE'
+                     '        WHEN    rel.prim_id   =   %s  THEN    "2"'
+                     '                                      ELSE    "1"'
+                     '    END AS relCode'
+                     #'    reltbl.rel AS relCode'
+                     ' FROM    relation_rec    rel    INNER JOIN    id_rec      prim    ON    rel.prim_id   =    prim.id'
+                     '                                INNER JOIN    id_rec      sec     ON    rel.sec_id    =    sec.id'
+                     '                                INNER JOIN    rel_table   reltbl  ON    rel.rel       =    reltbl.rel'
                      ' WHERE prim_id =   %s'
-                     ' OR    sec_id  =   %s' % (student_id, student_id, student_id, student_id, student_id)
+                     ' OR    sec_id  =   %s' % (student_id, student_id, student_id, student_id, student_id, student_id)
     )
     relatives = do_sql(relatives_sql)
     return relatives.fetchall()
+
+def getRelationships():
+    #relationship_sql = 'SELECT TRIM(rel_table.rel) AS rel, TRIM(rel_table.txt) AS txt FROM rel_table WHERE rel IN ("AUNN","COCO","GPGC","HW","PC","SBSB")'
+    #relationships = do_sql(relationship_sql)
+    #return relationships.fetchall()
+    relationships = dict([('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),('AUNN2','Niece/Nephew')])
+    return relationships
 
 def getMajors():
     major_sql = 'SELECT DISTINCT TRIM(major) AS major_code, TRIM(txt) AS major_name FROM major_table ORDER BY TRIM(txt)'
     majors = do_sql(major_sql)
     return majors.fetchall()
 
+def search_activity(request, search_string):
+    activity_search_sql = 'SELECT TRIM(invl_table.invl) AS invl, TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND invl_table.txt LIKE "%%%s%%"' % (search_string)
+    activity_search = do_sql(activity_search_sql)
+    return activity_search.fetchall()

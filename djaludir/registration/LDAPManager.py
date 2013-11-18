@@ -41,8 +41,42 @@ class LDAPManager(object):
 
         user = modlist.addModlist(person)
 
-        dn = 'cn=%s,ou=USERS,o=CARTHAGE' % (cn)
-        self.l.add_s(dn, user,)
+        dn = 'cn=%s,ou=USERS,o=CARTHAGE' % (person["mail"])
+        if not settings.DEBUG:
+            self.l.add_s(dn, user)
+        return self.search(person["carthageNameID"])
+
+    def dj_create(self, username, data):
+        # We create a User object for LDAP users so we can get
+        # permissions, however we -don't- want them to be able to
+        # login without going through LDAP with this user. So we
+        # effectively disable their non-LDAP login ability by
+        # setting it to a random password that is not given to
+        # them. In this way, static users that don't go through
+        # ldap can still login properly, and LDAP users still
+        # have a User object.
+
+        from random import choice
+        import string
+        temp_pass = ""
+        data = data[0][1]
+        for i in range(48):
+            temp_pass = temp_pass + choice(string.letters)
+        email = data['mail'][0]
+        if not email:
+            email = username
+        user = User.objects.create_user(username,email,temp_pass)
+        user.first_name = data['givenName'][0]
+        user.last_name = data['sn'][0]
+        user.save()
+        # add to groups
+        for key, val in GROUPS.items():
+            group = data.get(key)
+            if group and group[0] == 'A':
+                g = Group.objects.get(name__iexact=key)
+                g.user_set.add(user)
+        # update informix?
+        return user
 
     def update(self, person):
         """
@@ -90,19 +124,15 @@ class LDAPManager(object):
         if field not in valid:
             return None
         philter = "(&(objectclass=carthageUser) (%s=%s))" % (field,val)
-        ret = [
-            'cn','givenName','sn','mail','carthageDob','carthageNameID',
-            'carthageSSN','carthageStaffStatus','carthageFacultyStatus',
-            'carthageStudentStatus'
-        ]
+        ret = settings.LDAP_RETURN
 
         result_id = self.l.search(
             settings.LDAP_BASE,ldap.SCOPE_SUBTREE,philter,ret
         )
         result_type, result_data = self.l.result(result_id, 0)
+        # If the user does not exist in LDAP, Fail.
+        if (len(result_data) != 1):
+            return None
+        else:
+            return result_data
 
-        try:
-            r = result_data[0][1]
-        except:
-            r = None
-        return r

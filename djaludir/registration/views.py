@@ -76,7 +76,7 @@ def search_informix(request):
                         <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
                         for further assistance.
                     '''
-                elif len(objects) > 5:
+                elif len(objects) > 10:
                     results = None
                     error = "Too many results returned. Narrow your search."
                 else:
@@ -113,10 +113,10 @@ def search_ldap(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            logger.debug("data = %s" % data)
             l = LDAPManager()
             user = l.search(data["alumna"])
             if user:
+                user = user[0][1]
                 # update informix if no ldap_user
                 if not data["ldap_name"] and not settings.DEBUG:
                     sql = """
@@ -124,12 +124,11 @@ def search_ldap(request):
                     """ % (user["cn"][0],data["alumna"])
                     ln = do_sql(sql)
                 else:
-                    logger.debug("user = %s" % user)
-                # display the login form
-                form = {'data':{'username':user["cn"][0],},}
-                redir = reverse_lazy("manager_search")
-                extra_context = {'user':user,'form':form,'next':redir,}
-                template = "login"
+                    # display the login form
+                    form = {'data':{'username':user["cn"][0],},}
+                    redir = reverse_lazy("manager_search")
+                    extra_context = {'user':user,'form':form,'next':redir,}
+                    template = "login"
             else:
                 # display the create form
                 data["carthageNameID"] = data["alumna"]
@@ -161,23 +160,27 @@ def create_ldap(request):
             data["cn"] = data["mail"]
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
+            # create the ldap user [manager controls debug settings]
+            l = LDAPManager()
+            user = l.create(data)
             if not settings.DEBUG:
-                # create the ldap user
-                l = LDAPManager()
-                user = l.create(data)
+                user = user[0][1]
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'"
                 """ % (user["cn"][0],data["mail"])
                 ln = do_sql(sql)
                 # send email to admins
-                subject = "[LDAP][Create] %s %s" % (user.givenName,user.sn)
+                subject = "[LDAP][Create] %s %s" % (user["givenName"][0],user["sn"][0])
                 send_mail(
                     request,TO_LIST, subject, data["email"],
                     "registration/ldap_email.html", data
                 )
             else:
                 logger.debug("data = %s" % data)
+            # create the django user
+            djuser = l.dj_create(data["mail"],user)
+
             return HttpResponseRedirect(reverse_lazy("auth_login"))
         else:
             return render_to_response(
@@ -185,5 +188,13 @@ def create_ldap(request):
                 context_instance=RequestContext(request)
             )
     else:
+        form = CreateLdapForm()
+    return render_to_response(
+        "registration/create.html", {'form':form,},
+        context_instance=RequestContext(request)
+    )
+    """
+    else:
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
+    """

@@ -12,10 +12,48 @@
     </style>
 {% endblock %}
 {% block extra_javascript %}
+    <script type="text/javascript" src="/mkishline/static/djaludir/js/commonLib.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script type="text/javascript">
+        //var relationships = "HW^Husband,HW^Wife,PC^Parent,PC^Child,SBSB^Sibling,COCO^Cousin,GPGC^Grandparent,GPGC^Grandchild,AUNN^Aunt,AUNN^Uncle,AUNN^Niece,AUNN^Nephew";
+        var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
+        
         $(document).ready(function(){
             $('#advancedSettings').hide();
             $('#settingsLink').click(function(){ $('#advancedSettings, #generalSettings').toggle(); });
+
+            $('input[name="addRelative"]').click(function(){
+                var addedRelatives = $('.relativeBlock').length + 1;
+                $('<div>').addClass('form-row relativeBlock').append($('<label>').text('Relative:'))
+                    .append($('<input>').attr({'type':'text','name':'relativeFname' + addedRelatives,'size':'10'}))
+                    .append($('<input>').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12'}))
+                    .append($('<select>').attr('name','relativeText' + addedRelatives))
+                .insertBefore($(this));
+                
+                loadSelectKeyVal('select[name="relativeText' + addedRelatives + '"]', relationships);
+            });
+
+            $('input[name="addActivity"]').click(function(){
+                var addedActivities = $('#activityList li').length + 1;
+                $('<li />')
+                    .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'size':'25'}))
+                    .insertAfter($('#activityList li:last'));
+            });
+
+            $('input[name="addTeam"]').click(function(){
+                var addedTeams = $('#athleticList li').length + 1;
+                $('<li>')
+                    .html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'size':'25'}))
+                    .insertAfter($('#athleticList li:last'));
+            });
+            
+            $('input[name="activitySearch"]').autocomplete({
+                source: "../../activity/" + $(this).val()) + "/",
+                minLength: 3,
+                select: function(event, ui){
+                    console.log(ui);
+                }
+            });
         });
     </script>
 {% endblock %}
@@ -55,19 +93,31 @@
         <div class="form-row"><label>Email:</label><input type="text" name="email" value="{{person.email}}" size="25" /></div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="familyBlock">
         <div class="form-row header">Family</div>
         {% for relative in relatives %}
-            <div class="form-row">
-                <label>Relative:</label>{{relative.firstname}} {{relative.lastname}}
-                {% if relative.relText %}({{relative.relText}}){% endif %}<br />
+            <div class="form-row relativeBlock">
+                <label>Relative:</label><input type="text" name="relativeFname{{forloop.counter}}" value="{{relative.firstname}}" />
+                <input type="text" name="relativeLname{{forloop.counter}}" value="{{relative.lastname}}" />
+                <select name="relativeText{{forloop.counter}}">
+                    {% comment %}
+                    {% for relationship in relationships %}
+                        <option value="{{relationship.rel}}" {% ifequal relative.relText relationship.rel %}selected="selected"{% endifequal %}>{{relationship.txt}}</option>
+                    {% endfor %}
+                    {% endcomment %}
+                
+                    {% for relationshipCode, relationshipText in relationships.items %}
+                        <option value="{{relationshipCode}}" {% ifequal relative.relCode relationshipCode %}selected="selected"{% endifequal %}>{{relationshipText}}</option>
+                    {% endfor %}
+                </select><br />
                 <label class="relative">&nbsp;</label>
                 {% comment %}placeholder for DOB{% endcomment %}
             </div>
         {% endfor %}
+        <input type="button" name="addRelative" value="Add Relative" />
     </fieldset>
 
-    <fieldset>
+    <fieldset id="academicBlock">
         <div class="form-row header">Academics</div>
     
         <div class="form-row"><label>Degree:</label><input type="text" name="degree" value="{{person.degree}}" /></div>
@@ -111,27 +161,28 @@
                 {% endfor %}
             </select>
         </div>
-        {% if activities %}
         <div class="form-row">
             <label>Student Organization{{activities|pluralize}}:</label><br />
-            <ul>
+            <ul id="activityList">
                 {% for org in activities %}
-                    <li><input type="text" name="activity{{for.counter}}" value="{{org.activity}}" /></li>
+                    <li><input type="text" name="activity{{for.counter}}" value="{{org.activity}}" size="25" /></li>
                 {% endfor %}
             </ul>
+            <input type="button" name="addActivity" value="Add Activity" />
+            
+            <p>&nbsp;</p>
+            <input type="text" name="activitySearch" />
         </div>
-        {% endif %}
 
-        {% if athletics %}
         <div class="form-row">
             <label>Athletic Team{{athletics|pluralize}}</label><br />
-            <ul>
+            <ul id="athleticList">
                 {% for team in athletics %}
                     <li><input type="text" name="athletic{{for.counter}}" value="{{team.sport}}" /></li>
                 {% endfor %}
             </ul>
+            <input type="button" name="addTeam" value="Add Athletic Team" />
         </div>
-        {% endif %}
     </fieldset>
 
     <fieldset>

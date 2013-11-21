@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.contrib.auth.models import User, Group
 
 import ldap
 import ldap.modlist as modlist
+
+# Constants
+
+GROUPS = {"carthageFacultyStatus":"",
+          "carthageStaffStatus":"",
+          "carthageStudentStatus":"",
+          "carthageFormerStudentStatus":"",
+          "carthageOtherStatus":""
+}
 
 class LDAPManager(object):
 
@@ -75,7 +85,6 @@ class LDAPManager(object):
             if group and group[0] == 'A':
                 g = Group.objects.get(name__iexact=key)
                 g.user_set.add(user)
-        # update informix?
         return user
 
     def update(self, person):

@@ -7,9 +7,7 @@ class RegistrationSearchForm(forms.Form):
 
     givenName      = forms.CharField(required=True,max_length=64)
     sn             = forms.CharField(required=True,max_length=64)
-    #carthageDob     = forms.DateField(required=True, help_text="Format: mm/dd/yyyy")
-    carthageDob    = forms.DateField(required=False, help_text="Format: mm/dd/yyyy")
-    #postal_code     = forms.CharField(required=True,max_length=10)
+    carthageDob     = forms.DateField(required=True, help_text="Format: mm/dd/yyyy")
     postal_code     = forms.CharField(required=False,max_length=10)
     carthageNameID  = forms.CharField(required=False,max_length=8)
     mail           = forms.EmailField(required=False,max_length=128)

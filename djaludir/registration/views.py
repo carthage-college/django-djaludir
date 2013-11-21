@@ -45,21 +45,21 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
+            # if we have ID, don't need anything else
+            if data["carthageNameID"]:
+                where+= ' id_rec.id = "%s"' % data["carthageNameID"]
+            else:
+                where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
                      ' lower(aname_rec.line1) like "%%%s%%" )'
                      % (data["givenName"],data["givenName"]))
-            where += ' AND'
-            where += ' lower(id_rec.lastname) = "%s"' % data['sn'].lower()
-            if data["carthageDob"]:
+                where += ' AND'
+                where += ' lower(id_rec.lastname) = "%s"' % data['sn'].lower()
                 where+= ' AND'
                 where+= ' (profile_rec.birth_date = "%s"' % data["carthageDob"].strftime("%m/%d/%Y")
                 where+= ' OR profile_rec.birth_date is null)'
-            if data["postal_code"]:
-                where+= ' AND'
-                where+= ' ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )' % data["postal_code"]
-            if data["carthageNameID"]:
-                where+= ' AND'
-                where+= ' id_rec.id = "%s"' % data["carthageNameID"]
+                if data["postal_code"]:
+                    where+= ' AND'
+                    where+= ' ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )' % data["postal_code"]
             xsql = SEARCH + where
             xsql += ' GROUP by id,birth_date,firstname,lastname,alt_name,addr_line1,addr_line2,city,st,postal_code,phone,email,ldap_name'
             xsql += ' ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date'
@@ -76,7 +76,7 @@ def search_informix(request):
                         <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
                         for further assistance.
                     '''
-                elif len(objects) > 10:
+                elif len(objects) > 20:
                     results = None
                     error = "Too many results returned. Narrow your search."
                 else:
@@ -113,9 +113,11 @@ def search_ldap(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
+            # search ldap
             l = LDAPManager()
             user = l.search(data["alumna"])
             if user:
+                # we have a user
                 user = user[0][1]
                 # update informix if no ldap_user
                 if not data["ldap_name"] and not settings.DEBUG:
@@ -123,12 +125,11 @@ def search_ldap(request):
                         UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'"
                     """ % (user["cn"][0],data["alumna"])
                     ln = do_sql(sql)
-                else:
-                    # display the login form
-                    form = {'data':{'username':user["cn"][0],},}
-                    redir = reverse_lazy("manager_search")
-                    extra_context = {'user':user,'form':form,'next':redir,}
-                    template = "login"
+                # display the login form
+                form = {'data':{'username':user["cn"][0],},}
+                redir = reverse_lazy("manager_search")
+                extra_context = {'user':user,'form':form,'next':redir,}
+                template = "login"
             else:
                 # display the create form
                 data["carthageNameID"] = data["alumna"]

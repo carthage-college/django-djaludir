@@ -1,19 +1,10 @@
 import ldap
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.models import User
 
 from djaludir.registration.LDAPManager import LDAPManager
-
-# Constants
-
-GROUPS = {"carthageFacultyStatus":"",
-          "carthageStaffStatus":"",
-          "carthageStudentStatus":"",
-          "carthageFormerStudentStatus":"",
-          "carthageOtherStatus":""
-}
 
 class LDAPBackend(object):
     supports_object_permissions = False
@@ -52,7 +43,7 @@ class LDAPBackend(object):
                 user = User.objects.get(username__exact=username)
             except:
                 # Create a User object.
-                user = lm.dj_create(username,data)
+                user = l.dj_create(username,data)
 
             # Success.
             return user

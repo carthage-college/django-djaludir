@@ -14,7 +14,9 @@
         </li>
         <li class="ctrlHolder">
             <h3><label for="id_carthageDob">Date of birth</label></h3>
-            <input type="date" name="carthageDob" id="id_carthageDob" value="{{form.data.carthageDob}}" />
+            <div class="required">
+                <input type="date" name="carthageDob" id="id_carthageDob" value="{{form.data.carthageDob}}" required="required" />
+            </div>
             <p class="help">Format: mm/dd/yyyy</p>
         </li>
         <li class="ctrlHolder">

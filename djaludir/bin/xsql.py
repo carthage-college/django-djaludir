@@ -22,20 +22,16 @@ Shell script...
 
 # set up command-line options
 desc = """
-Accepts as input a user ID.
+Accepts as input a SQL statement.
 """
 
 parser = OptionParser(description=desc)
-parser.add_option("-i", "--uid", help="User ID.", dest="uid")
+parser.add_option("-s", "--sql", help="SQL statement.", dest="sql")
 
 def main():
     """
     main method
     """
-
-    sql = """
-        SELECT MIN(yr) AS start_year, MAX(yr) AS end_year FROM stu_acad_rec WHERE id = "%s" AND yr > 0
-    """ % uid
 
     objs = do_sql(sql)
 
@@ -48,9 +44,9 @@ def main():
 
 if __name__ == "__main__":
     (options, args) = parser.parse_args()
-    uid = options.uid
+    sql = options.sql
 
-    mandatories = ['uid',]
+    mandatories = ['sql',]
     for m in mandatories:
         if not options.__dict__[m]:
             print "mandatory option is missing: %s\n" % m

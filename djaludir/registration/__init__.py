@@ -20,5 +20,11 @@ SEARCH = """
     LEFT JOIN aa_rec as email_rec on
         (id_rec.id = email_rec.id AND email_rec.aa = "EML1")
     WHERE
-
+"""
+SEARCH_GROUP_BY = """
+    GROUP by id,birth_date,firstname,lastname,alt_name,addr_line1,
+    addr_line2,city,st,postal_code,phone,email,ldap_name
+"""
+SEARCH_ORDER_BY = """
+    ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date
 """

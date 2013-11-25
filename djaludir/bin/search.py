@@ -1,6 +1,6 @@
 from djzbar.utils.informix import do_sql
 
-data = {'first_name':'gary','last_name':'williams','email':'','college_id':'','dob':'',}
+data = {'first_name':'st','last_name':'kirk','email':'','college_id':'','dob':'',}
 
 SEARCH = """
     SELECT

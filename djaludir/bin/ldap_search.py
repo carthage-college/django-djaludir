@@ -1,18 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Notes:
-
-password is MD5 hash?
-http://www.openldap.org/lists/openldap-software/200011/msg00268.html
-
-userpassword: {MD5}X03MO1qnZdYdgyfeuILPmQ==
-
-https://groups.google.com/forum/#!topic/novell.support.edirectory.windows/Y7PaE5zC47c
-
-userpassword is a write-only attribute. You can't read it.
-
-add example:
-http://www.grotan.com/ldap/python-ldap-samples.html#add
+Shell script to search LDAP store by username or ID
 """
 
 from optparse import OptionParser
@@ -31,58 +19,37 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djaludir.settings")
 # now we can import settings
 from django.conf import settings
 
+from djaludir.registration.LDAPManager import LDAPManager
+
 # set up command-line options
 desc = """
 Accepts as input:
-    first name
-    last name
-    username
+    attribute value
+    attribute name
+
+Valid attributes:
+    ["cn","carthageNameID","mail"]
 """
 
 parser = OptionParser(description=desc)
-parser.add_option("-g", "--first_name", help="Person's first name.", dest="g")
-parser.add_option("-s", "--last_name", help="Person's last name.", dest="s")
-parser.add_option("-d", "--user_name", help="Person's username.", dest="d")
+parser.add_option("-f", "--att_name", help="Schema attribute field name.", dest="field")
+parser.add_option("-v", "--att_val", help="Schema attribute value.", dest="value")
+parser.add_option("-p", "--password", help="Person's password.", dest="password")
 
 def main():
     """
     main method
     """
 
-    # Authenticate the base user so we can search
-    try:
-        l = ldap.initialize('%s://%s:%s' % (settings.LDAP_PROTOCOL,settings.LDAP_SERVER,settings.LDAP_PORT))
-        l.protocol_version = ldap.VERSION3
-        l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
-    except ldap.LDAPError:
-        print 'authentication fail'
+    # initialize the manager
+    l = LDAPManager()
 
-    #username = "skirk"
-    #username = "eyoung"
-    #philter = "(&(objectclass=person) (cn=%s))" % username
-    #philter = "(&(objectclass=carthageUser) (cn=%s))" % d
-    philter = "(&(objectclass=carthageUser) (carthageNameID=%s))" % d
-    #ret = ['userpassword']
-    ret = ['dn','cn','givenName','sn','mail','carthageDob','carthageStaffStatus','carthageFacultyStatus','carthageNameID','carthageSSN','userPassword']
+    result = l.search(value,field=field)
+    print result
 
-    result_id = l.search(settings.LDAP_BASE, ldap.SCOPE_SUBTREE , philter, ret)
-
-    print "result_id = %s" % str(result_id)
-
-    result_type, result_data = l.result(result_id, 0)
-
-    print "result_type = %s" % str(result_type)
-    print "result_data = %s" % str(result_data)
-    #print "result_data = %s" % str(result_data[0][1])
-
-    #group = result_data[0][0].split(',')[1]
-    #group = result_data[0][0].split(',')
-    group = result_data[0][1].get("carthageFormerStudentStatus")
-
-    #result_data = [('cn=skirk,o=users', {'cn': ['skirk'], 'carthageStaffStatus': ['A'], 'sn': ['Kirk'], 'carthageDob': ['1969-04-02'], 'mail': ['skirk@carthage.edu'], 'carthageSSN': ['XXXXX0481'], 'givenName': ['Steven'], 'carthageFacultyStatus': [''], 'carthageNameID': ['1217657']})]
-
-
-    print "group = %s" % group
+    # authenticate
+    if password:
+        l.bind(result[0][0],password)
 
 ######################
 # shell command line
@@ -90,12 +57,19 @@ def main():
 
 if __name__ == "__main__":
     (options, args) = parser.parse_args()
-    g = options.g
-    s = options.s
-    d = options.d
-    if not s or not d:
-        print "You must provide at least the person's last name or username.\n"
+    field = options.field
+    value = options.value
+    password = options.password
+
+    valid = ["cn","carthageNameID","mail"]
+    if not field and not value:
+        print "You must provide an attribute name and its value.\n"
         parser.print_help()
         exit(-1)
+    elif field not in valid:
+        print "Your attribute is not valid.\n"
+        parser.print_help()
+        exit(-1)
+    else:
+        sys.exit(main())
 
-    sys.exit(main())

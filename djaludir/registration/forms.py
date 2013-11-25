@@ -27,7 +27,7 @@ class CreateLdapForm(forms.Form):
     def clean_userPassword(self):
         if len(self.cleaned_data.get("userPassword")) < 8:
             raise forms.ValidationError("Password must be at least 8 characters.")
-        return self.cleaned_data["userPassword"]
+        return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):
         cleaned_data = self.cleaned_data
@@ -44,4 +44,3 @@ class CreateLdapForm(forms.Form):
         if user:
             raise forms.ValidationError("That email already exists in the system. Use another.")
         return cleaned_data["mail"]
-

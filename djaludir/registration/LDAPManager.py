@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from django.core.exceptions import PermissionDenied
 
 import ldap
 import ldap.modlist as modlist
-
-# Constants
-
-GROUPS = {"carthageFacultyStatus":"",
-          "carthageStaffStatus":"",
-          "carthageStudentStatus":"",
-          "carthageFormerStudentStatus":"",
-          "carthageOtherStatus":""
-}
 
 class LDAPManager(object):
 
@@ -29,31 +21,42 @@ class LDAPManager(object):
         except ldap.LDAPError, e:
             raise Exception(e)
 
+    def bind(self, dn, password):
+
+        # Attempt to bind to the user's DN.
+        # we need try/except here for edge cass errors
+        # like server refuses to execute.
+        """
+        try:
+            self.l.simple_bind_s(dn,password)
+        except:
+            raise PermissionDenied
+        """
+        self.l.simple_bind_s(dn,password)
+
     def create(self, person):
         """
         Creates a new LDAP user.
         Takes as argument a dictionary with the following key/value pairs:
 
-        objectclass     ["User","carthageUser"]
-        givenName       [first name]
-        sn              [last name]
-        carthageDob     [date of birth]
-        carthageNameID  [college ID]
-        cn              [we use email for username]
-        mail            [email]
-        userPassword    [password]
+        objectclass                 ["User","carthageUser"]
+        givenName                   [first name]
+        sn                          [last name]
+        carthageDob                 [date of birth]
+        carthageNameID              [college ID]
+        cn                          [we use email for username]
+        mail                        [email]
+        userPassword                [password]
+        carthageFacultyStatus       [faculty]
+        carthageStaffStatus         [staff]
+        carthageStudentStatus       [student]
+        carthageFormerStudentStatus [alumni]
+        carthageOtherStatus         [trustees etc]
         """
-        person["carthageFacultyStatus"] = ""
-        person["carthageStaffStatus"] = ""
-        person["carthageStudentStatus"] = ""
-        person["carthageFormerStudentStatus"] = "A"
-        person["carthageOtherStatus"] = ""
-
         user = modlist.addModlist(person)
 
-        dn = 'cn=%s,ou=USERS,o=CARTHAGE' % (person["mail"])
-        if not settings.DEBUG:
-            self.l.add_s(dn, user)
+        dn = 'cn=%s,o=USERS' % (person["mail"])
+        self.l.add_s(dn, user)
         return self.search(person["carthageNameID"])
 
     def dj_create(self, username, data):
@@ -80,7 +83,7 @@ class LDAPManager(object):
         user.last_name = data['sn'][0]
         user.save()
         # add to groups
-        for key, val in GROUPS.items():
+        for key, val in settings.LDAP_GROUPS.items():
             group = data.get(key)
             if group and group[0] == 'A':
                 g = Group.objects.get(name__iexact=key)
@@ -91,7 +94,7 @@ class LDAPManager(object):
         """
         Updates an LDAP user.
         """
-        return False
+        return None
 
     def delete(self, person):
         """
@@ -115,7 +118,8 @@ class LDAPManager(object):
         Searches for an LDAP user.
         Takes as argument a value and a valid unique field from
         the schema (i.e. carthageNameID, cn, mail).
-        Returns a dictionary with the following key/value pairs:
+        Returns a list with dn tuple and a dictionary with the
+        following key/value pairs:
 
         givenName               [first name]
         sn                      [last name]

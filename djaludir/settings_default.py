@@ -9,6 +9,7 @@ import os
 #DEBUG = False
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+INFORMIX_DEBUG = "debug"
 ADMINS = (
     ('', ''),
 )
@@ -29,9 +30,9 @@ FILE_CHARSET = 'utf-8'
 SERVER_URL = ""
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(__file__)
-ROOT_URL = "/djproj/"
-ROOT_URLCONF = 'djproj.urls'
-WSGI_APPLICATION = 'djproj.wsgi.application'
+ROOT_URL = "/djaludir/"
+ROOT_URLCONF = 'djaludir.urls'
+WSGI_APPLICATION = 'djaludir.wsgi.application'
 MEDIA_ROOT = ''
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 STATIC_ROOT = ''
@@ -47,7 +48,7 @@ DATABASES = {
     'default': {
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        'NAME': 'djproj',
+        'NAME': 'djaludir',
         'ENGINE': 'django.db.backends.mysql',
         'USER': '',
         'PASSWORD': ''
@@ -64,9 +65,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'djproj',
-    'djproj.core',
-    'djproj.myapp',
+    'djaludir',
+    'djaludir.core',
+    'djaludir.myapp',
     'djtools',
 )
 
@@ -85,7 +86,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 TEMPLATE_DIRS = (
-    "/data2/django_projects/djproj/templates/",
+    "/data2/django_projects/djaludir/templates/",
     "/data2/django_templates/djdfir/",
     "/data2/django_templates/djcher/",
     "/data2/django_templates/",
@@ -123,13 +124,14 @@ LDAP_BASE = ""
 LDAP_USER = ""
 LDAP_PASS = ""
 LDAP_EMAIL_DOMAIN = ""
+LDAP_GROUPS = {"":"",}
 # auth backends
 AUTHENTICATION_BACKENDS = (
     'djauth.ldapBackend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-LOGIN_URL = '/djproj/accounts/login/'
-LOGIN_REDIRECT_URL = '/djproj/'
+LOGIN_URL = '/djaludir/accounts/login/'
+LOGIN_REDIRECT_URL = '/djaludir/'
 USE_X_FORWARDED_HOST = True
 #SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

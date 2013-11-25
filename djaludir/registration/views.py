@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
 from djaludir.core.models import YEARS
-from djaludir.registration import SEARCH
+from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration.forms import RegistrationSearchForm, CreateLdapForm
 from djaludir.registration.LDAPManager import LDAPManager
 
@@ -32,6 +32,14 @@ def search(request):
         context_instance=RequestContext(request)
     )
 
+def error_mess(val):
+    error = '''
+        %s results returned. Please try your search again,
+        or contact the
+        <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
+        for further assistance.
+    ''' % val
+
 def search_informix(request):
     """
     Search informix database for alumna's record.
@@ -46,12 +54,12 @@ def search_informix(request):
             # data dictionary
             data = form.cleaned_data
             # if we have ID, don't need anything else
+            where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
+                 ' lower(aname_rec.line1) like "%%%s%%" )'
+                 % (data["givenName"],data["givenName"]))
             if data["carthageNameID"]:
-                where+= ' id_rec.id = "%s"' % data["carthageNameID"]
+                where+= 'AND id_rec.id = "%s"' % data["carthageNameID"]
             else:
-                where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
-                     ' lower(aname_rec.line1) like "%%%s%%" )'
-                     % (data["givenName"],data["givenName"]))
                 where += ' AND'
                 where += ' lower(id_rec.lastname) = "%s"' % data['sn'].lower()
                 where+= ' AND'
@@ -61,33 +69,24 @@ def search_informix(request):
                     where+= ' AND'
                     where+= ' ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )' % data["postal_code"]
             xsql = SEARCH + where
-            xsql += ' GROUP by id,birth_date,firstname,lastname,alt_name,addr_line1,addr_line2,city,st,postal_code,phone,email,ldap_name'
-            xsql += ' ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date'
-            results = do_sql(xsql)
+            xsql += SEARCH_GROUP_BY
+            xsql += SEARCH_ORDER_BY
+            results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
             objects = []
             if results:
                 for r in results:
                     objects.append(r)
-                if len(objects) < 1:
+                ln = len(objects)
+                if ln < 1:
                     results = None
-                    error = '''
-                        No results returned. Please try your search again,
-                        or contact the
-                        <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
-                        for further assistance.
-                    '''
-                elif len(objects) > 20:
+                    error = error_mess("No")
+                elif ln > 20:
                     results = None
-                    error = "Too many results returned. Narrow your search."
+                    error = error_mess(ln)
                 else:
                     results = objects
             else:
-                error = '''
-                    No results returned. Please try your search again,
-                    or contact the
-                    <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
-                    for further assistance.
-                '''
+                error = error_mess(ln)
         else:
             error = form.errors
         extra_context = {'form':form,'error':error,'results':results,}
@@ -120,11 +119,11 @@ def search_ldap(request):
                 # we have a user
                 user = user[0][1]
                 # update informix if no ldap_user
-                if not data["ldap_name"] and not settings.DEBUG:
+                if data["ldap_name"]=='' and not settings.DEBUG:
                     sql = """
-                        UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'"
-                    """ % (user["cn"][0],data["alumna"])
-                    ln = do_sql(sql)
+                        UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
+                    """ % (user["cn"][0], data["alumna"])
+                    results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
                 redir = reverse_lazy("manager_search")
@@ -138,7 +137,7 @@ def search_ldap(request):
                 extra_context = {'action':action,'form':form,}
                 template = "create"
             return render_to_response(
-                "registration/%s_ldap.html" % template, extra_context,
+                "registration/%s_ldap.inc.html" % template, extra_context,
                 context_instance=RequestContext(request)
             )
     else:
@@ -157,41 +156,54 @@ def create_ldap(request):
         form = CreateLdapForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            data["objectclass"] = '["User","carthageUser"]'
-            data["cn"] = data["mail"]
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
+            # login (cn) will be email address
+            data["cn"] = data["mail"]
+            # remove confirmation password
+            data.pop('confPassword',None)
+            # python ldap wants strings, not unicode
+            for k,v in data.items():
+                data[k] = str(v)
+            data["objectclass"] = ["User","carthageUser"]
+            data["carthageFacultyStatus"] = ""
+            data["carthageStaffStatus"] = ""
+            data["carthageStudentStatus"] = ""
+            data["carthageFormerStudentStatus"] = "A"
+            data["carthageOtherStatus"] = ""
+            logger.debug("data = %s" % data)
             # create the ldap user [manager controls debug settings]
             l = LDAPManager()
             user = l.create(data)
+            logger.debug("user = %s" % user)
             if not settings.DEBUG:
-                user = user[0][1]
                 # update informix cvid_rec.ldap_user
                 sql = """
-                    UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'"
-                """ % (user["cn"][0],data["mail"])
-                ln = do_sql(sql)
-                # send email to admins
-                subject = "[LDAP][Create] %s %s" % (user["givenName"][0],user["sn"][0])
-                send_mail(
-                    request,TO_LIST, subject, data["email"],
-                    "registration/ldap_email.html", data
-                )
+                    UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
+                """ % (user[0][1]["cn"][0],data["mail"])
+                ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             else:
                 logger.debug("data = %s" % data)
             # create the django user
             djuser = l.dj_create(data["mail"],user)
-
+            # send email to admins
+            subject = """
+                [LDAP][Create] %s %s
+            """ % (user[0][1]["givenName"][0],user[0][1]["sn"][0])
+            send_mail(
+                request,TO_LIST, subject, data["mail"],
+                "registration/create_ldap_email.html", data
+            )
             return HttpResponseRedirect(reverse_lazy("auth_login"))
         else:
             return render_to_response(
-                "registration/create.html", {'form':form,},
+                "registration/create_ldap.html", {'form':form,},
                 context_instance=RequestContext(request)
             )
     else:
-        form = CreateLdapForm()
+        form = CreateLdapForm(initial={"carthageNameID":'901251',})
     return render_to_response(
-        "registration/create.html", {'form':form,},
+        "registration/create_ldap.html", {'form':form,},
         context_instance=RequestContext(request)
     )
     """

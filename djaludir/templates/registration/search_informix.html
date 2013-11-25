@@ -20,6 +20,9 @@
                     {% if r.phone %}
                     <dt>Last 4 digits of phone</dt><dd>x{{r.phone|slice:"8:12"}}</dd>
                     {% endif %}
+                    {% if r.email %}
+                    <dt>Carthage email</dt><dd>{{r.email}}</dd>
+                    {% endif %}
                     </dl>
                 </li>
             {% endfor %}

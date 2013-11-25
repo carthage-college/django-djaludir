@@ -6,6 +6,9 @@ from django.contrib.auth.models import User
 
 from djaludir.registration.LDAPManager import LDAPManager
 
+import logging
+logger = logging.getLogger(__name__)
+
 class LDAPBackend(object):
     supports_object_permissions = False
     supports_anonymous_user = False
@@ -13,7 +16,6 @@ class LDAPBackend(object):
 
     def authenticate(self, username=None, password=None):
         if not password:
-            #raise PermissionDenied
             return None
         username = username.lower()
         base = settings.LDAP_BASE
@@ -24,30 +26,25 @@ class LDAPBackend(object):
         l = LDAPManager()
 
         try:
-            result_id = l.search(base, scope, philter, ret)
-            result_type, result_data = l.result(result_id, 0)
+            result_data = l.search(username,field="cn")
+
             # If the user does not exist in LDAP, Fail.
-            if (len(result_data) != 1):
+            if not result_data:
                 return None
 
             # Attempt to bind to the user's DN.
-            # we don't need an "if" statement here.
-            # simple_bind will except if it fails, never return a value
-            l.simple_bind_s(result_data[0][0],password)
+            l.bind(result_data[0][0],password)
 
             # The user existed and authenticated.
             # Get the user record or create one with no privileges.
-
-            data = result_data[0][1]
             try:
                 user = User.objects.get(username__exact=username)
             except:
                 # Create a User object.
-                user = l.dj_create(username,data)
+                user = l.dj_create(username,result_data)
 
             # Success.
             return user
-
         except ldap.INVALID_CREDENTIALS:
             # Name or password were bad. Fail permanently.
             #raise PermissionDenied

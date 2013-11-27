@@ -1,5 +1,4 @@
 {% extends "core/home.html" %}
-
 {% block title %}Edit Alumni Information &mdash; {{block.super}}{% endblock %}
 {% block extra_style %}
     {{block.super}}
@@ -7,20 +6,28 @@
         fieldset {border:.1em solid #000000;}
         label {width:auto;padding-right:5px;font-weight:bold;}
         .business_address {width:9em;}
+        div.header {font-weight:bold;font-size:13pt;float:left;}
+        div.privacy {float:right;}
         .home_address {width:7.2em;}
         .relative {width:4em;}
     </style>
 {% endblock %}
+{% block jquery %}
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+{% endblock %}
+{% block javascript %}{% endblock %}
 {% block extra_javascript %}
     <script type="text/javascript" src="/mkishline/static/djaludir/js/commonLib.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script type="text/javascript">
-        //var relationships = "HW^Husband,HW^Wife,PC^Parent,PC^Child,SBSB^Sibling,COCO^Cousin,GPGC^Grandparent,GPGC^Grandchild,AUNN^Aunt,AUNN^Uncle,AUNN^Niece,AUNN^Nephew";
         var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
-        
+
         $(document).ready(function(){
             $('#advancedSettings').hide();
             $('#settingsLink').click(function(){ $('#advancedSettings, #generalSettings').toggle(); });
+            $('input[name="relativeCount"]').val($('.relativeBlock').length);
+            $('input[name="activityCount"]').val($('#activityList li').length);
+            $('input[name="athleticCount"]').val($('#athleticList li').length);
 
             $('input[name="addRelative"]').click(function(){
                 var addedRelatives = $('.relativeBlock').length + 1;
@@ -29,8 +36,9 @@
                     .append($('<input>').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12'}))
                     .append($('<select>').attr('name','relativeText' + addedRelatives))
                 .insertBefore($(this));
-                
+
                 loadSelectKeyVal('select[name="relativeText' + addedRelatives + '"]', relationships);
+                $('input[name="relativeCount"]').val(addedRelatives);
             });
 
             $('input[name="addActivity"]').click(function(){
@@ -38,6 +46,15 @@
                 $('<li />')
                     .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'size':'25'}))
                     .insertAfter($('#activityList li:last'));
+                $('input[name="activityCount"]').val(addedActivities);
+            });
+
+            $('input[name="activitySearch"]').autocomplete({
+                source: '../../activity/',
+                minLength: 2,
+                select: function(event, ui){
+                    console.log('Obj: ' + ui + '\nItem: ' + ui.item + '\nValue: ' + ui.value);
+                }
             });
 
             $('input[name="addTeam"]').click(function(){
@@ -45,20 +62,28 @@
                 $('<li>')
                     .html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'size':'25'}))
                     .insertAfter($('#athleticList li:last'));
+                $('input[name="athleticCount"]').val(addedTeams);
             });
-            
-            $('input[name="activitySearch"]').autocomplete({
-                source: "../../activity/" + $(this).val()) + "/",
-                minLength: 3,
-                select: function(event, ui){
-                    console.log(ui);
-                }
+
+            $('.privacyToggle').click(function(){
+                var pub = "Public", priv = "Private";
+                $chkBox = $(this).parent().find('input[type="checkbox"]');
+                var isPrivate = $chkBox.is(':checked');
+                //Since the click occurred, we are changing the status so everything gets toggled
+                isPrivate = !isPrivate;
+                $(this).text(isPrivate ? priv : pub);
+                isPrivate ? $chkBox.attr('checked','checked') : $chkBox.removeAttr('checked');
             });
         });
     </script>
 {% endblock %}
 {% block content %}
     <fieldset>
+        <input type="hidden" name="carthageID" value="{{studentID}}" />
+        <input type="hidden" name="relativeCount" />
+        <input type="hidden" name="activityCount" />
+        <input type="hidden" name="athleticCount" />
+
         <div class="form-row header">Privacy Settings</div>
         <ul id="generalSettings">
             <li><input type="radio" name="privacy" /> Please do not show any of my information in the alumni directory.</li>
@@ -71,9 +96,9 @@
         </div>
         <a href="#" id="settingsLink">Toggle advanced privacy settings</a>
     </fieldset>
-    
     <fieldset>
         <div class="form-row header">Personal Information</div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle">Public</a><input type="checkbox" name="privacyPersonal" value="Y" /></div>
         <div class="form-row">
             <label>Name:</label>
             <select name="prefix">
@@ -100,12 +125,6 @@
                 <label>Relative:</label><input type="text" name="relativeFname{{forloop.counter}}" value="{{relative.firstname}}" />
                 <input type="text" name="relativeLname{{forloop.counter}}" value="{{relative.lastname}}" />
                 <select name="relativeText{{forloop.counter}}">
-                    {% comment %}
-                    {% for relationship in relationships %}
-                        <option value="{{relationship.rel}}" {% ifequal relative.relText relationship.rel %}selected="selected"{% endifequal %}>{{relationship.txt}}</option>
-                    {% endfor %}
-                    {% endcomment %}
-                
                     {% for relationshipCode, relationshipText in relationships.items %}
                         <option value="{{relationshipCode}}" {% ifequal relative.relCode relationshipCode %}selected="selected"{% endifequal %}>{{relationshipText}}</option>
                     {% endfor %}
@@ -119,7 +138,6 @@
 
     <fieldset id="academicBlock">
         <div class="form-row header">Academics</div>
-    
         <div class="form-row"><label>Degree:</label><input type="text" name="degree" value="{{person.degree}}" /></div>
         <div class="form-row"><label>Class year:</label>
             <select name="class_year">
@@ -169,7 +187,6 @@
                 {% endfor %}
             </ul>
             <input type="button" name="addActivity" value="Add Activity" />
-            
             <p>&nbsp;</p>
             <input type="text" name="activitySearch" />
         </div>
@@ -196,6 +213,11 @@
                     <option value="">{{person.business_state}}</option>
                 </select>
                 <input type="text" name="business_zip" value="{{person.business_zip}}" size="5" />
+                <select name="business_country">
+                    {% for ctry, txt in countries %}
+                        <option value="{{ctry}}" {% ifequal ctry person.business_country %}selected="selected"{% endif %}>{{ctry}}</option>
+                    {% endfor %}
+                </select>
         </div>
         <div class="form-row">
             <label>Business phone:</label><input type="text" name="business_phone" value="{{person.business_phone}}" size="12" />
@@ -217,8 +239,12 @@
                     <option>{{person.home_state}}</option>
                 </select>
                 <input type="text" name="home_zip" value="{{person.home_zip}}" size="5" />
+                <select name="home_country">
+                    {% for ctry, txt in countries %}
+                        <option value="{{ctry}}" {% ifequal ctry person.home_country %}selected="selected"{% endifequal %}>{{txt}}</option>
+                    {% endfor %}
+                </select>
         </div>
     </fieldset>
-    
     <p><a href="../../search/">Return to Search</a></p>
 {% endblock %}

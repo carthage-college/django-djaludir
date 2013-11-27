@@ -3,12 +3,12 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
-from django.utils import simplejson
 
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
 import datetime
+import json
 
 if settings.DEBUG:
     TO_LIST = ["mkishline@carthage.edu",]
@@ -47,10 +47,10 @@ def update(request):
         if(relRelation[-1:] == '1'):
             alumPrimary = 'N'
 
-        if(relRelation[-1:] == '1' || relRelation[-1:] == '2'):
+        if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
             relRelation = relRelation[0:-1]
 
-        if(len(relFname + relLname) > 0 && relRelation != ''):
+        if(len(relFname + relLname) > 0 and relRelation != ''):
             insertRelative(studentID, relRelation, relFname, relLname, alumPrimary)
 
 
@@ -308,7 +308,7 @@ def search_activity(request):
     activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())
     activity_search = do_sql(activity_search_sql)
     #return activity_search.fetchall()
-    #context = simplejson.dumps(activity_search.fetchall())
+    #context = json.dumps(activity_search.fetchall())
     return HttpResponse(activity_search.fetchall())
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):

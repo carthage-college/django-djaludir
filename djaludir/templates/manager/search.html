@@ -5,14 +5,13 @@
     <link rel="stylesheet" href="/mkishline/static/djaludir/css/tablesorter_theme/blue/style.css" />
     <style type="text/css">
         .center {text-align:center;font-size:14px;font-weight:bold;}
-        
         #searchResults {padding:3px 5px;}
-        
         th.headerSortUp {
             /* background-image: url('/mkishline/static/djaludir/css/tablesorter_theme/blue/asc.gif');
             background-color: #3399FF; */
             background: url('/mkishline/static/djaludir/css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
         }
+        #profile .form-row {margin-bottom:3px;}
     </style>
 {% endblock %}
 {% block extra_javascript %}
@@ -31,19 +30,19 @@
         function createBlock(fieldName, searchTerm){
             if (fieldName === undefined || fieldName == null) fieldName = '';
             if (searchTerm === undefined || searchTerm == null) searchTerm = '';
-            
+
             if(criteria < MAX_CRITERIA){
                 var $divObj = $('<div>').addClass('form-row').addClass('search');
                 $('<select>').attr('name','within' + criteria).appendTo($divObj);
 
                 $('<span> contains </span>').appendTo($divObj);
-                $('<input>').attr('type','text').attr('name','term' + criteria).attr('size','15').val(searchTerm).appendTo($divObj);
+                $('<input>').attr('type','text').attr('name','term' + criteria).attr('class','medium').val(searchTerm).appendTo($divObj);
 
                 if(criteria < MAX_CRITERIA - 1){
                     $('<span>&nbsp;</span>').appendTo($divObj);
-                    $('<input>').attr('type','button').attr('name','add_search').val('ADD').click(createBlock).appendTo($divObj);
+                    $('<input>').attr('type','button').attr('name','add_search').attr('class','button').val('ADD').click(createBlock).appendTo($divObj);
                 }
-                
+
                 $('#submitrow').before($divObj);
                 clearSelect('select[name="within' + criteria + '"]');
                 loadSelectKeyVal('select[name="within' + criteria + '"]', SELECT_VALUES, false);
@@ -56,7 +55,7 @@
                 }
             }
         }
-        
+
         function deleteBlock(){
             $(this).parent('.form-row').remove();
             var curRow = 1;
@@ -72,7 +71,7 @@
             });
             updateCriteria();
         }
-        
+
         $(document).ready(function(){
             $('#searchResults').tablesorter({
                 headers: {
@@ -80,7 +79,7 @@
                     4: { sorter:false }
                 }
             });
-            
+
             $('form[name="searchForm"]').submit(function(){
                 var validForm = false;
                 $('#formfieldset div.search input[name^="term"]').each(function(){
@@ -90,7 +89,7 @@
                 });
                 return validForm;
             })
-            
+
             updateCriteria();
             {% if searching %}
                 {% for field, term in searching.items %}
@@ -103,14 +102,15 @@
     </script>
 {% endblock %}
 {% block content %}
+    <div class="buffer">
     {% if message %}<div class="message">{{message}}</div>{% endif %}
-    <p>Search:</p>
-    <form action="." name="searchForm" method="post">
+    <h1>Search:</h1>
+    <form action="." name="searchForm" method="post" class="form" id="profile">
         <input type="hidden" name="maxCriteria" value="0" />
         {% csrf_token %}
         <fieldset id="formfieldset">
             <div id="submitrow" class="form-row">
-                <input type="submit" name="submit" value="Search" />
+                <input type="submit" name="submit" value="Search" class="button" />
             </div>
         </fieldset>
     </form>
@@ -123,7 +123,7 @@
         </thead>
         <tbody>
             {% for person in matches %}
-                <tr>
+                <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{person.class_year}}</td>
                     <td>{{person.firstname}}</td>
                     <td>{% if person.maiden_name %}({{person.maiden_name}}) {% endif %}{{person.lastname}}</td>
@@ -140,4 +140,5 @@
     {% if debug %}
         {{debug}}
     {% endif %}
+    </div>
 {% endblock %}

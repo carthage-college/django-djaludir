@@ -63,11 +63,15 @@ def search_informix(request):
                 where += ' AND'
                 where += ' lower(id_rec.lastname) = "%s"' % data['sn'].lower()
                 where+= ' AND'
-                where+= ' (profile_rec.birth_date = "%s"' % data["carthageDob"].strftime("%m/%d/%Y")
+                where+= '''
+                     (profile_rec.birth_date = "%s"
+                ''' % data["carthageDob"].strftime("%m/%d/%Y")
                 where+= ' OR profile_rec.birth_date is null)'
                 if data["postal_code"]:
                     where+= ' AND'
-                    where+= ' ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )' % data["postal_code"]
+                    where+= '''
+                        ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )
+                    ''' % data["postal_code"]
             xsql = SEARCH + where
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY

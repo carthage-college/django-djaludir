@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.core.exceptions import PermissionDenied
 
 import ldap
 import ldap.modlist as modlist
@@ -21,25 +20,28 @@ class LDAPManager(object):
         except ldap.LDAPError, e:
             raise Exception(e)
 
+    def unbind(self):
+        #
+        # Disconnect and free resources when done
+        #
+        self.l.unbind_s()
+
     def bind(self, dn, password):
 
         # Attempt to bind to the user's DN.
         # we need try/except here for edge cass errors
         # like server refuses to execute.
-        """
         try:
             self.l.simple_bind_s(dn,password)
-        except:
-            raise PermissionDenied
-        """
-        self.l.simple_bind_s(dn,password)
+        except ldap.LDAPError, e:
+            raise Exception(e)
 
     def create(self, person):
         """
         Creates a new LDAP user.
         Takes as argument a dictionary with the following key/value pairs:
 
-        objectclass                 ["User","carthageUser"]
+        objectclass                 ["User","etc"]
         givenName                   [first name]
         sn                          [last name]
         carthageDob                 [date of birth]
@@ -55,7 +57,7 @@ class LDAPManager(object):
         """
         user = modlist.addModlist(person)
 
-        dn = 'cn=%s,o=USERS' % (person["mail"])
+        dn = 'cn=%s,%s' % (person["mail"],settings.LDAP_BASE)
         self.l.add_s(dn, user)
         return self.search(person["carthageNameID"])
 
@@ -94,7 +96,16 @@ class LDAPManager(object):
         """
         Updates an LDAP user.
         """
-        return None
+
+        # Some place-holders for old and new values
+        old = {'description':'User object for replication using slurpd'}
+        new = {'description':'Bind object used for replication using slurpd'}
+
+        # Convert place-holders for modify-operation using modlist-module
+        ldif = modlist.modifyModlist(old,new)
+
+        # Do the actual modification 
+        l.modify_s(dn,ldif)
 
     def delete(self, person):
         """
@@ -102,16 +113,12 @@ class LDAPManager(object):
         Takes as argument a dictionary with the following key/value pairs:
 
         cn              [username]
-        group           [faculty,staff,student,alumni,other]
         """
-
-        deleteDN = "cn=%s,ou=%s,o=CARTHAGE" % (person["username"],person["group"])
+        dn = "cn=%s,%s" % (person["cn"],settings.LDAP_BASE)
         try:
-            # we can safely ignore the results returned, since an exception
-            # will be raised if the delete doesn't work.
-            self.l.delete_s(deleteDN)
+            self.l.delete_s(dn)
         except ldap.LDAPError, e:
-            pass
+            raise Exception(e)
 
     def search(self, val, field="carthageNameID"):
         """

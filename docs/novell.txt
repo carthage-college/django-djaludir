@@ -1,27 +1,60 @@
-The attributes we use in LDAP are:
+Containers
 
+In the Novell ecosystem, "containers" are the same as the Organizational Unit we see in OpenLDAP world: that is, the "ou" in the LDAP schema.
+
+Carthage have the following containers:
+
+Faculty
+Staff
+Students
+Former Students
+TrustedOutsiders
+
+see below for their corresponding attributes.
+
+The attributes we use in LDAP
 carthageDob - date of birth
 carthageFacultyStatus - populated with an A if the user is a faculty member
 carthageStaffStatus - populated with an A if the user is a staff member
 carthageStudentStatus - populated with an A if the user is a student
+carthageFormerStudentStatus - populated with an A if the user is a alumni
+carthageOtherStatus - populated with an A if the user a "Trusted Outsider"
 carthageNameID - ID#
 carthageSSN - social security number (only last four digits, all others are Xs)
 cn = username
 givenName  = First Name
 sn = Last Name
 mail = e-mail address
+userPassword = [see below]
 
 To have the carthage specific attributes, a user must have an objectClass of carthageUser.
 
+userPassword
 
-http://support.novell.com/techcenter/articles/dnd20030504.html
+In Novell, you can't really see this value. You can only create it and update it. There is some magic that takes place when you create a password, wherein the value is encrypted. The same magic takes care of comparing values during authentication.
 
-Also note the special userPassword attribute. This is an attribute that can only be written to or deleted, never read from. You can change a password with LDAP by first doing a delete on the userPassword with a value of the old password, and then an add with the new password-something like this PHP:
+This is an attribute that can only be written to or deleted, never read from. You can change a password with LDAP by first doing a delete on the userPassword with a value of the old password, and then an add with the new password-something like this PHP:
 
 $result=$ldap->modify($dn
-      changes => [
-            delete => [ userPassword => "$oldpass"],
-            add => [userPassword => "$newpass"],
-      ]
-      );
+    changes => [
+        delete => [ userPassword => "$oldpass"],
+        add => [userPassword => "$newpass"],
+    ]
+);
+
+Trees
+
+CAMPUS
+LDAP
+META
+
+These trees also correspond to the servers in our pool. For example, we use the CAMPUS tree for authentication for most web applications, and corresponds to the hendrix.carthage.edu server. For the alumni directory, since we are creating LDAP users, we have to use the LDAP tree, which corresponds to the george.carthage.edu server.
+
+Chapuzas
+On johann.carthage.edu, Ron dumps CSV files that Novell can import into the LDAP store. Those files live in:
+/home/IBM/Desktop/import/input
+You set up the import mechanism through the Novell eDirectory web interface.
+
+
+http://support.novell.com/techcenter/articles/dnd20030504.html
 

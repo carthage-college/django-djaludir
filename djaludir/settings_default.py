@@ -115,7 +115,16 @@ CACHES = {
     }
 }
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
-
+# SMTP settings
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_FAIL_SILENTLY = True
+DEFAULT_FROM_EMAIL = ""
+SERVER_EMAIL = ""
+SERVER_MAIL=""
 # LDAP Constants
 LDAP_SERVER = ''
 LDAP_PORT = '636'
@@ -125,6 +134,8 @@ LDAP_USER = ""
 LDAP_PASS = ""
 LDAP_EMAIL_DOMAIN = ""
 LDAP_GROUPS = {"":"",}
+LDAP_OBJECT_CLASS = ""
+LDAP_RETURN = []
 # auth backends
 AUTHENTICATION_BACKENDS = (
     'djauth.ldapBackend.LDAPBackend',

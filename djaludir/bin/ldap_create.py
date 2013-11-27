@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Add a user to LDAP store
-
-e.g.
-
-# python bin/ldap_add.py --first_name=Larry --last_name=Karthago --user_name=larry --dob=1974-02-02 --group=Alumni --id=90125 --email=larry@carthage.edu --password='xxx'
-
 """
 
 from optparse import OptionParser
@@ -55,7 +50,13 @@ def main():
 
     # Authenticate the base user so we can search
     try:
-        l = ldap.initialize('%s://%s:%s' % (settings.LDAP_PROTOCOL,settings.LDAP_SERVER,settings.LDAP_PORT))
+        l = ldap.initialize("""
+            %s://%s:%s""" % (
+                settings.LDAP_PROTOCOL,
+                settings.LDAP_SERVER,
+                settings.LDAP_PORT
+            )
+        )
         l.protocol_version = ldap.VERSION3
         l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
     except ldap.LDAPError:
@@ -91,7 +92,7 @@ def main():
     user = modlist.addModlist(person)
     print user
 
-    dn = 'cn=%s,o=USERS' % (cn)
+    dn = 'cn=%s,%s' % (cn,settings.LDAP_BASE)
     l.add_s(dn, user)
 
 ######################

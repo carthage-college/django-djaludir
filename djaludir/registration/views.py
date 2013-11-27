@@ -119,7 +119,7 @@ def search_ldap(request):
                 # we have a user
                 user = user[0][1]
                 # update informix if no ldap_user
-                if data["ldap_name"]=='' and not settings.DEBUG:
+                if data["ldap_name"]=='':
                     sql = """
                         UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
                     """ % (user["cn"][0], data["alumna"])
@@ -172,7 +172,7 @@ def create_ldap(request):
             data["carthageFormerStudentStatus"] = "A"
             data["carthageOtherStatus"] = ""
             logger.debug("data = %s" % data)
-            # create the ldap user [manager controls debug settings]
+            # create the ldap user
             l = LDAPManager()
             user = l.create(data)
             logger.debug("user = %s" % user)
@@ -180,16 +180,17 @@ def create_ldap(request):
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
-                """ % (user[0][1]["cn"][0],data["mail"])
+                """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"])
                 ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             else:
                 logger.debug("data = %s" % data)
             # create the django user
             djuser = l.dj_create(data["mail"],user)
             # send email to admins
-            subject = """
-                [LDAP][Create] %s %s
-            """ % (user[0][1]["givenName"][0],user[0][1]["sn"][0])
+            subject = "[LDAP][Create] %s %s" % (
+                user[0][1]["givenName"][0],
+                user[0][1]["sn"][0]
+            )
             send_mail(
                 request,TO_LIST, subject, data["mail"],
                 "registration/create_ldap_email.html", data
@@ -200,14 +201,13 @@ def create_ldap(request):
                 "registration/create_ldap.html", {'form':form,},
                 context_instance=RequestContext(request)
             )
-    else:
-        form = CreateLdapForm(initial={"carthageNameID":'901251',})
-    return render_to_response(
-        "registration/create_ldap.html", {'form':form,},
-        context_instance=RequestContext(request)
-    )
-    """
+    elif settings.DEBUG:
+        form = CreateLdapForm(initial={"carthageNameID":'901257',})
+        return render_to_response(
+            "registration/create_ldap.html", {'form':form,},
+            context_instance=RequestContext(request)
+        )
     else:
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
-    """
+

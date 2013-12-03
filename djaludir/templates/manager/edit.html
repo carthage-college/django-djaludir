@@ -6,9 +6,11 @@
         fieldset {border:.1em solid #000000;}
         label {width:auto;padding-right:5px;font-weight:bold;}
         .business_address {width:9em;}
+        .form-row {clear:both;}
         div.header {font-weight:bold;font-size:13pt;float:left;}
-        div.privacy {float:right;}
         .home_address {width:7.2em;}
+        div.privacy {float:right;}
+        input.privacyToggle {display:none;}
         .relative {width:4em;}
     </style>
 {% endblock %}
@@ -18,7 +20,7 @@
 {% endblock %}
 {% block javascript %}{% endblock %}
 {% block extra_javascript %}
-    <script type="text/javascript" src="/mkishline/static/djaludir/js/commonLib.js"></script>
+    <script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
     <script type="text/javascript">
         var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
 
@@ -65,19 +67,66 @@
                 $('input[name="athleticCount"]').val(addedTeams);
             });
 
-            $('.privacyToggle').click(function(){
-                var pub = "Public", priv = "Private";
-                $chkBox = $(this).parent().find('input[type="checkbox"]');
-                var isPrivate = $chkBox.is(':checked');
-                //Since the click occurred, we are changing the status so everything gets toggled
-                isPrivate = !isPrivate;
-                $(this).text(isPrivate ? priv : pub);
-                isPrivate ? $chkBox.attr('checked','checked') : $chkBox.removeAttr('checked');
+            $('a.privacyToggle').each(function(){
+                var cbName = $(this).parent().find('input.privacyToggle').attr('name');
+                $(this).click({chkBoxName: cbName}, togglePrivacy);
+                togglePrivacy(cbName);
+            });
+
+            $('input[name="privacy"]').click(function(){
+                alert($(this).val());
+                switch($(this).val()){
+                    case '0':
+                        setPrivacy('Personal,Family,Academics,Professional,Address', true);
+                        break;
+                    case '1':
+                        setPrivacy('Family,Academics,Professional,Address', true);
+                        setPrivacy('Personal', false);
+                        break;
+                    case '2':
+                        setPrivacy('Family,Professional,Address', true);
+                        setPrivacy('Personal,Academics', false);
+                        break;
+                    case '3':
+                        setPrivacy('Personal,Family,Academics,Professional,Address', true);
+                        break;
+                    case '4':
+                        break;
+                }
             });
         });
+        
+        function handlerPrivacy(event){
+            togglePrivacy(event.data.chkBoxName);
+        }
+        
+        function togglePrivacy(chkBoxName){
+            if(typeof chkBoxName != 'string'){
+                chkBoxName = chkBoxName.data.chkBoxName;
+            }
+            $chkBox = $('input[name="' + chkBoxName + '"]');
+            $linkObj = $chkBox.parent().find('a.privacyToggle');
+            var isPrivate = !$chkBox.is(':checked');
+            isPrivate = !isPrivate;
+            $linkObj.text('Information is: ' + (isPrivate ? 'Private' : 'Public'));
+            $chkBox.prop('checked', !isPrivate);
+        }
+        
+        function setPrivacy(chkBoxName, isPrivate){
+            console.log('Found ' + chkBoxName.split(',').length + ' matches');
+            $.each(chkBoxName.split(','), function(index, value){
+                $chkBox = $('input[name="privacy' + value + '"]');
+                console.log('Trying to find input[name="privacy' + value + '"]: ' + ($chkBox.length > 0 ? 'Success' : 'Failure'));
+                $chkBox.parent().find('a.privacyToggle').text('Information is: ' + (isPrivate ? 'Private' : 'Public'));
+                $chkBox.prop('checked', !isPrivate);
+            });
+        }
     </script>
 {% endblock %}
 {% block content %}
+    {% if submitted %}
+        <h2>Thank you for updating your information. Your changes have been submitted to the office of Instutitional Advancement for review.</h2>
+    {% endif %}        
     <fieldset>
         <input type="hidden" name="carthageID" value="{{studentID}}" />
         <input type="hidden" name="relativeCount" />
@@ -85,11 +134,12 @@
         <input type="hidden" name="athleticCount" />
 
         <div class="form-row header">Privacy Settings</div>
-        <ul id="generalSettings">
-            <li><input type="radio" name="privacy" /> Please do not show any of my information in the alumni directory.</li>
-            <li><input type="radio" name="privacy" /> Do not allow others to see information other than my name and class year.</li>
-            <li><input type="radio" name="privacy" /> Allow people to see my academic details but do not share my contact information. (Others will be able to send you an message but your email will remain private.)</li>
-            <li><input type="radio" name="privacy" /> Make my information available.</li>
+        <ul class="form-row" id="generalSettings">
+            <li><input type="radio" name="privacy" value="0" /> Please do not show any of my information in the alumni directory.</li>
+            <li><input type="radio" name="privacy" value="1" /> Do not allow others to see information other than my name and class year.</li>
+            <li><input type="radio" name="privacy" value="2" /> Allow people to see my personal and academic details but do not share my address information. (Others will be able to send you a message but your email will remain private.)</li>
+            <li><input type="radio" name="privacy" value="3" /> Make all my information available.</li>
+            <li><input type="radio" name="privacy" value="4" /> Custom (specify your own privacy settings)</li>
         </ul>
         <div id="advancedSettings">
             A checked box indicates that the information will be visible to other alumni.
@@ -98,7 +148,7 @@
     </fieldset>
     <fieldset>
         <div class="form-row header">Personal Information</div>
-        <div class="privacy"><a href="javascript://" class="privacyToggle">Public</a><input type="checkbox" name="privacyPersonal" value="Y" /></div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyPersonal" class="privacyToggle" value="N" /></div>
         <div class="form-row">
             <label>Name:</label>
             <select name="prefix">
@@ -115,11 +165,19 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="form-row"><label>Email:</label><input type="text" name="email" value="{{person.email}}" size="25" /></div>
+        <div class="form-row"><label>Class year:</label>
+            <select name="class_year">
+                <option value=""></option>
+                {% for year in years reversed %}
+                    <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
     </fieldset>
 
     <fieldset id="familyBlock">
         <div class="form-row header">Family</div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyFamily" class="privacyToggle" value="N" /></div>
         {% for relative in relatives %}
             <div class="form-row relativeBlock">
                 <label>Relative:</label><input type="text" name="relativeFname{{forloop.counter}}" value="{{relative.firstname}}" />
@@ -138,15 +196,8 @@
 
     <fieldset id="academicBlock">
         <div class="form-row header">Academics</div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyAcademics" class="privacyToggle" value="N" /></div>
         <div class="form-row"><label>Degree:</label><input type="text" name="degree" value="{{person.degree}}" /></div>
-        <div class="form-row"><label>Class year:</label>
-            <select name="class_year">
-                <option value=""></option>
-                {% for year in years reversed %}
-                    <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>{{year}}</option>
-                {% endfor %}
-            </select>
-        </div>
         <div class="form-row"><label>Major 1:</label>
             <select name="major1">
                 <option value=""></option>
@@ -204,6 +255,7 @@
 
     <fieldset>
         <div class="form-row header">Professional Information</div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyProfessional" class="privacyToggle" value="N" /></div>
         <div class="form-row"><label>Business name:</label><input type="text" name="business_name" value="{{person.business_name}}" /></div>
         <div class="form-row">
             <label>Business address:</label><input type="text" name="business_address" value="{{person.business_address}}" /><br />
@@ -215,7 +267,7 @@
                 <input type="text" name="business_zip" value="{{person.business_zip}}" size="5" />
                 <select name="business_country">
                     {% for ctry, txt in countries %}
-                        <option value="{{ctry}}" {% ifequal ctry person.business_country %}selected="selected"{% endif %}>{{ctry}}</option>
+                        <option value="{{ctry}}" {% ifequal ctry person.business_country %}selected="selected"{% endifequal %}>{{ctry}}</option>
                     {% endfor %}
                 </select>
         </div>
@@ -226,6 +278,8 @@
 
     <fieldset>
         <div class="form-row header">Address</div>
+        <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyAddress" class="privacyToggle" value="N" /></div>
+        <div class="form-row"><label>Email:</label><input type="text" name="email" value="{{person.email}}" size="25" /></div>
         <div class="form-row">
             <label>Home phone:</label><input type="text" name="home_phone" value="{{person.home_phone}}" size="12" />
         </div>

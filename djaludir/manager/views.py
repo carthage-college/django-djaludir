@@ -79,9 +79,24 @@ def update(request):
     clearPrivacy(studentID)
 
     #def insertPrivacy(carthageID, field, display):
-
+    personal = request.POST.get('privacyPersonal','Y')
+    insertPrivacy(studentID, 'personal', personal)
+    
+    family = request.POST.get('privacyFamily','Y')
+    insertPrivacy(studentID, 'family', family)
+    
+    academics = request.POST.get('privacyAcademics','Y')
+    insertPrivacy(studentID, 'academics', academics)
+    
+    professional = request.POST.get('privacyProfessional','Y')
+    insertPrivacy(studentID, 'professional', professional)
+    
+    address = request.POST.get('privacyAddress','Y')
+    insertPrivacy(studentID, 'address', address)
+    
     return render_to_response(
-        "manager/update.html",
+        "manager/edit.html",
+        {'submitted':'yes'},
         context_instance=RequestContext(request)
     )
 
@@ -346,3 +361,94 @@ def insertPrivacy(carthageID, field, display):
     privacy_sql = 'INSERT INTO stg_aludir_privacy (id, fieldname, display, lastupdated) VALUES (%s, "%s", "%s", "%s")' % (carthageID, field, display, datetime.datetime.now())
     do_sql(privacy_sql)
     return privacy_sql
+
+def emailDifferences(studentID):
+    emailBody = ''
+    student = getStudent(studentID)
+    
+    #Get information about the person
+    alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
+                  "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1) AS major1, TRIM(major2) AS major2, TRIM(major3) AS major3, masters_grad_year,"
+                  "TRIM(job_title) AS job_title FROM stg_aludir_alumni WHERE id = %s ORDER BY alum_no DESC") % (studentID)
+    alum = do_sql(alumni_sql)
+    alumni = alum.fetchone()
+    
+    #Get address information
+    homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
+                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'HOME')
+    homeaddress = do_sql(homeaddress_sql)
+    home_address = homeaddress.fetchone()
+    
+    workaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
+                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'WORK')
+    workaddress = do_sql(workaddress_sql)
+    work_address = workaddress.fetchone()
+    
+    #Get organization information
+    
+    if(student.prefix != alumni.prefix):
+        emailBody += ('Prefix: changed from "%s" to "%s"<br />') % (student.prefix, alumni.prefix)
+    if(student.fname != alumni.fname):
+        emailBody += ('First Name: changed from "%s" to "%s"<br />') % (student.fname, alumni.fname)
+    if(student.birth_lname != alumni.maidenname):
+        emailBody += ('Maiden Name: changed from "%s" to "%s"<br />') % (student.birth_lname, alumni.maidenname)
+    if(student.lname != alumni.lname):
+        emailBody += ('Last Name: changed from "%s" to "%s"<br />') % (student.lname, alumni.lname)
+    if(student.suffix != alumni.suffix):
+        emailBody += ('Suffix: changed from "%s" to "%s"<br />') % (student.suffix, alumni.suffix)
+    
+    #Section for relatives
+    
+    #Section for academics
+    if(student.degree != alumni.degree):
+        emailBody += ('Degree: changed from "%s" to "%s"<br />') % (student.degree, alumni.degree)
+    if(student.major1 != alumni.major1):
+        emailBody += ('Major 1: changed from "%s" to "%s"<br />') % (student.major1, alumni.major1)
+    if(student.major2 != alumni.major2):
+        emailBody += ('Major 2: changed from "%s" to "%s"<br />') % (student.major2, alumni.major2)
+    if(student.major3 != alumni.major3):
+        emailBody += ('Major 3: changed from "%s" to "%s"<br />') % (student.major3, alumni.major3)
+    if(student.masters_grad_year != alumni.masters_grad_year):
+        emailBody += ('Masters Grad Year: changed from "%s" to "%s"<br />') % (student.masters_grad_year, alumni.masters_grad_year)
+
+    #Section for student organizations
+    
+    #Section for athletic teams
+    
+    if(student.business_name != alumni.business_name):
+        emailBody += ('Business Name: changed from "%s" to "%s"<br />') % (student.business_name, alumni.business_name)
+    if(student.job_title != alumni.job_title):
+        emailBody += ('Job Title: changed from "%s" to "%s"<br />') % (student.job_title, alumni.job_title)
+    
+    #Section for work address
+    if(student.business_address != work_address.address_line1):
+        emailBody += ('Business Address: changed from "%s" to "%s"<br />') % (student.business_address, work_address.address_line1)
+    if(student.business_city != work_address.city):
+        emailBody += ('Business City: changed from "%s" to "%s"<br />') % (student.business_city, work_address.city)
+    if(student.business_state != work_address.state):
+        emailBody += ('Business State: changed from "%s" to "%s"<br />') % (student.business_state, work_address.state)
+    if(student.business_zip != work_address.zip):
+        emailBody += ('Business Zip: changed from "%s" to "%s"<br />') % (student.business_zip, work_address.zip)
+    if(student.business_country != work_address.country):
+        emailBody += ('Business Country: changed from "%s" to "%s"<br />') % (student.business_country, work_address.country)
+    if(student.business_phone != work_address.phone):
+        emailBody += ('Business Phone: changed from "%s" to "%s"<br />') % (student.business_phone, work_address.phone)
+
+    #Section for home address
+    if(student.home_address != home_address.address_line1):
+        emailBody += ('Home Address: changed from "%s" to "%s"<br />') % (student.home_address1, home_address.address_line1)
+    if(student.home_address != home_address.address_line2):
+        emailBody += ('Home Address Line 2: changed from "%s" to "%s"<br />') % (student.home_address2, home_address.address_line2)
+    if(student.home_address != home_address.address_line3):
+        emailBody += ('Home Address Line 3: changed from "%s" to "%s"<br />') % (student.home_address3, home_address.address_line3)
+    if(student.home_city != home_address.city):
+        emailBody += ('Home City: changed from "%s" to "%s"<br />') % (student.home_city, home_address.city)
+    if(student.home_state != home_address.state):
+        emailBody += ('Home State: changed from "%s" to "%s"<br />') % (student.home_state, home_address.state)
+    if(student.home_zip != home_address.zip):
+        emailBody += ('Home Zip: changed from "%s" to "%s"<br />') % (student.home_zip, home_address.zip)
+    if(student.home_country != home_address.country):
+        emailBody += ('Home Country: changed from "%s" to "%s"<br />') % (student.home_country, home_address.country)
+    if(student.home_phone != home_address.phone):
+        emailBody += ('Home Phone: changed from "%s" to "%s"<br />') % (student.home_phone, home_address.phone)
+    

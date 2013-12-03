@@ -2,21 +2,21 @@
 {% block title %}Search &mdash; {{block.super}}{% endblock %}
 {% block extra_style %}
     {{block.super}}
-    <link rel="stylesheet" href="/mkishline/static/djaludir/css/tablesorter_theme/blue/style.css" />
+    <link rel="stylesheet" href="{{static_url}}css/tablesorter_theme/blue/style.css" />
     <style type="text/css">
         .center {text-align:center;font-size:14px;font-weight:bold;}
         #searchResults {padding:3px 5px;}
         th.headerSortUp {
-            /* background-image: url('/mkishline/static/djaludir/css/tablesorter_theme/blue/asc.gif');
+            /* background-image: url('{{static_url}}css/tablesorter_theme/blue/asc.gif');
             background-color: #3399FF; */
-            background: url('/mkishline/static/djaludir/css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
+            background: url('{{static_url}}css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
         }
         #profile .form-row {margin-bottom:3px;}
     </style>
 {% endblock %}
 {% block extra_javascript %}
-    <script type="text/javascript" src="/mkishline/static/djaludir/js/commonLib.js"></script>
-    <script type="text/javascript" src="/mkishline/static/djaludir/js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
+    <script type="text/javascript" src="{{static_url}}js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript">
         var MAX_CRITERIA = 5;
         var criteria = 0;

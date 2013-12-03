@@ -10,7 +10,7 @@
             {% for r in results %}
                 <li>
                     <input type="radio" name="alumna" value="{{r.id}}" id="id_alumna" />
-                    <label for="id_alumna"> {{r.firstname}} {{r.lastname}}</label>
+                    <label for="id_alumna"> {{r.firstname}} {% if r.maiden_name %}({{r.maiden_name}}) {% endif %}{{r.lastname}}</label>
                     <input type="hidden" name="ldap_name" value="{{r.ldap_name}}" />
                     <dl style="margin-left:25px;">
                     <dt>Postal code</dt><dd>{{r.postal_code}}</dd>
@@ -19,9 +19,6 @@
                     {% endif %}
                     {% if r.phone %}
                     <dt>Last 4 digits of phone</dt><dd>x{{r.phone|slice:"8:12"}}</dd>
-                    {% endif %}
-                    {% if r.email %}
-                    <dt>Carthage email</dt><dd>{{r.email}}</dd>
                     {% endif %}
                     </dl>
                 </li>

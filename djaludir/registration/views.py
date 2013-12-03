@@ -39,6 +39,7 @@ def error_mess(val):
         <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
         for further assistance.
     ''' % val
+    return error
 
 def search_informix(request):
     """
@@ -53,20 +54,22 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            # if we have ID, don't need anything else
             where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
-                 ' lower(aname_rec.line1) like "%%%s%%" )'
-                 % (data["givenName"],data["givenName"]))
+                ' lower(aname_rec.line1) like "%%%s%%" )'
+                % (data["givenName"],data["givenName"]))
+            where += ' AND'
+            where += (' ( lower(id_rec.lastname) = "%s" OR'
+                ' lower(maiden.lastname) = "%s" )'
+                % (data['sn'].lower(), data['sn'].lower()))
+            # if we have ID, we don't need anything else
             if data["carthageNameID"]:
                 where+= 'AND id_rec.id = "%s"' % data["carthageNameID"]
             else:
-                where += ' AND'
-                where += ' lower(id_rec.lastname) = "%s"' % data['sn'].lower()
-                where+= ' AND'
-                where+= '''
-                     (profile_rec.birth_date = "%s"
-                ''' % data["carthageDob"].strftime("%m/%d/%Y")
-                where+= ' OR profile_rec.birth_date is null)'
+                #where+= ' AND'
+                #where+= '''
+                #     (profile_rec.birth_date = "%s"
+                #''' % data["carthageDob"].strftime("%m/%d/%Y")
+                #where+= ' OR profile_rec.birth_date is null)'
                 if data["postal_code"]:
                     where+= ' AND'
                     where+= '''
@@ -84,9 +87,11 @@ def search_informix(request):
                 if ln < 1:
                     results = None
                     error = error_mess("No")
-                elif ln > 20:
+                elif ln > 200:
+                    logger.debug("ln = %s" % ln)
                     results = None
                     error = error_mess(ln)
+                    logger.debug("error = %s" % error)
                 else:
                     results = objects
             else:

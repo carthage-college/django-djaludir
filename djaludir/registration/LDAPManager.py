@@ -10,11 +10,7 @@ class LDAPManager(object):
     def __init__(self):
         # Authenticate the base user so we can search
         try:
-            self.l = ldap.initialize('%s://%s:%s' % (
-                    settings.LDAP_PROTOCOL,settings.LDAP_SERVER,
-                    settings.LDAP_PORT
-                )
-            )
+            self.l = ldap.initialize('%s://%s:%s' % ( settings.LDAP_PROTOCOL,settings.LDAP_SERVER, settings.LDAP_PORT))
             self.l.protocol_version = ldap.VERSION3
             self.l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
         except ldap.LDAPError, e:
@@ -71,16 +67,15 @@ class LDAPManager(object):
         # ldap can still login properly, and LDAP users still
         # have a User object.
 
-        from random import choice
-        import string
-        temp_pass = ""
         data = data[0][1]
-        for i in range(48):
-            temp_pass = temp_pass + choice(string.letters)
         email = data['mail'][0]
+        uid = data['carthageNameID'][0]
         if not email:
             email = username
-        user = User.objects.create_user(username,email,temp_pass)
+        password = User.objects.make_random_password(length=24)
+        user = User.objects.create_user(
+            pk=uid,username=username,password=password,email=email
+        )
         user.first_name = data['givenName'][0]
         user.last_name = data['sn'][0]
         user.save()

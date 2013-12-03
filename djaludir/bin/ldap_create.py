@@ -49,17 +49,12 @@ def main():
     """
 
     # Authenticate the base user so we can search
-    try:
-        l = ldap.initialize("""
-            %s://%s:%s""" % (
-                settings.LDAP_PROTOCOL,
-                settings.LDAP_SERVER,
-                settings.LDAP_PORT
-            )
-        )
+    if settings.DEBUG:
+        l = ldap.initialize("%s://%s:%s" % (settings.LDAP_PROTOCOL, settings.LDAP_SERVER, settings.LDAP_PORT))
         l.protocol_version = ldap.VERSION3
         l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
-    except ldap.LDAPError:
+    #except ldap.LDAPError:
+    else:
         print 'authentication fail'
         exit(-1)
 
@@ -71,7 +66,7 @@ def main():
 
     person = {
         "objectclass":["User","carthageUser"],
-        "givenName":givenName,"sn":sn,"cn":cn,
+        "givenName":givenName,"sn":sn,"cn":cn,"loginDisabled":"false",
         "carthageDob":carthageDob,"carthageNameID":carthageNameID,
         "mail":mail,"userPassword":userPassword
     }

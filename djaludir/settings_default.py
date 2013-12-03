@@ -141,8 +141,9 @@ AUTHENTICATION_BACKENDS = (
     'djauth.ldapBackend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-LOGIN_URL = '/djaludir/accounts/login/'
-LOGIN_REDIRECT_URL = '/djaludir/'
+LOGIN_URL = '/alumni/directory/auth/login/'
+LOGOUT_URL = '/alumni/directory/auth/logout/'
+LOGIN_REDIRECT_URL = '/alumni/directory/'
 USE_X_FORWARDED_HOST = True
 #SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

@@ -3,3 +3,4 @@
 *.pyc
 settings.py
 wsgi.py
+djaludir/static/admin

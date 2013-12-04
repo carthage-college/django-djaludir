@@ -50,6 +50,7 @@ def search_informix(request):
     if request.method == "POST":
         results = None
         error = None
+        xsql = None
         form = RegistrationSearchForm(request.POST)
         if form.is_valid():
             # data dictionary
@@ -98,7 +99,7 @@ def search_informix(request):
                 error = error_mess(ln)
         else:
             error = form.errors
-        extra_context = {'form':form,'error':error,'results':results,}
+        extra_context = {'form':form,'error':error,'results':results,'sql':xsql,}
         return render_to_response(
             "registration/search_informix.html", extra_context,
             context_instance=RequestContext(request)
@@ -174,7 +175,7 @@ def create_ldap(request):
             # python ldap wants strings, not unicode
             for k,v in data.items():
                 data[k] = str(v)
-            data["objectclass"] = ["User","carthageUser"]
+            data["objectclass"] = settings.LDAP_OJBECT_CLASS
             data["carthageFacultyStatus"] = ""
             data["carthageStaffStatus"] = ""
             data["carthageStudentStatus"] = ""

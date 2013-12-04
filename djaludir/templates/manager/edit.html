@@ -122,6 +122,7 @@
     </script>
 {% endblock %}
 {% block content %}
+    <div class="buffer">
     {% if submitted %}
         <h2>Thank you for updating your information. Your changes have been submitted to the office of Instutitional Advancement for review.</h2>
     {% endif %}
@@ -298,5 +299,6 @@
                 </select>
         </div>
     </fieldset>
-    <p><a href="../../search/">Return to Search</a></p>
+    <p><a href="{% url 'manager_search' %}">Return to Search</a></p>
+    </div>
 {% endblock %}

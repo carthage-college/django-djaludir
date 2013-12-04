@@ -3,6 +3,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
+from django.contrib.auth.decorators import login_required
 
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
@@ -17,6 +18,7 @@ else:
 
 ATHLETIC_IDS = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','S073','S079','S080','S083','S090','S095','S220','S100','S101','S109','S126','S131','S156','S161','S172','S173','S176','S186','S187','S196','S197','S204','S205','S207','S208','S253','S215','S216'"
 
+@login_required
 def display(request, student_id):
     alumni = getStudent(student_id)
     activities = getStudentActivities(student_id, False)
@@ -29,6 +31,7 @@ def display(request, student_id):
         context_instance=RequestContext(request)
     )
 
+@login_required
 def update(request):
     studentID = request.POST.get('studentID')
 
@@ -99,6 +102,7 @@ def update(request):
         context_instance=RequestContext(request)
     )
 
+@login_required
 def search(request):
     fieldlist = []
     terms = []
@@ -162,6 +166,7 @@ def search(request):
         context_instance=RequestContext(request)
     )
 
+@login_required
 def edit(request, student_id):
     #Retrieve relevant information about the alumni
     alumni = getStudent(student_id)
@@ -317,6 +322,7 @@ def getCountries():
     countries = do_sql(countries_sql)
     return countries.fetchall()
 
+@login_required
 def search_activity(request):
     search_string = request.GET.get("term","Football")
     activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())

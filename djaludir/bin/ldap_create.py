@@ -20,6 +20,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djaludir.settings")
 # now we can import settings
 from django.conf import settings
 
+from djaludir.registration.LDAPManager import LDAPManager
+
 # set up command-line options
 desc = """
 Accepts as input and all are required:
@@ -48,30 +50,17 @@ def main():
     main method
     """
 
-    # Authenticate the base user so we can search
-    try:
-        l = ldap.initialize("""
-            %s://%s:%s""" % (
-                settings.LDAP_PROTOCOL,
-                settings.LDAP_SERVER,
-                settings.LDAP_PORT
-            )
-        )
-        l.protocol_version = ldap.VERSION3
-        l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
-    except ldap.LDAPError:
-        print 'authentication fail'
-        exit(-1)
+    # initialize the manager
+    l = LDAPManager()
 
     # If there is only one value in the attribute value list,
     # the value can be just a string – it need not be a list.
     # Example: ('ou', 'user') is an acceptable alternative to
     # ('ou', ['user']).
-    #    "objectclass":["User","carthageUser"],
 
     person = {
-        "objectclass":["User","carthageUser"],
-        "givenName":givenName,"sn":sn,"cn":cn,
+        "objectclass":settings.LDAP_OJBECT_CLASS,
+        "givenName":givenName,"sn":sn,"cn":cn,"loginDisabled":"false",
         "carthageDob":carthageDob,"carthageNameID":carthageNameID,
         "mail":mail,"userPassword":userPassword
     }
@@ -89,11 +78,8 @@ def main():
 
     print cn
     print person
-    user = modlist.addModlist(person)
+    user = l.create(person)
     print user
-
-    dn = 'cn=%s,%s' % (cn,settings.LDAP_BASE)
-    l.add_s(dn, user)
 
 ######################
 # shell command line

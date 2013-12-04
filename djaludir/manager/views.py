@@ -32,12 +32,11 @@ def display(request, student_id):
 def update(request):
     studentID = request.POST.get('studentID')
 
-    #def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title):
+    #Insert personal information
     insertRelative(studentID, request.POST.get('fname'), request.POST.get('lname'), request.POST.get('suffix'), request.POST.get('prefix'),
                    request.POST.get('email'), request.POST.get('maidenname'), request.POST.get('degree'), request.POST.get('class_year'), request.POST.get('business_name'),
                    request.POST.get('major1'), request.POST.get('major2'), request.POST.get('major3'), request.POST.get('masters_grad_year'), request.POST.get('job_title'))
 
-    #def insertRelative(carthageID, relCode, fname, lname):
     #Loop through all the relatives records
     for relativeIndex in range (0, int(request.POST.get('relativeCount'))):
         relFname = request.POST.get('relativeFname' + str(relativeIndex))
@@ -54,7 +53,7 @@ def update(request):
             insertRelative(studentID, relRelation, relFname, relLname, alumPrimary)
 
 
-    #def insertActivity(carthageID, activityCode):
+    #Insert organizationa and athletic involvement
     for activityIndex in range (0, int(request.POST.get('activityCount'))):
         activityCode = request.POST.get('activity' + str(activityIndex))
 
@@ -67,7 +66,7 @@ def update(request):
         if(len(athleticCode) > 0):
             insertActivity(studentID, athleticCode)
 
-    #def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
+    #Insert home and work address information
     insertAddress('WORK', studentID, request.POST.get('business_address'), '', '',
                   request.POST.get('business_city'), request.POST.get('business_state'), request.POST.get('business_zip'), '', request.POST.get('business_phone'))
 
@@ -75,25 +74,25 @@ def update(request):
                   request.POST.get('home_city'), request.POST.get('home_state'), request.POST.get('home_zip'), '', request.POST.get('home_phone'))
 
 
-    #def clearPrivacy(carthageID)
+    #Clear privacy values
     clearPrivacy(studentID)
 
-    #def insertPrivacy(carthageID, field, display):
+    #Insert updated privacy settings
     personal = request.POST.get('privacyPersonal','Y')
     insertPrivacy(studentID, 'personal', personal)
-    
+
     family = request.POST.get('privacyFamily','Y')
     insertPrivacy(studentID, 'family', family)
-    
+
     academics = request.POST.get('privacyAcademics','Y')
     insertPrivacy(studentID, 'academics', academics)
-    
+
     professional = request.POST.get('privacyProfessional','Y')
     insertPrivacy(studentID, 'professional', professional)
-    
+
     address = request.POST.get('privacyAddress','Y')
     insertPrivacy(studentID, 'address', address)
-    
+
     return render_to_response(
         "manager/edit.html",
         {'submitted':'yes'},
@@ -365,27 +364,30 @@ def insertPrivacy(carthageID, field, display):
 def emailDifferences(studentID):
     emailBody = ''
     student = getStudent(studentID)
-    
+    activities = getStudentActivities(studentID, False)
+    athletics = getStudentActivities(studentID, True)
+
     #Get information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
                   "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1) AS major1, TRIM(major2) AS major2, TRIM(major3) AS major3, masters_grad_year,"
                   "TRIM(job_title) AS job_title FROM stg_aludir_alumni WHERE id = %s ORDER BY alum_no DESC") % (studentID)
     alum = do_sql(alumni_sql)
     alumni = alum.fetchone()
-    
+
     #Get address information
     homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'HOME')
     homeaddress = do_sql(homeaddress_sql)
     home_address = homeaddress.fetchone()
-    
+
     workaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'WORK')
     workaddress = do_sql(workaddress_sql)
     work_address = workaddress.fetchone()
-    
+
     #Get organization information
-    
+
+    #Section for personal information
     if(student.prefix != alumni.prefix):
         emailBody += ('Prefix: changed from "%s" to "%s"<br />') % (student.prefix, alumni.prefix)
     if(student.fname != alumni.fname):
@@ -396,9 +398,9 @@ def emailDifferences(studentID):
         emailBody += ('Last Name: changed from "%s" to "%s"<br />') % (student.lname, alumni.lname)
     if(student.suffix != alumni.suffix):
         emailBody += ('Suffix: changed from "%s" to "%s"<br />') % (student.suffix, alumni.suffix)
-    
+
     #Section for relatives
-    
+
     #Section for academics
     if(student.degree != alumni.degree):
         emailBody += ('Degree: changed from "%s" to "%s"<br />') % (student.degree, alumni.degree)
@@ -412,14 +414,14 @@ def emailDifferences(studentID):
         emailBody += ('Masters Grad Year: changed from "%s" to "%s"<br />') % (student.masters_grad_year, alumni.masters_grad_year)
 
     #Section for student organizations
-    
+
     #Section for athletic teams
-    
+
     if(student.business_name != alumni.business_name):
         emailBody += ('Business Name: changed from "%s" to "%s"<br />') % (student.business_name, alumni.business_name)
     if(student.job_title != alumni.job_title):
         emailBody += ('Job Title: changed from "%s" to "%s"<br />') % (student.job_title, alumni.job_title)
-    
+
     #Section for work address
     if(student.business_address != work_address.address_line1):
         emailBody += ('Business Address: changed from "%s" to "%s"<br />') % (student.business_address, work_address.address_line1)

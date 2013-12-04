@@ -74,7 +74,6 @@
             });
 
             $('input[name="privacy"]').click(function(){
-                alert($(this).val());
                 switch($(this).val()){
                     case '0':
                         setPrivacy('Personal,Family,Academics,Professional,Address', true);
@@ -88,35 +87,34 @@
                         setPrivacy('Personal,Academics', false);
                         break;
                     case '3':
-                        setPrivacy('Personal,Family,Academics,Professional,Address', true);
+                        setPrivacy('Personal,Family,Academics,Professional,Address', false);
                         break;
                     case '4':
                         break;
                 }
             });
         });
-        
-        function handlerPrivacy(event){
-            togglePrivacy(event.data.chkBoxName);
-        }
-        
+
         function togglePrivacy(chkBoxName){
             if(typeof chkBoxName != 'string'){
                 chkBoxName = chkBoxName.data.chkBoxName;
             }
             $chkBox = $('input[name="' + chkBoxName + '"]');
             $linkObj = $chkBox.parent().find('a.privacyToggle');
+            /*
             var isPrivate = !$chkBox.is(':checked');
             isPrivate = !isPrivate;
             $linkObj.text('Information is: ' + (isPrivate ? 'Private' : 'Public'));
             $chkBox.prop('checked', !isPrivate);
+            */
+            var isPublic = $chkBox.is(':checked');
+            $linkObj.text('Information is: ' + (isPublic ? 'Private' : 'Public'));
+            $chkBox.prop('checked', !isPublic);
         }
-        
+
         function setPrivacy(chkBoxName, isPrivate){
-            console.log('Found ' + chkBoxName.split(',').length + ' matches');
             $.each(chkBoxName.split(','), function(index, value){
                 $chkBox = $('input[name="privacy' + value + '"]');
-                console.log('Trying to find input[name="privacy' + value + '"]: ' + ($chkBox.length > 0 ? 'Success' : 'Failure'));
                 $chkBox.parent().find('a.privacyToggle').text('Information is: ' + (isPrivate ? 'Private' : 'Public'));
                 $chkBox.prop('checked', !isPrivate);
             });
@@ -126,7 +124,7 @@
 {% block content %}
     {% if submitted %}
         <h2>Thank you for updating your information. Your changes have been submitted to the office of Instutitional Advancement for review.</h2>
-    {% endif %}        
+    {% endif %}
     <fieldset>
         <input type="hidden" name="carthageID" value="{{studentID}}" />
         <input type="hidden" name="relativeCount" />
@@ -139,7 +137,7 @@
             <li><input type="radio" name="privacy" value="1" /> Do not allow others to see information other than my name and class year.</li>
             <li><input type="radio" name="privacy" value="2" /> Allow people to see my personal and academic details but do not share my address information. (Others will be able to send you a message but your email will remain private.)</li>
             <li><input type="radio" name="privacy" value="3" /> Make all my information available.</li>
-            <li><input type="radio" name="privacy" value="4" /> Custom (specify your own privacy settings)</li>
+            <li><input type="radio" name="privacy" value="4" /> Custom (specify your own privacy settings, a checked box makes information public)</li>
         </ul>
         <div id="advancedSettings">
             A checked box indicates that the information will be visible to other alumni.

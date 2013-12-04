@@ -20,9 +20,6 @@ class LDAPBackend(object):
         username = username.lower()
         base = settings.LDAP_BASE
         scope = ldap.SCOPE_SUBTREE
-        philter = """
-            (&(objectclass=%s) (cn=%s))
-        """ % (settings.LDAP_OBJECT_CLASS,username)
         ret = settings.LDAP_RETURN
 
         l = LDAPManager()

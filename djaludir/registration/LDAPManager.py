@@ -138,7 +138,9 @@ class LDAPManager(object):
         valid = ["cn","carthageNameID","mail"]
         if field not in valid:
             return None
-        philter = "(&(objectclass=carthageUser) (%s=%s))" % (field,val)
+        philter = "(&(objectclass=%s) (%s=%s))" % (
+            settings.LDAP_OBJECT_FILTER,field,val
+        )
         ret = settings.LDAP_RETURN
 
         result_id = self.l.search(
@@ -150,4 +152,3 @@ class LDAPManager(object):
             return None
         else:
             return result_data
-

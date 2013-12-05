@@ -134,7 +134,7 @@ def search_ldap(request):
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
-                redir = reverse_lazy("manager_search")
+                redir = reverse_lazy("alumni_directory_home")
                 extra_context = {'user':user,'form':form,'next':redir,}
                 template = "login"
             else:

@@ -26,7 +26,6 @@ class LDAPBackend(object):
 
         try:
             result_data = l.search(username,field="cn")
-
             # If the user does not exist in LDAP, Fail.
             if not result_data:
                 return None

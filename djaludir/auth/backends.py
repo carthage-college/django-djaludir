@@ -40,7 +40,6 @@ class LDAPBackend(object):
             except:
                 # Create a User object.
                 user = l.dj_create(username,result_data)
-
             # Success.
             return user
         except ldap.INVALID_CREDENTIALS:

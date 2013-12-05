@@ -26,7 +26,6 @@ class LDAPBackend(object):
 
         try:
             result_data = l.search(username,field="cn")
-
             # If the user does not exist in LDAP, Fail.
             if not result_data:
                 return None
@@ -41,7 +40,6 @@ class LDAPBackend(object):
             except:
                 # Create a User object.
                 user = l.dj_create(username,result_data)
-
             # Success.
             return user
         except ldap.INVALID_CREDENTIALS:

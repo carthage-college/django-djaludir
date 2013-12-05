@@ -59,18 +59,16 @@ def search_informix(request):
                 ' lower(aname_rec.line1) like "%%%s%%" )'
                 % (data["givenName"],data["givenName"]))
             where += ' AND'
-            where += (' ( lower(id_rec.lastname) = "%s" OR'
-                ' lower(maiden.lastname) = "%s" )'
-                % (data['sn'].lower(), data['sn'].lower()))
+            where += ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
             # if we have ID, we don't need anything else
             if data["carthageNameID"]:
                 where+= 'AND id_rec.id = "%s"' % data["carthageNameID"]
             else:
-                #where+= ' AND'
-                #where+= '''
-                #     (profile_rec.birth_date = "%s"
-                #''' % data["carthageDob"].strftime("%m/%d/%Y")
-                #where+= ' OR profile_rec.birth_date is null)'
+                where+= ' AND'
+                where+= '''
+                     (profile_rec.birth_date = "%s"
+                ''' % data["carthageDob"].strftime("%m/%d/%Y")
+                where+= ' OR profile_rec.birth_date is null)'
                 if data["postal_code"]:
                     where+= ' AND'
                     where+= '''
@@ -136,7 +134,7 @@ def search_ldap(request):
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
-                redir = reverse_lazy("manager_search")
+                redir = reverse_lazy("alumni_directory_home")
                 extra_context = {'user':user,'form':form,'next':redir,}
                 template = "login"
             else:

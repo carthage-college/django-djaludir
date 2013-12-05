@@ -19,15 +19,10 @@ $(function() {
 <div id="second">
     <div class="buffer">
         <h1>Carthage Alumni Directory</h1>
-        {% if user.is_anonymous %}
-            {% include "accounts/login_form.inc.html" %}
-            {% include "auth/instructions.inc.html" %}
-        {% else %}
-            <ul>
-                <li><a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></li>
-                <li><a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a></li>
-            </ul>
-        {% endif %}
+        <ul>
+            <li><a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></li>
+            <li><a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a></li>
+        </ul>
     </div>
 </div>
 {% endblock %}

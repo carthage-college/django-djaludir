@@ -5,6 +5,9 @@ from django.contrib.auth.models import User, Group
 import ldap
 import ldap.modlist as modlist
 
+import logging
+logger = logging.getLogger(__name__)
+
 class LDAPManager(object):
 
     def __init__(self):
@@ -73,9 +76,8 @@ class LDAPManager(object):
         if not email:
             email = username
         password = User.objects.make_random_password(length=24)
-        user = User.objects.create_user(
-            pk=uid,username=username,password=password,email=email
-        )
+        user = User.objects.create(pk=uid,username=username,email=email)
+        user.set_password(password)
         user.first_name = data['givenName'][0]
         user.last_name = data['sn'][0]
         user.save()

@@ -70,7 +70,6 @@
             $('a.privacyToggle').each(function(){
                 var cbName = $(this).parent().find('input.privacyToggle').attr('name');
                 $(this).click({chkBoxName: cbName}, togglePrivacy);
-                //togglePrivacy(cbName);
                 setPrivacy(cbName.replace(/privacy/i,''), false);
             });
 
@@ -244,7 +243,7 @@
                 <label>Athletic Team{{athletics|pluralize}}</label><br />
                 <ul id="athleticList">
                     {% for team in athletics %}
-                        <li><input type="text" name="athletic{{forloop.counter}}" value="{{team.sport}}" /></li>
+                        <li><input type="text" name="athletic{{forloop.counter}}" value="{{team.sport}}" size="25" /></li>
                     {% endfor %}
                 </ul>
                 <input type="button" name="addTeam" value="Add Athletic Team" />
@@ -260,7 +259,9 @@
                 <label class="business_address">&nbsp;</label>
                     <input type="text" name="business_city" value="{{person.business_city}}" />,
                     <select name="business_state">
-                        <option value="">{{person.business_state}}</option>
+                        {% for state in states %}
+                            <option value="{{state.st}}" {% ifequal state.st person.business_state %}selected="selected"{% endifequal %}>{{state.st}}</option>
+                        {% endfor %}
                     </select>
                     <input type="text" name="business_zip" value="{{person.business_zip}}" size="5" />
                     <select name="business_country">
@@ -288,7 +289,9 @@
                 <label class="home_address">City, State Zip</label>
                     <input type="text" name="home_city" value="{{person.home_city}}" />,
                     <select name="home_state">
-                        <option>{{person.home_state}}</option>
+                        {% for state in states %}
+                            <option value="{{state.st}}" {% ifequal state.st person.home_state %}selected="selected"{% endifequal %}>{{state.st}}</option>
+                        {% endfor %}
                     </select>
                     <input type="text" name="home_zip" value="{{person.home_zip}}" size="5" />
                     <select name="home_country">

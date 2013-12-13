@@ -1,15 +1,18 @@
 from datetime import date
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
-from django.contrib.auth.decorators import login_required
 
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
 import datetime
 import json
+
+import pdb
 
 if settings.DEBUG:
     TO_LIST = ["mkishline@carthage.edu",]
@@ -34,14 +37,17 @@ def display(request, student_id):
 @login_required
 def update(request):
     studentID = request.POST.get('carthageID')
+    
+    test = do_sql("SELECT * FROM id_rec WHERE id = 371861").fetchall()
+    success = len(test) > 0
 
     #Insert personal information
-    insertAlumni(studentID, request.POST.get('fname'), request.POST.get('lname'), request.POST.get('suffix'), request.POST.get('prefix'),
+    alumni_sql = insertAlumni(studentID, request.POST.get('fname'), request.POST.get('lname'), request.POST.get('suffix'), request.POST.get('prefix'),
                    request.POST.get('email'), request.POST.get('maidenname'), request.POST.get('degree'), request.POST.get('class_year'), request.POST.get('business_name'),
                    request.POST.get('major1'), request.POST.get('major2'), request.POST.get('major3'), request.POST.get('masters_grad_year'), request.POST.get('job_title'))
 
     #Loop through all the relatives records
-    for relativeIndex in range (1, int(request.POST.get('relativeCount'))):
+    for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
         relFname = request.POST.get('relativeFname' + str(relativeIndex))
         relLname = request.POST.get('relativeLname' + str(relativeIndex))
         relRelation = request.POST.get('relativeText' + str(relativeIndex))
@@ -57,13 +63,13 @@ def update(request):
 
 
     #Insert organizationa and athletic involvement
-    for activityIndex in range (0, int(request.POST.get('activityCount'))):
+    for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
         activityText = request.POST.get('activity' + str(activityIndex))
 
         if(len(activityText) > 0):
             insertActivity(studentID, activityText)
 
-    for athleticIndex in range (0, int(request.POST.get('athleticCount'))):
+    for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
         athleticText = request.POST.get('athletic' + str(athleticIndex))
 
         if(len(athleticText) > 0):
@@ -95,6 +101,8 @@ def update(request):
 
     address = request.POST.get('privacyAddress','Y')
     insertPrivacy(studentID, 'Address', address)
+    
+    emailDifferences(studentID)
 
     return HttpResponseRedirect(reverse('manager_user_edit_success', kwargs={'student_id':studentID}))
 
@@ -177,13 +185,14 @@ def edit(request, student_id, success=False):
     suffixes = ('','II','III','IV','JR','MD','PHD','SR')
     year_range = range(1900, date.today().year + 1)
     relationships = getRelationships()
+    states = getStates()
     countries = getCountries()
 
     return render_to_response(
         "manager/edit.html",
         {'submitted':success,'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics,
          'relatives':relatives, 'privacy':privacy, 'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes,
-         'years':year_range, 'relationships':relationships, 'countries':countries},
+         'years':year_range, 'relationships':relationships, 'states':states, 'countries':countries},
         context_instance=RequestContext(request)
     )
 
@@ -223,7 +232,7 @@ def getStudent(student_id):
            '    CASE'
            '        WHEN    TRIM(progs.deg)    NOT IN ("BA","BS")          THEN    alum.cl_yr'
            '                                                               ELSE    0'
-           '    END    AS    masters_grad_year'
+           '    END    AS    masters_grad_year, "" AS job_title'
            ' FROM    alum_rec    alum   INNER JOIN    id_rec            ids     ON    alum.id                =        ids.id'
            '                            LEFT JOIN    ('
            '                                SELECT prim_id, MAX(active_date) active_date'
@@ -308,9 +317,6 @@ def getPrivacy(student_id):
     return privacy.fetchall()
 
 def getRelationships():
-    #relationship_sql = 'SELECT TRIM(rel_table.rel) AS rel, TRIM(rel_table.txt) AS txt FROM rel_table WHERE rel IN ("AUNN","COCO","GPGC","HW","PC","SBSB")'
-    #relationships = do_sql(relationship_sql)
-    #return relationships.fetchall()
     relationships = dict([('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),('AUNN2','Niece/Nephew')])
     return relationships
 
@@ -319,11 +325,17 @@ def getMajors():
     majors = do_sql(major_sql)
     return majors.fetchall()
 
+def getStates():
+    states_sql = 'SELECT TRIM(st) AS st FROM st_table WHERE NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)'
+    states = do_sql(states_sql, key="debug")
+    return states.fetchall()
+
 def getCountries():
     countries_sql = 'SELECT TRIM(ctry) AS ctry, TRIM(txt) AS txt FROM ctry_table ORDER BY web_ord, TRIM(txt)'
     countries = do_sql(countries_sql)
     return countries.fetchall()
 
+@login_required
 def search_activity(request):
     search_string = request.GET.get("term","Football")
     activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())
@@ -333,73 +345,90 @@ def search_activity(request):
     return HttpResponse(activity_search.fetchall())
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
-    relation_sql = "INSERT INTO stg_aludir_relative (id, relationCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (carthageID, relCode, fname, lname, alumPrimary, datetime.datetime.now())
-    do_sql(relation_sql)
+    relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
+    do_sql(relation_sql, key="debug")
     return relation_sql
 
 def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title):
+    if class_year == '' or class_year == 0:
+        class_year = 0
+    if masters_grad_year == '' or masters_grad_year == 0:
+        masters_grad_year = 0
     alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
-                  'job_title, submitted_on)'
-                  'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", "%s")'
-                  % (carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, datetime.datetime.now())
+                  'job_title, submitted_on) '
+                  'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
+                  % (carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, getNow())
     )
-    do_sql(alumni_sql)
+    do_sql(alumni_sql, key="debug")
     return alumni_sql
 
 def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
+    
     address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
-                   'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")'
-                   % (aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone, datetime.datetime.now())
+                   'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
+                   % (aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone, getNow())
     )
-    do_sql(address_sql)
+    do_sql(address_sql, key="debug")
     return address_sql
 
 def insertActivity(carthageID, activityText):
-    activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText) VALUES (%s, "%s", "%s")' % (carthageID, activityText, datetime.datetime.now())
-    do_sql(activity_sql)
+    activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText, submitted_on) VALUES (%s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, activityText, getNow())
+    do_sql(activity_sql, key="debug")
     return activity_sql
 
 def clearPrivacy(carthageID):
     privacy_sql = 'DELETE FROM stg_aludir_privacy WHERE id = %s' % (carthageID)
-    do_sql(privacy_sql)
+    do_sql(privacy_sql, key="debug")
     return privacy_sql
 
 def insertPrivacy(carthageID, field, display):
-    privacy_sql = 'INSERT INTO stg_aludir_privacy (id, fieldname, display, lastupdated) VALUES (%s, "%s", "%s", "%s")' % (carthageID, field, display, datetime.datetime.now())
-    do_sql(privacy_sql)
+    privacy_sql = 'INSERT INTO stg_aludir_privacy (id, fieldname, display, lastupdated) VALUES (%s, "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, field, display, getNow())
+    do_sql(privacy_sql, key="debug")
     return privacy_sql
 
+def getNow():
+    return datetime.datetime.now().strftime('%Y-%m-%d')
+
 def emailDifferences(studentID):
-    emailBody = ''
     student = getStudent(studentID)
 
     #Get information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
-                  "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1) AS major1, TRIM(major2) AS major2, TRIM(major3) AS major3, masters_grad_year,"
-                  "TRIM(job_title) AS job_title FROM stg_aludir_alumni WHERE id = %s ORDER BY alum_no DESC") % (studentID)
-    alum = do_sql(alumni_sql)
+                  "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1, TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3, masters_grad_year,"
+                  "TRIM(job_title) AS job_title "
+                  "FROM stg_aludir_alumni alum LEFT JOIN major_table major1 ON alum.major1 = major1.major "
+                  "LEFT JOIN major_table major2 ON alum.major2 = major2.major "
+                  "LEFT JOIN major_Table major3 ON alum.major3 = major3.major "
+                  "WHERE id = %s ORDER BY alum_no DESC") % (studentID)
+    alum = do_sql(alumni_sql, key="debug")
     alumni = alum.fetchone()
 
     #Get information about the alum's relatives
-    relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND approved = ''") % (studentID)
-    relatives = do_sql(relatives_sql).fetchall()
+    relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
+    relatives = do_sql(relatives_sql, key="debug").fetchall()
 
     #Get address information (work and home)
     homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
-                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'HOME')
-    homeaddress = do_sql(homeaddress_sql)
-    home_address = homeaddress.fetchone()
+                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' ORDER BY aa_no DESC") % (studentID, 'HOME')
+    homeaddress = do_sql(homeaddress_sql, key="debug")
+    if(homeaddress != None):
+        home_address = homeaddress.fetchone()
+    else:
+        home_address = []
 
     workaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
-                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone WHERE id = %s AND aa_type = '%s' ORDER BY aa_no DESC") % (studentID, 'WORK')
-    workaddress = do_sql(workaddress_sql)
-    work_address = workaddress.fetchone()
+                       "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' ORDER BY aa_no DESC") % (studentID, 'WORK')
+    workaddress = do_sql(workaddress_sql, key="debug")
+    if(workaddress != None):
+        work_address = workaddress.fetchone()
+    else:
+        work_address = []
 
     #Get organization information
-    activities_sql = ("SELECT activityText FROM stg_aludir_activity WHERE id = %s AND approved = ''") % (studentID)
-    alum_activities = do_sql(activities_sql)
+    activities_sql = ("SELECT activityText FROM stg_aludir_activity WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
+    alum_activities = do_sql(activities_sql, key="debug").fetchall()
 
-    data = []
+    data = {'studentID':studentID}
     #Section for personal information
     if(student.prefix != alumni.prefix):
         data["prefix"] = alumni.prefix
@@ -418,8 +447,7 @@ def emailDifferences(studentID):
         data["original_suffix"] = student.suffix
 
     #Section for relatives
-    if(len(relatives) > 0):
-        data["relatives"] = relatives
+    data["relatives"] = relatives
 
     #Section for academics
     if(student.degree != alumni.degree):
@@ -439,8 +467,7 @@ def emailDifferences(studentID):
         data["original_mastersgradyear"] = student.masters_grad_year
 
     #Section for activities (this may get split out into organizations vs athletics in the future)
-    if(len(alum_activities) > 0):
-        data["organizations"] = alum_activities
+    data["organizations"] = alum_activities
 
     if(student.business_name != alumni.business_name):
         data["business_name"] = alumni.business_name
@@ -470,7 +497,7 @@ def emailDifferences(studentID):
         data["original_businessphone"] = student.business_phone
 
     #Section for home address
-    if(student.home_address != home_address.address_line1):
+    if(student.home_address1 != home_address.address_line1):
         data["home_address"] = home_address.address_line1
         data["original_homeaddress"] = student.home_address1
     if(student.home_address2 != home_address.address_line2):
@@ -496,83 +523,6 @@ def emailDifferences(studentID):
         data["original_homephone"] = student.home_phone
     
     send_mail(
-        None, 'Alumni Directory Update', 'mkishline@carthage.edu',
+        None, ['mkishline@carthage.edu'], 'Alumni Directory Update', 'mkishline@carthage.edu',
         'manager/email.html', data
     )
-    
-    """
-    #Section for personal information
-    if(student.prefix != alumni.prefix):
-        emailBody += ('Prefix: changed from "%s" to "%s"<br />') % (student.prefix, alumni.prefix)
-    if(student.fname != alumni.fname):
-        emailBody += ('First Name: changed from "%s" to "%s"<br />') % (student.fname, alumni.fname)
-    if(student.birth_lname != alumni.maidenname):
-        emailBody += ('Maiden Name: changed from "%s" to "%s"<br />') % (student.birth_lname, alumni.maidenname)
-    if(student.lname != alumni.lname):
-        emailBody += ('Last Name: changed from "%s" to "%s"<br />') % (student.lname, alumni.lname)
-    if(student.suffix != alumni.suffix):
-        emailBody += ('Suffix: changed from "%s" to "%s"<br />') % (student.suffix, alumni.suffix)
-
-    #Section for relatives
-    if(len(relatives) > 0):
-        emailBody += 'Relatives: '
-        for rel in relatives :
-            emailBody += ('"%s" "%s" ("%s")<br />') % (rel.fname, rel.lname, rel.relcode)
-        emailBody += '<br />'
-
-    #Section for academics
-    if(student.degree != alumni.degree):
-        emailBody += ('Degree: changed from "%s" to "%s"<br />') % (student.degree, alumni.degree)
-    if(student.major1 != alumni.major1):
-        emailBody += ('Major 1: changed from "%s" to "%s"<br />') % (student.major1, alumni.major1)
-    if(student.major2 != alumni.major2):
-        emailBody += ('Major 2: changed from "%s" to "%s"<br />') % (student.major2, alumni.major2)
-    if(student.major3 != alumni.major3):
-        emailBody += ('Major 3: changed from "%s" to "%s"<br />') % (student.major3, alumni.major3)
-    if(student.masters_grad_year != alumni.masters_grad_year):
-        emailBody += ('Masters Grad Year: changed from "%s" to "%s"<br />') % (student.masters_grad_year, alumni.masters_grad_year)
-
-    #Section for activities (this may get split out into organizations vs athletics in the future)
-    if(len(alum_activities) > 0):
-        emailBody += 'Organization: '
-        for org in alum_activities:
-            emailBody += ('"%s"<br />') % (org.activityText)
-        emailBody += '<br />'
-
-    if(student.business_name != alumni.business_name):
-        emailBody += ('Business Name: changed from "%s" to "%s"<br />') % (student.business_name, alumni.business_name)
-    if(student.job_title != alumni.job_title):
-        emailBody += ('Job Title: changed from "%s" to "%s"<br />') % (student.job_title, alumni.job_title)
-
-    #Section for work address
-    if(student.business_address != work_address.address_line1):
-        emailBody += ('Business Address: changed from "%s" to "%s"<br />') % (student.business_address, work_address.address_line1)
-    if(student.business_city != work_address.city):
-        emailBody += ('Business City: changed from "%s" to "%s"<br />') % (student.business_city, work_address.city)
-    if(student.business_state != work_address.state):
-        emailBody += ('Business State: changed from "%s" to "%s"<br />') % (student.business_state, work_address.state)
-    if(student.business_zip != work_address.zip):
-        emailBody += ('Business Zip: changed from "%s" to "%s"<br />') % (student.business_zip, work_address.zip)
-    if(student.business_country != work_address.country):
-        emailBody += ('Business Country: changed from "%s" to "%s"<br />') % (student.business_country, work_address.country)
-    if(student.business_phone != work_address.phone):
-        emailBody += ('Business Phone: changed from "%s" to "%s"<br />') % (student.business_phone, work_address.phone)
-
-    #Section for home address
-    if(student.home_address != home_address.address_line1):
-        emailBody += ('Home Address: changed from "%s" to "%s"<br />') % (student.home_address1, home_address.address_line1)
-    if(student.home_address != home_address.address_line2):
-        emailBody += ('Home Address Line 2: changed from "%s" to "%s"<br />') % (student.home_address2, home_address.address_line2)
-    if(student.home_address != home_address.address_line3):
-        emailBody += ('Home Address Line 3: changed from "%s" to "%s"<br />') % (student.home_address3, home_address.address_line3)
-    if(student.home_city != home_address.city):
-        emailBody += ('Home City: changed from "%s" to "%s"<br />') % (student.home_city, home_address.city)
-    if(student.home_state != home_address.state):
-        emailBody += ('Home State: changed from "%s" to "%s"<br />') % (student.home_state, home_address.state)
-    if(student.home_zip != home_address.zip):
-        emailBody += ('Home Zip: changed from "%s" to "%s"<br />') % (student.home_zip, home_address.zip)
-    if(student.home_country != home_address.country):
-        emailBody += ('Home Country: changed from "%s" to "%s"<br />') % (student.home_country, home_address.country)
-    if(student.home_phone != home_address.phone):
-        emailBody += ('Home Phone: changed from "%s" to "%s"<br />') % (student.home_phone, home_address.phone)
-    """

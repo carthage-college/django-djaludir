@@ -18,29 +18,6 @@
     <script type="text/javascript" src="{{static_url}}/js/alumniSearch.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#searchResults').tablesorter({
-                headers: {
-                    3: { sorter:false },
-                    4: { sorter:false }
-                }
-            });
-
-            //Before submitting the form, make sure that at least one search field has data in it.
-            //QUESTION: Should there be a minimum character limit (2-3 characters), perhaps even as an aggregated calculation?
-            var validForm = false;
-            $('form[name="searchForm"]').submit(function(){
-                $('#formfieldset div.search input[name^="term"]').each(function(){
-                    if($(this).val() != ''){
-                        validForm = true;
-                    }
-                });
-                if(!validForm){
-                    alert('You must enter at least one search criteria.');
-                }
-                return validForm;
-            })
-
-            updateCriteria();
             {% if searching %}
                 {% for field, term in searching.items %}
                     createBlock('{{field}}','{{term}}');

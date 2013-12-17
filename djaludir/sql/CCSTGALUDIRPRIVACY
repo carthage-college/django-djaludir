@@ -1,0 +1,71 @@
+{
+ Revision Information (Automatically maintained by 'make' - DON'T CHANGE)
+ -------------------------------------------------------------------------
+ $Header$
+ -------------------------------------------------------------------------
+}
+
+table stg_aludir_privacy
+    desc	"Maintains status of user-defined privacy settings for information in alumni directory"
+    location	"DBS_DEVELOPMENT"
+    lockmode	row
+    prefix	"alum"		{ Used by makedef }
+    rowlimits	??:??
+    status	"Active"
+    text	"Staging Alumni Privacy Settings"
+    track	"DEVELOPMENT"
+
+column priv_no	serial not null
+    comments    ""
+    desc	"System generated sequential number uniquely identifying this record."
+    heading	"Privacy"
+    text	"Privacy No."
+    attributes
+       (
+       )
+
+column id	integer{id} default 0 not null
+	comments	""
+	desc		"Identifies the entity associated with this record."
+	heading		"ID"
+	text		"ID"
+	attributes
+	    (
+	    )
+
+column fieldname	char(30)
+	comments	""
+	desc		"Name of the field or collection"
+	heading		"fieldname"
+	text		"fieldname"
+	attributes
+	    (
+	    )
+
+column display		char(1)
+	comments	""
+	desc		"Y or N, should this fieldname be displayed"
+	heading		"display"
+	text		"display"
+	attributes
+	    (
+	    )
+
+column lastupdated	date
+	comments	""
+	desc		"Last Modified Date"
+	heading		"Last Modified Date"
+	text		"Last Modified Date"
+	attributes
+	    (
+	    )
+
+index				{ Index names must be unique across database }
+    stg_aludir_privacy on (priv_no)
+
+grant
+    select  to (group carsprog, group development, group donor_acct, group plangvg)
+    update  to (group carsprog, group development, group donor_acct, group plangvg)
+    insert  to (group carsprog, group development, group donor_acct, group plangvg)
+    delete  to (group carsprog)
+    control to (group carsprog)

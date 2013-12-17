@@ -1,0 +1,153 @@
+{
+ Revision Information (Automatically maintained by 'make' - DON'T CHANGE)
+ -------------------------------------------------------------------------
+ $Header$
+ -------------------------------------------------------------------------
+}
+
+table stg_aludir_address
+    desc	"One (of possibly many) address records for an alumni"
+    location	"DBS_DEVELOPMENT"
+    lockmode	row
+    prefix	""		{ Used by makedef }
+    rowlimits	??:??
+    status	"Active"
+    text	"Address information for alumni"
+    track	"DEVELOPMENT"
+
+column aa_no      serial not null
+    comments    ""
+    desc        "System generated sequential number uniquely identifying this record."
+    heading     "Address"
+    text        "Address No."
+    attributes
+        (
+        )
+
+column aa	char(4)
+	comments	""
+	desc		"Address Type"
+	heading		"Address Type"
+	text		"Address Type"
+	attributes
+		(
+		)
+
+column id	integer{id} default 0 not null
+	comments	""
+	desc		"System generated sequential number uniquely identifying this record."
+	heading		"ID"
+	text		"ID"
+	attributes
+		(
+		)
+
+column address_line1	char(64)
+	comments	""
+	desc		"Address Line 1"
+	heading		"Address Line 1"
+	text		"Address Line 1"
+	attributes
+		(
+		)
+
+column address_line2    char(64)
+        comments        ""
+        desc            "Address Line 2"
+        heading         "Address Line 2"
+        text            "Address Line 2"
+        attributes
+                (
+                )
+
+column address_line3    char(64)
+        comments        ""
+        desc            "Address Line 3"
+        heading         "Address Line 3"
+        text            "Address Line 3"
+        attributes
+                (
+                )
+
+column city		char(50)
+	comments	""
+	desc		"City"
+	heading		"City"
+	text		"City"
+	attributes
+		(
+		)
+
+column state		char(2)
+	comments	""
+	desc		"State"
+	heading		"State"
+	text		"State"
+	attributes
+		(
+		)
+
+column zip		char(10)
+	comments	""
+	desc		"Postal Code"
+	heading		"Postal Code"
+	text		"Postal Code"
+	attributes
+		(
+		)
+
+column country		char(3)
+	comments	""
+	desc		"Country"
+	heading		"Country"
+	text		"Country"
+	attributes
+		(
+		)
+
+column phone		char(12)
+	comments	""
+	desc		"Phone"
+	heading		"Phone"
+	text		"Phone"
+	attributes
+		(
+		)
+
+column submitted_on	date
+	comments	""
+	desc		"Submitted Date"
+	heading		"Submitted Date"
+	text		"Submitted Date"
+	attributes
+		(
+		)
+
+column approved		char(1)
+	comments	""
+	desc		"Approved"
+	heading		"Approved"
+	text		"Approved"
+	attributes
+		(
+		)
+
+column approved_date	date
+	comments		""
+	desc		"Approved Date"
+	heading		"Approved Date"
+	text		"Approved Date"
+	attributes
+		(
+		)
+
+index				{ Index names must be unique across database }
+    stg_aludir_address01 on (aa_no)
+
+grant
+    select  to (group carsprog, group development, group donor_acct, group plangvg)
+    update  to (group carsprog, group development, group donor_acct, group plangvg)
+    insert  to (group carsprog, group development, group donor_acct, group plangvg)
+    delete  to (group carsprog)
+    control to (group carsprog)
+

@@ -130,6 +130,10 @@ def search(request):
                     if len(orSQL) > 0:
                         orSQL += 'OR '
                     orSQL += 'LOWER(invl_table.txt) LIKE "%%%s%%" ' % (searchterm.lower())
+                elif fieldname == 'alum.cl_yr' or fieldname == 'ids.id':
+                    if len(andSQL) > 0:
+                        andSQL += 'AND '
+                    andSQL += '%s = %s' % (fieldname, searchterm)
                 else:
                     if len(andSQL) > 0:
                         andSQL += 'AND '

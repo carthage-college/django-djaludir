@@ -1,0 +1,197 @@
+{
+ Revision Information (Automatically maintained by 'make' - DON'T CHANGE)
+ -------------------------------------------------------------------------
+ $Header$
+ -------------------------------------------------------------------------
+}
+
+table stg_aludir_alumni
+    desc	"Flattened version of the data model describing an alumnus/alumna" 
+    location	"DBS_DEVELOPMENT"
+    lockmode	row
+    prefix	""		{ Used by makedef }
+    rowlimits	??:??
+    status	"Active"
+    text	"Staging Alumni Information"
+    track	"DEVELOPMENT"
+
+column alum_no      serial not null
+    comments    ""
+    desc        "System generated sequential number uniquely identifying this record."
+    heading     "Alumni"
+    text        "Alumni No."
+    attributes
+        (
+        )
+
+column id	integer{id} default 0 not null
+	comments	""
+	desc		"Identifies the entity associated with this record."
+	heading		"ID"
+	text		"ID"
+	attributes
+		(
+		)
+
+column fname	char(32)
+	comments	""
+	desc		"First Name"
+	heading		"First Name"
+	text		"First Name"
+	attributes
+		(
+		)
+
+column lname	char(32)
+	comments	""
+	desc		"Last Name"
+	heading		"Last Name"
+	text		"Last Name"
+	attributes
+		(
+		)
+
+column suffix	char(10)
+	comments	""
+	desc		"Suffix"
+	heading		"Suffix"
+	text		"Suffix"
+	attributes
+		(
+		)
+
+column prefix	char(10)
+	comments	""
+	desc		"Prefix"
+	heading		"Prefix"
+	text		"Prefix"
+	attributes
+		(
+		)
+
+column email	char(128)
+	comments	""
+	desc		"Email"
+	heading		"Email"
+	text		"Email"
+	attributes
+		(
+		)
+
+column maidenname	char(32)
+	comments	""
+	desc		"Maiden Name"
+	heading		"Maiden Name"
+	text		"Maiden Name"
+	attributes
+		(
+		)
+
+column degree		char(4)
+	comments	""
+	desc		"Degree"
+	heading		"Degree"
+	text		"Degree"
+	attributes
+		(
+		)
+
+column class_year	integer default 0 not null
+	comments	""
+	desc		"Class Year"
+	heading		"Class Year"
+	text		"Class Year"
+	attributes
+		(
+		)
+
+column business_name	char(64)
+	comments	""
+	desc		"Business Name"
+	heading		"Business Name"
+	text		"Business Name"
+	attributes
+		(
+		)
+
+column major1		char(4)
+	comments	""
+	desc		"Major 1"
+	heading		"Major 1"
+	text		"Major 1"
+	attributes
+		(
+		)
+
+column major2           char(4)
+        comments        ""
+        desc            "Major 2"
+        heading         "Major 2"
+        text            "Major 2"
+        attributes
+                (
+                )
+
+column major3           char(4)
+        comments        ""
+        desc            "Major 3"
+        heading         "Major 3"
+        text            "Major 3"
+        attributes
+                (
+                )
+
+column masters_grad_year	integer default 0 not null
+	comments	""
+	desc		"Masters Graduation Year"
+	heading		"Masters Graduation Year"
+	text		"Masters Graduation Year"
+	attributes
+		(
+		)
+
+column job_title	char(64)
+	comments	""
+	desc		"Job Title"
+	heading		"Job Title"
+	text		"Job Title"
+	attributes
+		(
+		)
+
+column submitted_on	date
+	comments	""
+	desc		"Submitted Date"
+	heading		"Submitted Date"
+	text		"Submitted Date"
+	attributes
+		(
+		)
+
+column approved		char(1)
+	comments	""
+	desc		"Approved"
+	heading		"Approved"
+	text		"Approved"
+	attributes
+		(
+		)
+
+column approved_date	date
+	comments	""
+	desc		"Approved Date"
+	heading		"Approved Date"
+	text		"Approved Date"
+	attributes
+		(
+		)
+
+index				{ Index names must be unique across database }
+    stg_aludir_alumni01 on (alum_no)
+
+grant
+    select  to (group carsprog, group development, group donor_acct, group plangvg)
+    update  to (group carsprog, group development, group donor_acct, group plangvg)
+    insert  to (group carsprog, group development, group donor_acct, group plangvg)
+    delete  to (group carsprog)
+    control to (group carsprog)

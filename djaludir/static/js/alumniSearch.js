@@ -2,6 +2,44 @@ var MAX_CRITERIA = 5;
 var criteria = 0;
 var SELECT_VALUES = 'ids.firstname^First Name,ids.lastname^Last Name,alum.cl_yr^Class year,home_state^Home State,home_city^Home City,ids.id^ID Number,maiden.lastname^Maiden Name,activity^Activity/Sport,major1.txt^Primary Major,major2.txt^Secondary Major,job_title^Job Title';
 
+$(document).ready(function(){
+	$('#searchResults').tablesorter({
+		headers: {
+			3: { sorter:false },
+			4: { sorter:false }
+		}
+	});
+
+	//Before submitting the form, make sure that at least one search field has data in it.
+	//QUESTION: Should there be a minimum character limit (2-3 characters), perhaps even as an aggregated calculation?
+	$('form[name="searchForm"]').submit(function(){
+        var hasData = false, errMsg = '';
+		$('#formfieldset div.search input[name^="term"]').each(function(){
+			if($(this).val() != ''){
+                hasData = true;
+                index = $(this).attr('name').replace(/term/,'');
+                selectVal = $('select[name="within' + index + '"]').val();
+                if(selectVal == 'ids.id' || selectVal == 'alum.cl_yr'){
+                    $(this).val($(this).val().replace(/\s+/g,''));
+                    isNumber = $(this).val().match(/^\d+$/) != null;
+                    if(!isNumber){
+                        errMsg += $('select[name="within' + index + '"] option:selected').text() + ' must be a number\n';
+                    }
+                }
+			}
+		});
+		if(!hasData){
+			alert('You must enter at least one search criteria.');
+		}
+        else if(errMsg.length > 0){
+            alert(errMsg);
+        }
+		return hasData && errMsg.length == 0;
+	})
+
+	updateCriteria();
+});
+
 function updateCriteria(){
     criteria = $('#formfieldset div.search').length;
     $('input[name="maxCriteria"]').val(criteria);

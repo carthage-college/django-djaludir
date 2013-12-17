@@ -7,8 +7,6 @@
         .center {text-align:center;font-size:14px;font-weight:bold;}
         #searchResults {padding:3px 5px;}
         th.headerSortUp {
-            /* background-image: url('{{static_url}}css/tablesorter_theme/blue/asc.gif');
-            background-color: #3399FF; */
             background: url('{{static_url}}css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
         }
         #profile .form-row {margin-bottom:3px;}
@@ -17,61 +15,8 @@
 {% block extra_javascript %}
     <script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
     <script type="text/javascript" src="{{static_url}}js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="{{static_url}}/js/alumniSearch.js"></script>
     <script type="text/javascript">
-        var MAX_CRITERIA = 5;
-        var criteria = 0;
-        var SELECT_VALUES = 'ids.firstname^First Name,ids.lastname^Last Name,alum.cl_yr^Class year,home_state^Home State,home_city^Home City,ids.id^ID Number,maiden.lastname^Maiden Name,activity^Activity/Sport,major1.txt^Primary Major,major2.txt^Secondary Major,job_title^Job Title';
-
-        function updateCriteria(){
-            criteria = $('#formfieldset div.search').length;
-            $('input[name="maxCriteria"]').val(criteria);
-        }
-
-        function createBlock(fieldName, searchTerm){
-            if (fieldName === undefined || fieldName == null) fieldName = '';
-            if (searchTerm === undefined || searchTerm == null) searchTerm = '';
-
-            if(criteria < MAX_CRITERIA){
-                var $divObj = $('<div>').addClass('form-row').addClass('search');
-                $('<select>').attr('name','within' + criteria).appendTo($divObj);
-
-                $('<span> contains </span>').appendTo($divObj);
-                $('<input>').attr('type','text').attr('name','term' + criteria).attr('class','medium').val(searchTerm).appendTo($divObj);
-
-                if(criteria < MAX_CRITERIA - 1){
-                    $('<span>&nbsp;</span>').appendTo($divObj);
-                    $('<input>').attr('type','button').attr('name','add_search').attr('class','button').val('ADD').click(createBlock).appendTo($divObj);
-                }
-
-                $('#submitrow').before($divObj);
-                clearSelect('select[name="within' + criteria + '"]');
-                loadSelectKeyVal('select[name="within' + criteria + '"]', SELECT_VALUES, false);
-                $('select[name="within' + criteria + '"]').val(fieldName);
-
-                updateCriteria();
-
-                if(criteria > 1){
-                    $('<a>').attr('name','delete').text(' X ').click(deleteBlock).appendTo($divObj);
-                }
-            }
-        }
-
-        function deleteBlock(){
-            $(this).parent('.form-row').remove();
-            var curRow = 1;
-            $('#formfieldset div.search').each(function(){
-                $(this).find('select[name^="within"]').attr('name','within' + curRow);
-                $(this).find('input[name^="term"]').attr('name','term' + curRow);
-                if($(this).find('input[name="add_search"]').length == 0){
-                    var $deleteObj = $(this).find('a[name="delete"]');
-                    $('<span>&nbsp;</span>').insertBefore($deleteObj);
-                    $('<input>').attr('type','button').attr('name','add_search').val('ADD').click(createBlock).insertBefore($deleteObj);
-                }
-                curRow++;
-            });
-            updateCriteria();
-        }
-
         $(document).ready(function(){
             $('#searchResults').tablesorter({
                 headers: {
@@ -80,13 +25,18 @@
                 }
             });
 
+            //Before submitting the form, make sure that at least one search field has data in it.
+            //QUESTION: Should there be a minimum character limit (2-3 characters), perhaps even as an aggregated calculation?
+            var validForm = false;
             $('form[name="searchForm"]').submit(function(){
-                var validForm = false;
                 $('#formfieldset div.search input[name^="term"]').each(function(){
                     if($(this).val() != ''){
                         validForm = true;
                     }
                 });
+                if(!validForm){
+                    alert('You must enter at least one search criteria.');
+                }
                 return validForm;
             })
 
@@ -119,7 +69,7 @@
     <h3>{{matches|length}} match{{matches|length|pluralize:"es"}}</h3>
     <table id="searchResults" class="tablesorter">
         <thead>
-            <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Deceased</th><th>Action</th></tr>
+            <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Action</th><th>Message</th></tr>
         </thead>
         <tbody>
             {% for person in matches %}
@@ -127,9 +77,11 @@
                     <td>{{person.class_year}}</td>
                     <td>{{person.firstname}}</td>
                     <td>{% if person.maiden_name %}({{person.maiden_name}}) {% endif %}{{person.lastname}}</td>
-                    <td>{% comment %}{% if person.is_deceased %}deceased{% endif %}{% endcomment %}</td>
-                    <td><a href="../display/{{person.id}}/">Details</a>
+                    <td><a href="{% url 'manager_alum_display' person.id %}">Details</a>
                         {% if session.is_superuser %} &nbsp; <a href="../edit/{{person.id}}">Edit</a>{% endif %}
+                    </td>
+                    <td>
+                        <a href="#">Send Message</a>
                     </td>
                 </tr>
             {% endfor %}

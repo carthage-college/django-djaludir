@@ -27,10 +27,12 @@ def display(request, student_id):
     activities = getStudentActivities(student_id, False)
     athletics = getStudentActivities(student_id, True)
     relatives = getRelatives(student_id)
+    privacy = getPrivacy(student_id)
 
     return render_to_response(
         "manager/display.html",
-        {'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics, 'relatives':relatives},
+        {'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics, 'relatives':relatives,
+         'privacy':privacy},
         context_instance=RequestContext(request)
     )
 
@@ -314,7 +316,12 @@ def getRelatives(student_id):
 def getPrivacy(student_id):
     privacy_sql = ("SELECT TRIM(fieldname) AS fieldname, TRIM(display) AS display FROM stg_aludir_privacy WHERE id = %s") % (student_id)
     privacy = do_sql(privacy_sql)
-    return privacy.fetchall()
+    field = []
+    setting = []
+    for row in privacy:
+        field += (row.fieldname,)
+        setting += (row.display)
+    return dict(zip(field, setting))
 
 def getRelationships():
     relationships = dict([('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),('AUNN2','Niece/Nephew')])

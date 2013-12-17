@@ -3,7 +3,7 @@
 {% block extra_style %}
     {{block.super}}
     <style type="text/css">
-        fieldset {border:.1em solid #000000;}
+        fieldset {border:.1em solid #000000;margin-bottom:8px;}
         label {width:auto;padding-right:5px;font-weight:bold;}
         .business_address {width:9em;}
         .form-row {clear:both;}
@@ -33,10 +33,10 @@
 
             $('input[name="addRelative"]').click(function(){
                 var addedRelatives = $('.relativeBlock').length + 1;
-                $('<div>').addClass('form-row relativeBlock').append($('<label>').text('Relative:'))
-                    .append($('<input>').attr({'type':'text','name':'relativeFname' + addedRelatives,'size':'10'}))
-                    .append($('<input>').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12'}))
-                    .append($('<select>').attr('name','relativeText' + addedRelatives))
+                $('<div />').addClass('form-row relativeBlock').append($('<label />').text('Relative:'))
+                    .append($('<input />').attr({'type':'text','name':'relativeFname' + addedRelatives,'size':'12'}))
+                    .append($('<input />').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12'}))
+                    .append($('<select />').attr('name','relativeText' + addedRelatives))
                 .insertBefore($(this));
 
                 loadSelectKeyVal('select[name="relativeText' + addedRelatives + '"]', relationships);
@@ -62,7 +62,7 @@
             $('input[name="addTeam"]').click(function(){
                 var addedTeams = $('#athleticList li').length + 1;
                 $('<li>')
-                    .html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'size':'25'}))
+                    .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'size':'25'}))
                     .insertAfter($('#athleticList li:last'));
                 $('input[name="athleticCount"]').val(addedTeams);
             });
@@ -93,6 +93,10 @@
                         break;
                 }
             });
+            
+            {% for field, display in privacy.items %}
+                setPrivacy('{{field}}', '{{display}}' == 'Y');
+            {% endfor %}
         });
 
         function togglePrivacy(chkBoxName){

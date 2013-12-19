@@ -3,7 +3,8 @@ var criteria = 0;
 var SELECT_VALUES = 'ids.firstname^First Name,ids.lastname^Last Name,alum.cl_yr^Class year,home_state^Home State,home_city^Home City,ids.id^ID Number,maiden.lastname^Maiden Name,activity^Activity/Sport,major1.txt^Primary Major,major2.txt^Secondary Major,job_title^Job Title';
 
 $(document).ready(function(){
-	$('#searchResults').tablesorter({
+	//Initialize tablesorter plugin, disabling sort functionality for "display" and "send message"
+    $('#searchResults').tablesorter({
 		headers: {
 			3: { sorter:false },
 			4: { sorter:false }
@@ -14,78 +15,122 @@ $(document).ready(function(){
 	//QUESTION: Should there be a minimum character limit (2-3 characters), perhaps even as an aggregated calculation?
 	$('form[name="searchForm"]').submit(function(){
         var hasData = false, errMsg = '';
-		$('#formfieldset div.search input[name^="term"]').each(function(){
-			if($(this).val() != ''){
+		//Loop through the value of each row's search term
+        $('#formfieldset div.search input[name^="term"]').each(function(){
+			//If the term is not an empty string
+            if($(this).val().replace(/\s+/g,'') != ''){
+                //hasData only needs to be true once for the form to pass the hasData condition
                 hasData = true;
+
+                //Get the number of the current row
                 index = $(this).attr('name').replace(/term/,'');
+
+                //Access the value of the corresponding select box
                 selectVal = $('select[name="within' + index + '"]').val();
+
+                //If the user is searching either the Student ID or the Class Year...
+                //This is important because the logic in the search SQL is different when dealing with numbers instead of strings
                 if(selectVal == 'ids.id' || selectVal == 'alum.cl_yr'){
+
+                    //Remove any whitespace in the search term
                     $(this).val($(this).val().replace(/\s+/g,''));
-                    isNumber = $(this).val().match(/^\d+$/) != null;
-                    if(!isNumber){
+
+                    //If the term is not a number, generate an error message
+                    if($(this).val().match(/^\d+$/) == null){
                         errMsg += $('select[name="within' + index + '"] option:selected').text() + ' must be a number\n';
                     }
                 }
 			}
 		});
-		if(!hasData){
+		//If no information was entered into any row's search term
+        if(!hasData){
 			alert('You must enter at least one search criteria.');
 		}
+        //If an error condition was met and a message was generated
         else if(errMsg.length > 0){
             alert(errMsg);
         }
 		return hasData && errMsg.length == 0;
 	})
 
+    //Update the search criteria counter
 	updateCriteria();
 });
 
+//Update the counter representing the number of rows of search criteria
 function updateCriteria(){
     criteria = $('#formfieldset div.search').length;
     $('input[name="maxCriteria"]').val(criteria);
 }
 
 function createBlock(fieldName, searchTerm){
+    //Default values for arguments
     if (fieldName === undefined || fieldName == null) fieldName = '';
     if (searchTerm === undefined || searchTerm == null) searchTerm = '';
 
+    //Only create a new row if the total number of rows is less than the number specified by MAX_CRITERIA
     if(criteria < MAX_CRITERIA){
-        var $divObj = $('<div>').addClass('form-row').addClass('search');
+        //Create row containing search fields
+        var $divObj = $('<div>').addClass('form-row search');
         $('<select>').attr('name','within' + criteria).appendTo($divObj);
 
         $('<span> contains </span>').appendTo($divObj);
+        
+        //Create the "term" input box and, if a searchTerm argument was specified, set the value of the box appropriately
         $('<input>').attr({'type':'text','name':'term' + criteria,'class':'medium'}).val(searchTerm).appendTo($divObj);
 
+        //If this is any row besides the last one, append an "Add" button to the row
         if(criteria < MAX_CRITERIA - 1){
             $('<span>&nbsp;</span>').appendTo($divObj);
             $('<input>').attr({'type':'button','name':'add_search','class':'button'}).val('ADD').click(createBlock).appendTo($divObj);
         }
 
+        //Insert the row into the search form
         $('#submitrow').before($divObj);
+        
+        //Initialize select box with approved search fields
         clearSelect('select[name="within' + criteria + '"]');
         loadSelectKeyVal('select[name="within' + criteria + '"]', SELECT_VALUES, false);
+        
+        //If the function was called with arguments specified, set the appropriate value
         $('select[name="within' + criteria + '"]').val(fieldName);
 
+        //Update the search criteria counter
         updateCriteria();
 
+        //For any row other than the very first one, append a "Delete" button to the 
         if(criteria > 1){
             $('<input />').attr({'type':'button','class':'button','name':'delete','value':'DELETE'}).click(deleteBlock).appendTo($divObj);
         }
     }
 }
 
+//Delete the selected row and resequence the remaining rows
 function deleteBlock(){
+    //Delete the search condition row
     $(this).parent('.form-row').remove();
+    
+    //Initialize current row counter to "1"
     var curRow = 1;
+    
+    //After the chosen row is deleted, resequence fields
     $('#formfieldset div.search').each(function(){
+        //Rename form fields to keep the sequencing correct
         $(this).find('select[name^="within"]').attr('name','within' + curRow);
         $(this).find('input[name^="term"]').attr('name','term' + curRow);
+        
+        //If the current row does not have the "Add" button (because it was the last row), insert a new "Add" button
         if($(this).find('input[name="add_search"]').length == 0){
+            //Identify the "Delete" button
             var $deleteObj = $(this).find('input[name="delete"]');
+            
+            //Insert an "Add" button and a spacer before the "Delete" button
             $('<span>&nbsp;</span>').insertBefore($deleteObj);
             $('<input>').attr({'type':'button','name':'add_search','class':'button'}).val('ADD').click(createBlock).insertBefore($deleteObj);
         }
         curRow++;
     });
+    
+    //Update the search criteria counter
     updateCriteria();
 }

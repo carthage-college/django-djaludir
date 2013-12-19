@@ -26,6 +26,7 @@
         var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
 
         $(document).ready(function(){
+            /*
             $('input[name="activitySearch"]').autocomplete({
                 source: '../../activity/',
                 minLength: 2,
@@ -33,6 +34,9 @@
                     console.log('Obj: ' + ui + '\nItem: ' + ui.item + '\nValue: ' + ui.value);
                 }
             });
+            */
+            var privateFields = '{% for field, display in privacy.items %}{% ifequal display 'Y' %}{{field}},{% endifequal %}{% endfor %}';
+            initPrivacy(privateFields);
 
             {% for field, display in privacy.items %}
                 setPrivacy('{{field}}', '{{display}}' == 'Y');
@@ -55,17 +59,13 @@
             <input type="hidden" name="athleticCount" />
 
             <div class="form-row header">Privacy Settings</div>
-            <ul class="form-row" id="generalSettings">
+            <ul class="form-row">
                 <li><input type="radio" name="privacy" value="0" /> Please do not show any of my information in the alumni directory.</li>
                 <li><input type="radio" name="privacy" value="1" /> Do not allow others to see information other than my name and class year.</li>
                 <li><input type="radio" name="privacy" value="2" /> Allow people to see my personal and academic details but do not share my address information. (Others will be able to send you a message but your email will remain private.)</li>
                 <li><input type="radio" name="privacy" value="3" /> Make all my information available.</li>
                 <li><input type="radio" name="privacy" value="4" /> Custom (specify your own privacy settings, a checked box makes information public)</li>
             </ul>
-            <div id="advancedSettings">
-                A checked box indicates that the information will be visible to other alumni.
-            </div>
-            <a href="#" id="settingsLink">Toggle advanced privacy settings</a>
         </fieldset>
         <fieldset>
             <div class="form-row header">Personal Information</div>
@@ -160,9 +160,7 @@
                 </ul>
                 <input type="button" name="addActivity" value="Add Activity" />
                 <p>&nbsp;</p>
-                <input type="text" name="activitySearch" />
             </div>
-    
             <div class="form-row">
                 <label>Athletic Team{{athletics|pluralize}}</label><br />
                 <ul id="athleticList">

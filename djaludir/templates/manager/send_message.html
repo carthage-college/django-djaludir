@@ -1,0 +1,10 @@
+<pre><p>{{data.body}}</p></pre>
+{% if data.auto %}
+    <p>{% if data.sender.email|length == 0 or data.sender.email == 'confirmation@carthage.edu' %}
+        The sender has not provided a valid email address to the Alumni Directory{% ifnotequal data.sender.id '' %} but their profile can be viewed <a href="{% url 'manager_alum_display' data.sender.id %}">here</a>{% endifnotequal %}.
+    {% else %}
+        Please reply to: <a href="mailto:{{data.sender.email}}">{{data.sender.email}}</a>.
+    {% endif %}</p>
+{% endif %}
+<p>&nbsp;</p>
+<p>This message was sent through the Carthage Alumni Directory. Your email address has not been shared with the sender of this message.</p>

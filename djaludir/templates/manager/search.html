@@ -32,7 +32,7 @@
     <div class="buffer">
     {% if message %}<div class="message">{{message}}</div>{% endif %}
     <h1>Search:</h1>
-    <form action="." name="searchForm" method="post" class="form" id="profile">
+    <form action="{% url 'manager_search' %}" name="searchForm" method="post" class="form" id="profile">
         <input type="hidden" name="maxCriteria" value="0" />
         {% csrf_token %}
         <fieldset id="formfieldset">
@@ -49,25 +49,23 @@
             <tr><th>Class Year</th><th>First Name</th><th>Last Name</th><th>Action</th><th>Message</th></tr>
         </thead>
         <tbody>
-            {% for person in matches %}
-                <tr class="{% cycle 'odd' 'even' %}">
-                    <td>{{person.class_year}}</td>
-                    <td>{{person.firstname}}</td>
-                    <td>{% if person.maiden_name %}({{person.maiden_name}}) {% endif %}{{person.lastname}}</td>
-                    <td><a href="{% url 'manager_alum_display' person.id %}">Details</a>
-                        {% if session.is_superuser %} &nbsp; <a href="../edit/{{person.id}}">Edit</a>{% endif %}
-                    </td>
-                    <td>
-                        <a href="#">Send Message</a>
-                    </td>
-                </tr>
-            {% endfor %}
+        {% for person in matches %}
+            <tr class="{% cycle 'odd' 'even' %}">
+                <td>{{person.class_year}}</td>
+                <td>{{person.firstname}}</td>
+                <td>{% if person.maiden_name %}({{person.maiden_name}}) {% endif %}{{person.lastname}}</td>
+                <td><a href="{% url 'manager_alum_display' person.id %}">Details</a>
+                    {% if user.is_superuser %} &nbsp; <a href="{% url 'manager_user_edit' person.id %}">Edit</a>{% endif %}
+                </td>
+                <td>
+                    {% if person.email|length > 0 %}<a href="{% url 'message_user' person.id %}">Send Message</a>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
     {% endif %}
 
-    {% if debug %}
-        {{debug}}
-    {% endif %}
+    {% if debug %}{{debug}}{% endif %}
     </div>
 {% endblock %}

@@ -10,9 +10,6 @@ from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
 import datetime
-import json
-
-import pdb
 
 if settings.DEBUG:
     TO_LIST = ["mkishline@carthage.edu",]
@@ -41,7 +38,7 @@ def display(request, student_id):
 def update(request):
     #Retrieve the ID of the alumn(a|us)
     studentID = request.POST.get('carthageID')
-    
+
     #Insert personal information
     alumni_sql = insertAlumni(studentID, request.POST.get('fname'), request.POST.get('lname'), request.POST.get('suffix'), request.POST.get('prefix'),
                    request.POST.get('email'), request.POST.get('maidenname'), request.POST.get('degree'), request.POST.get('class_year'), request.POST.get('business_name'),
@@ -52,7 +49,7 @@ def update(request):
         relFname = request.POST.get('relativeFname' + str(relativeIndex))
         relLname = request.POST.get('relativeLname' + str(relativeIndex))
         relRelation = request.POST.get('relativeText' + str(relativeIndex))
-        
+
         #Because of the way relationships are stored in CX, we must identify if the alumn(a|us) matches the first or second role in the relationship
         alumPrimary = 'Y'
         if(relRelation[-1:] == '1'):
@@ -105,7 +102,7 @@ def update(request):
 
     address = request.POST.get('privacyAddress','Y')
     insertPrivacy(studentID, 'Address', address)
-    
+
     #Generate an email specifying the differences between the existing information and the newly submitted data
     emailDifferences(studentID)
 
@@ -113,10 +110,11 @@ def update(request):
     return HttpResponseRedirect(reverse('manager_user_edit_success', kwargs={'student_id':studentID}))
 
 @login_required
-def search(request):
+def search(request, messageSent = False, permissionDenied = False):
     fieldlist = [] #Collection of fieldnames used in search
     terms = [] #Collection of terms used in search
     matches = [] #Recordset of the alumni who match the search criteria
+    message = ''
     sql = ''
     if request.method == 'POST':
         orSQL = ''
@@ -144,10 +142,12 @@ def search(request):
                     andSQL += ' LOWER(TRIM(%s::varchar(250))) LIKE "%%%s%%"' % (fieldname, searchterm.lower())
 
         #Based on the criteria specified by the user, add the necessary tables to the search query
-        selectFromSQL = ('SELECT DISTINCT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id, LOWER(ids.lastname) AS sort1, LOWER(ids.firstname) AS sort2'
+        selectFromSQL = ('SELECT DISTINCT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
+                     ' NVL(TRIM(aaEmail.line1) || TRIM(aaEmail.line2) || TRIM(aaEmail.line3), "") AS email, LOWER(ids.lastname) AS sort1, LOWER(ids.firstname) AS sort2'
                      ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
-                     ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"')
+                     ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"'
+                     ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)')
         #If search criteria includes activity or sport add the involvement tables
         if 'activity' in fieldlist:
             selectFromSQL += (
@@ -203,37 +203,91 @@ def search(request):
             matches = do_sql(sql, key="debug")
             matches = matches.fetchall()
 
+    if messageSent == True:
+        message = "Your message was sent successfully!"
+
+    if permissionDenied == True:
+        message = "You do not have permission to edit this record."
+
     return render_to_response(
         "manager/search.html",
-        {'searching':dict(zip(fieldlist, terms)), 'matches':matches, 'debug':sql},
+        {'message':message, 'searching':dict(zip(fieldlist, terms)), 'matches':matches, 'debug':sql},
         context_instance=RequestContext(request)
     )
 
 @login_required
 def edit(request, student_id, success = False):
-    #Retrieve relevant information about the alumni
-    alumni = getStudent(student_id)
-    activities = getStudentActivities(student_id, False)
-    athletics = getStudentActivities(student_id, True)
-    relatives = getRelatives(student_id)
-    privacy = getPrivacy(student_id)
+    if student_id == request.user.id or request.user.is_superuser:
+        #Retrieve relevant information about the alumni
+        alumni = getStudent(student_id)
+        activities = getStudentActivities(student_id, False)
+        athletics = getStudentActivities(student_id, True)
+        relatives = getRelatives(student_id)
+        privacy = getPrivacy(student_id)
 
-    #Assemble collections for the user to make choices
-    majors = getMajors()
-    prefixes = dict([('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),('MS','Ms'),('REV','Rev')])
-    suffixes = ('','II','III','IV','JR','MD','PHD','SR')
-    year_range = range(1900, date.today().year + 1)
-    relationships = getRelationships()
-    states = getStates()
-    countries = getCountries()
+        #Assemble collections for the user to make choices
+        majors = getMajors()
+        prefixes = dict([('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),('MS','Ms'),('REV','Rev')])
+        suffixes = ('','II','III','IV','JR','MD','PHD','SR')
+        year_range = range(1900, date.today().year + 1)
+        relationships = getRelationships()
+        states = getStates()
+        countries = getCountries()
 
+        return render_to_response(
+            "manager/edit.html",
+            {'submitted':success,'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics,
+             'relatives':relatives, 'privacy':privacy, 'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes,
+             'years':year_range, 'relationships':relationships, 'states':states, 'countries':countries},
+            context_instance=RequestContext(request)
+        )
+    else:
+        return HttpResponseRedirect(reverse('manager_search_denied'))
+
+@login_required
+def message(request, student_id, recipientHasEmail = True):
+    recipient = getMessageInfo(student_id)
+    recipientHasEmail = len(recipient.email) > 0
     return render_to_response(
-        "manager/edit.html",
-        {'submitted':success,'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics,
-         'relatives':relatives, 'privacy':privacy, 'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes,
-         'years':year_range, 'relationships':relationships, 'states':states, 'countries':countries},
+        "manager/create_message.html",
+        {'validRecipient':recipientHasEmail, 'recipient':recipient},
         context_instance=RequestContext(request)
     )
+
+@login_required
+def send_message(request):
+    recipient_id = request.POST.get('recipientID')
+    recipient = getMessageInfo(recipient_id)
+
+    attachEmail = request.POST.get('addEmail', 'N')
+    emailBody = request.POST.get('emailBody')
+
+    sender = getMessageInfo(request.user.id)
+
+    #If the inforamation about the sender is unavailable, create empty/default values
+    if sender == None or len(sender) == 0:
+        sender = {
+            'id':0,
+            'email':'confirmation@carthage.edu',
+            'firstname':'TestMike',
+            'lastname':'TestKishline',
+        }
+
+    autoAddOn = ''
+    if attachEmail == 'Y':
+        autoAddOn = 'Y'
+
+    #Initialize necessary components to generate email
+    data = {'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender}
+
+    subject_line = "Message from '%s' '%s' via the Carthage Alumni Directory" % (type(sender), len(sender)) #(sender.firstname, sender.lastname)
+    send_mail(
+        None, ['mkishline@gmail.com'], subject_line, 'mkishline@carthage.edu',
+        'manager/send_message.html', data
+    )
+
+    #Reuse the search page
+    return HttpResponseRedirect(reverse('manager_search_sent', kwargs={'messageSent':True}))
 
 def getStudent(student_id):
     #Compile all the one-to-one information about the alumn(a|us)
@@ -383,13 +437,20 @@ def getCountries():
     countries = do_sql(countries_sql)
     return countries.fetchall()
 
+def getMessageInfo(studentID):
+    message_sql = (
+        'SELECT ids.id, NVL(TRIM(email.line1) || TRIM(email.line2) || TRIM(email.line3), "") AS email, TRIM(ids.firstname) AS firstname, TRIM(ids.lastname) AS lastname'
+        ' FROM id_rec ids LEFT JOIN aa_rec email ON ids.id = email.id AND email.aa = "EML2" AND TODAY BETWEEN email.beg_date AND NVL(email.end_date, TODAY)'
+        ' WHERE ids.id = %s' % (studentID)
+    )
+    message = do_sql(message_sql, key="debug")
+    return message.fetchone()
+
 @login_required
 def search_activity(request):
     search_string = request.GET.get("term","Football")
     activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())
     activity_search = do_sql(activity_search_sql)
-    #return activity_search.fetchall()
-    #context = json.dumps(activity_search.fetchall())
     return HttpResponse(activity_search.fetchall())
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
@@ -479,7 +540,7 @@ def emailDifferences(studentID):
 
     data = {'studentID':studentID}
     #Section for personal information
-    if(student.prefix != alumni.prefix):
+    if(student.prefix.lower() != alumni.prefix.lower()):
         data["prefix"] = alumni.prefix
         data["original_prefix"] = student.prefix
     if(student.fname != alumni.fname):
@@ -491,7 +552,7 @@ def emailDifferences(studentID):
     if(student.lname != alumni.lname):
         data["lname"] = alumni.lname
         data["original_lname"] = student.lname
-    if(student.suffix != alumni.suffix):
+    if(student.suffix.lower() != alumni.suffix.lower()):
         data["suffix"] = alumni.suffix
         data["original_suffix"] = student.suffix
 

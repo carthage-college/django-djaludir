@@ -1,0 +1,28 @@
+{% extends "core/home.html" %}
+{% block title %}Send Message &mdash; {{block.super}}{% endblock %}
+
+{% block content %}
+    <p><a href="{% url 'manager_search' %}">Return to search</a></p>
+    
+    {% if validRecipient %}
+    <form action="{% url 'send_message_user' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="recipientID" value="{{recipient.id}}" />
+        <fieldset>
+            <div class="form-row">
+                <label>Send message to:</label>
+            </div>
+            <div class="form-row">
+                <textarea rows="10" cols="50" name="emailBody" placeholder="Email Message"></textarea>
+            </div>
+            <div class="form-row">
+                <input type="checkbox" name="addEmail" value="Y" /> Include my email address so {{recipient.firstname}} {{recipient.lastname}} can respond to me directly.
+            </div>
+            <input type="submit" name="submit" value="Send Email" />
+        </fieldset>
+    </form>
+    {% else %}
+        We're sorry but {{recipient.firstname}} {{recipient.lastname}} does not have an email address registered with Carthage so this action cannot be completed.
+    {% endif %}
+    <p><a href="{% url 'manager_search' %}">Return to search</a></p>
+{% endblock %}

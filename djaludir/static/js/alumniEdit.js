@@ -19,8 +19,10 @@ $(document).ready(function(){
         
         //Create HTML for relative form
         $('<div />').addClass('form-row relativeBlock').append($('<label />').text('Relative:'))
-            .append($('<input />').attr({'type':'text','name':'relativeFname' + addedRelatives,'size':'12'}))
-            .append($('<input />').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12'}))
+            .append($('<input />').attr({'type':'text','name':'relativeFname' + addedRelatives,'size':'12','placeholder':'First Name'}))
+            .append(' ')
+            .append($('<input />').attr({'type':'text','name':'relativeLname' + addedRelatives,'size':'12','placeholder':'Last Name'}))
+            .append(' ')
             .append($('<select />').attr('name','relativeText' + addedRelatives))
         .insertBefore($(this));
 
@@ -39,7 +41,7 @@ $(document).ready(function(){
 
         //Create HTML for activity form
         $('<li />')
-            .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'size':'25'}))
+            .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'size':'25','placeholder':'Activity Name'}))
             .insertAfter($('#activityList li:last'));
 
         //Update hidden activity count field
@@ -54,7 +56,7 @@ $(document).ready(function(){
         
         //Create HTML for athletic form
         $('<li>')
-            .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'size':'25'}))
+            .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'size':'25','placeholder':'Athletic Team'}))
             .insertAfter($('#athleticList li:last'));
 
         //Update hidden athletic count field

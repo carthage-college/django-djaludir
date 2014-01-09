@@ -65,11 +65,12 @@ $(function() {
     $('input[name="alumna"]:radio').live('click', function () {
         $.ajax({
             url:  '{{ldap_earl}}',
-            type: 'POST',
+            type: 'GET',
             async: true,
             data: $("#ldap-profile").serialize(),
             dataType: 'html',
             beforeSend: function(){
+                console.log($("#ldap-profile").serialize());
                 spinner.spin(target);
                 // disable form submit button
                 $('#submit').attr('disabled', 'disabled');

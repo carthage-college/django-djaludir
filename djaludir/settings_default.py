@@ -66,8 +66,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'djaludir',
-    'djaludir.core',
-    'djaludir.myapp',
+    'djaludir.auth',
+    'djaludir.registration',
+    'djaludir.manager',
     'djtools',
 )
 
@@ -171,6 +172,11 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
         },
     },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'handlers': {
         'null': {
             'level':'DEBUG',
@@ -191,16 +197,13 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'include_html': True,
             'class': 'django.utils.log.AdminEmailHandler'
         }
     },
     'loggers': {
-        'mugshots.upload': {
-            'handlers':['logfile'],
-            'propagate': True,
-            'level':'DEBUG',
-        },
-        'core': {
+        'djaludir': {
             'handlers':['logfile'],
             'propagate': True,
             'level':'DEBUG',

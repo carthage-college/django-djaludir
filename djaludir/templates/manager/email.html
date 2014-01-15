@@ -1,4 +1,4 @@
-<h3>Personal Information</h3>
+{% if data.personal %}<h3>Personal Information</h3>{% endif %}
 {% if data.prefix %}Prefix: changed from "{{data.original_prefix}}" to "{{data.prefix}}"<br />{% endif %}
 {% if data.fname %}First Name: changed from "{{data.original_fname}}" to "{{data.fname}}"<br />{% endif %}
 {% if data.maidenname %}Maiden Name: changed from "{{data.original_maidenname}}" to "{{data.maidenname}}"<br />{% endif %}
@@ -6,24 +6,24 @@
 {% if data.suffix %}Suffix: changed from "{{data.original_suffix}}" to "{{data.suffix}}"<br />{% endif %}
 {% if data.class_year %}Class Year: changed from "{{data.original_classyear}}" to "{{data.class_year}}"<br />{% endif %}
 
-<h3>Family</h3>
+{% if data.relatives %}<h3>Family</h3>{% endif %}
 {% for rel in data.relatives %}
 Relative: {{rel.fname}} {{rel.lname}} ({{rel.relcode}})<br />
 {% endfor %}
 
-<h3>Academics</h3>
+{% if data.academics %}<h3>Academics</h3>{% endif %}
 {% if data.degree %}Degree: changed from "{{data.original_degree}}" to "{{data.degree}}"<br />{% endif %}
 {% if data.major1 %}Major 1: changed from "{{data.original_major1}}" to "{{data.major1}}"<br />{% endif %}
 {% if data.major2 %}Major 2: changed from "{{data.original_major2}}" to "{{data.major2}}"<br />{% endif %}
 {% if data.major3 %}Major 3: changed from "{{data.original_major3}}" to "{{data.major3}}"<br />{% endif %}
 {% if data.masters_grad_year %}Masters Graduation Year: changed from "{{data.original_mastersgradyear}}" to "{{data.masters_grad_year}}"<br />{% endif %}
 
-    <h4>Student Organizations/Athletics</h4>
+    {% if data.organizations %}<h4>Student Organizations/Athletics</h4>{% endif %}
 {% for org in data.organizations %}
     {{org.activityText}}<br />
 {% endfor %}
 
-<h3>Professional Information</h3>
+{% if data.business %}<h3>Professional Information</h3>{% endif %}
 {% if data.business_name %}Business Name: changed from "{{data.original_businessname}}" to "{{data.business_name}}"<br />{% endif %}
 {% if data.job_title %}Job Title: changed from "{{data.original_jobtitle}}" to "{{data.job_title}}"<br />{% endif %}
 {% if data.business_address %}Business Address: changed from "{{data.original_businessaddress}}" to "{{data.business_address}}"<br />{% endif %}
@@ -33,7 +33,7 @@ Relative: {{rel.fname}} {{rel.lname}} ({{rel.relcode}})<br />
 {% if data.business_country %}Business Country: changed from "{{data.original_businesscountry}}" to "{{data.business_country}}"<br />{% endif %}
 {% if data.business_phone %}Business Phone: changed from "{{data.original_businessphone}}" to "{{data.business_phone}}"<br />{% endif %}
 
-<h3>Address</h3>
+{% if data.home %}<h3>Address</h3>{% endif %}
 {% if data.email %}Email: changed from "{{data.original_email}}" to "{{data.email}}"<br />{% endif %}
 {% if data.home_phone %}Home Phone: changed from "{{data.original_homephone}}" to "{{data.home_phone}}"<br />{% endif %}
 {% if data.home_address %}Home Address: changed from "{{data.original_homeaddress}}" to "{{data.home_address}}"<br />{% endif %}

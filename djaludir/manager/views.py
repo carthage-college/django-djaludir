@@ -292,18 +292,18 @@ def send_message(request):
 def getStudent(student_id):
     #Compile all the one-to-one information about the alumn(a|us)
     sql = ('SELECT DISTINCT'
-           '    ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(INITCAP(ids.title)) AS prefix, TRIM(email.line1) email,'
+           '    ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(INITCAP(ids.title)) AS prefix, TRIM(NVL(email.line1,"")) email,'
            '    CASE'
            '        WHEN    NVL(ids.decsd, "N")    =    "Y"                THEN    1'
            '                                                               ELSE    0'
            '    END    AS is_deceased,'
-           '    TRIM(maiden.lastname) AS birth_lname, TRIM(progs.deg) AS degree,'
+           '    TRIM(NVL(maiden.lastname,"")) AS birth_lname, TRIM(NVL(progs.deg,"")) AS degree,'
            '    CASE'
            '        WHEN    TRIM(progs.deg)    IN    ("BA","BS")           THEN    alum.cl_yr'
            '                                                               ELSE    0'
-           '    END    AS    class_year, TRIM(aawork.line1) AS business_name, TRIM(aawork.line2) AS business_address, TRIM(aawork.city) AS business_city, TRIM(aawork.st) AS business_state,'
-           '    TRIM(aawork.zip) AS business_zip, TRIM(aawork.ctry) AS business_country, TRIM(aawork.phone) AS business_phone, TRIM(ids.addr_line1) AS home_address1,'
-           '    TRIM(ids.addr_line2) AS home_address2, TRIM(ids.addr_line3) AS home_address3, TRIM(ids.city) AS home_city, TRIM(ids.st) AS home_state,'
+           '    END    AS    class_year, TRIM(NVL(aawork.line1, "")) AS business_name, TRIM(NVL(aawork.line2,"")) AS business_address, TRIM(NVL(aawork.city,"")) AS business_city,'
+           '    TRIM(aawork.st) AS business_state, TRIM(NVL(aawork.zip,"")) AS business_zip, TRIM(aawork.ctry) AS business_country, TRIM(NVL(aawork.phone,"")) AS business_phone,'
+           '    TRIM(ids.addr_line1) AS home_address1, TRIM(ids.addr_line2) AS home_address2, TRIM(ids.addr_line3) AS home_address3, TRIM(ids.city) AS home_city, TRIM(ids.st) AS home_state,'
            '    TRIM(ids.zip) AS home_zip, TRIM(ids.ctry) AS home_country, TRIM(ids.phone) AS home_phone,'
            '    TRIM('
            '        CASE'
@@ -466,7 +466,7 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
     alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
                   'job_title, submitted_on) '
                   'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
-                  % (carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, getNow())
+                  % (carthageID, fname, lname, suffix, prefix, email, maidenname.replace("(","").replace(")",""), degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, getNow())
     )
     do_sql(alumni_sql, key="debug")
     return alumni_sql
@@ -538,23 +538,28 @@ def emailDifferences(studentID):
     activities_sql = ("SELECT activityText FROM stg_aludir_activity WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
     alum_activities = do_sql(activities_sql, key="debug").fetchall()
 
-    data = {'studentID':studentID}
+    data = {'studentID':studentID,'personal':False,'academics':False,'business':False,'home':False}
     #Section for personal information
     if(student.prefix.lower() != alumni.prefix.lower()):
         data["prefix"] = alumni.prefix
         data["original_prefix"] = student.prefix
+        data["personal"] = True
     if(student.fname != alumni.fname):
         data["fname"] = alumni.fname
         data["original_fname"] = student.fname
+        data["personal"] = True
     if(student.birth_lname != alumni.maidenname):
         data["maidenname"] = alumni.maidenname
         data["original_maidenname"] = student.birth_lname
+        data["personal"] = True
     if(student.lname != alumni.lname):
         data["lname"] = alumni.lname
         data["original_lname"] = student.lname
+        data["personal"] = True
     if(student.suffix.lower() != alumni.suffix.lower()):
         data["suffix"] = alumni.suffix
         data["original_suffix"] = student.suffix
+        data["personal"] = True
 
     #Section for relatives
     data["relatives"] = relatives
@@ -563,18 +568,23 @@ def emailDifferences(studentID):
     if(student.degree != alumni.degree):
         data["degree"] = alumni.degree
         data["original_degree"] = student.degree
+        data["academics"] = True
     if(student.major1 != alumni.major1):
         data["major1"] = alumni.major1
         data["original_major1"] = student.major1
+        data["academics"] = True
     if(student.major2 != alumni.major2):
         data["major2"] = alumni.major2
         data["original_major2"] = student.major2
+        data["academics"] = True
     if(student.major3 != alumni.major3):
         data["major3"] = alumni.major3
         data["original_major3"] = student.major3
+        data["academics"] = True
     if(student.masters_grad_year != alumni.masters_grad_year):
         data["masters_grad_year"] = alumni.masters_grad_year
         data["original_mastersgradyear"] = student.masters_grad_year
+        data["academics"] = True
 
     #Section for activities (this may get split out into organizations vs athletics in the future)
     data["organizations"] = alum_activities
@@ -582,55 +592,71 @@ def emailDifferences(studentID):
     if(student.business_name != alumni.business_name):
         data["business_name"] = alumni.business_name
         data["original_businessname"] = student.business_name
+        data["business"] = True
     if(student.job_title != alumni.job_title):
         data["job_title"] = alumni.job_title
         data["original_jobtitle"] = student.job_title
+        data["business"] = True
 
     #Section for work address
     if(student.business_address != work_address.address_line1):
         data["business_address"] = work_address.address_line1
         data["original_businessaddress"] = student.business_address
+        data["business"] = True
     if(student.business_city != work_address.city):
         data["business_city"] = work_address.city
         data["original_businesscity"] = student.business_city
+        data["business"] = True
     if(student.business_state != work_address.state):
         data["business_state"] = work_address.state
         data["original_businessstate"] = student.business_state
+        data["business"] = True
     if(student.business_zip != work_address.zip):
         data["business_zip"] = work_address.zip
         data["original_businesszip"] = student.business_zip
+        data["business"] = True
     if(student.business_country != work_address.country):
         data["business_country"] = work_address.country
         data["original_businesscountry"] = student.business_country
+        data["business"] = True
     if(student.business_phone != work_address.phone):
         data["business_phone"] = work_address.phone
         data["original_businessphone"] = student.business_phone
+        data["business"] = True
 
     #Section for home address
     if(student.home_address1 != home_address.address_line1):
         data["home_address"] = home_address.address_line1
         data["original_homeaddress"] = student.home_address1
+        data["home"] = True
     if(student.home_address2 != home_address.address_line2):
         data["home_address2"] = home_address.address_line2
         data["original_homeaddress2"] = student.home_address2
+        data["home"] = True
     if(student.home_address3 != home_address.address_line3):
         data["home_address3"] = home_address.address_line3
         data["original_homeaddress3"] = student.home_address3
+        data["home"] = True
     if(student.home_city != home_address.city):
         data["home_city"] = home_address.city
         data["original_homecity"] = student.home_city
+        data["home"] = True
     if(student.home_state != home_address.state):
         data["home_state"] = home_address.state
         data["original_homestate"] = student.home_state
+        data["home"] = True
     if(student.home_zip != home_address.zip):
         data["home_zip"] = home_address.zip
         data["original_homezip"] = student.home_zip
+        data["home"] = True
     if(student.home_country != home_address.country):
         data["home_country"] = home_address.country
         data["original_homecountry"] = student.home_country
+        data["home"] = True
     if(student.home_phone != home_address.phone):
         data["home_phone"] = home_address.phone
         data["original_homephone"] = student.home_phone
+        data["home"] = True
     
     send_mail(
         None, ['mkishline@carthage.edu'], 'Alumni Directory Update', 'mkishline@carthage.edu',

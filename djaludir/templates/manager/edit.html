@@ -180,6 +180,7 @@
                 <label class="business_address">&nbsp;</label>
                 <input type="text" name="business_city" value="{{person.business_city}}" placeholder="Office City" />,
                 <select name="business_state">
+                    <option value=""></option>
                     {% for state in states %}
                         <option value="{{state.st}}" {% ifequal state.st person.business_state %}selected="selected"{% endifequal %}>{{state.st}}</option>
                     {% endfor %}
@@ -198,7 +199,7 @@
                 <label>Business phone:</label><input type="text" name="business_phone" value="{{person.business_phone}}" size="12" placeholder="Office Phone #" />
             </div>
         </fieldset>
-    
+
         <fieldset>
             <div class="form-row header">Address</div>
             <div class="privacy"><a href="javascript://" class="privacyToggle"></a><input type="checkbox" name="privacyAddress" class="privacyToggle" value="N" /></div>
@@ -213,6 +214,7 @@
                 <label>City, State Zip:</label>
                     <input type="text" name="home_city" value="{{person.home_city}}" placeholder="Residence City" />,
                     <select name="home_state">
+                        <option value=""></option>
                         {% for state in states %}
                             <option value="{{state.st}}" {% ifequal state.st person.home_state %}selected="selected"{% endifequal %}>{{state.st}}</option>
                         {% endfor %}

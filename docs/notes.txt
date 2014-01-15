@@ -1,0 +1,6 @@
+https://groups.google.com/forum/#!topic/django-users/Z7rKIzyu7VM
+
+$ wget http://www.url.com/subdir/listener/ --post-data "?test=test" -U
+"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-us) AppleWebKit/
+533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16"
+

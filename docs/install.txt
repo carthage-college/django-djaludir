@@ -1,3 +1,11 @@
 MySQL:
 
 username    varchar(128)
+
+Django groups:
+
+carthageFacultyStatus
+carthageStaffStatus
+carthageStudentStatus
+carthageFormerStudentStatus
+carthageOtherStatus

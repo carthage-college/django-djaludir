@@ -217,7 +217,7 @@ def search(request, messageSent = False, permissionDenied = False):
 
 @login_required
 def edit(request, student_id, success = False):
-    if student_id == request.user.id or request.user.is_superuser:
+    if int(student_id) == int(request.user.id) or request.user.is_superuser:
         #Retrieve relevant information about the alumni
         alumni = getStudent(student_id)
         activities = getStudentActivities(student_id, False)
@@ -454,6 +454,8 @@ def search_activity(request):
     return HttpResponse(activity_search.fetchall())
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
+    clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    do_sql(clear_sql, key="debug")
     relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
     do_sql(relation_sql, key="debug")
     return relation_sql
@@ -463,6 +465,8 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
         class_year = 0
     if masters_grad_year == '':
         masters_grad_year = 0
+    clear_sql = "UPDATE stg_aludir_alumni SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    do_sql(clear_sql, key="debug")
     alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
                   'job_title, submitted_on) '
                   'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
@@ -472,7 +476,8 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
     return alumni_sql
 
 def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
-    
+    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    do_sql(clear_sql, key="debug")
     address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
                    'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
                    % (aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone, getNow())
@@ -481,6 +486,8 @@ def insertAddress(aa_type, carthageID, address_line1, address_line2, address_lin
     return address_sql
 
 def insertActivity(carthageID, activityText):
+    clear_sql = "UPDATE stg_aludir_activity SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    do_sql(clear_sql, key="debug")
     activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText, submitted_on) VALUES (%s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, activityText, getNow())
     do_sql(activity_sql, key="debug")
     return activity_sql

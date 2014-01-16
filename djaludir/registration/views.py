@@ -106,7 +106,6 @@ def search_informix(request):
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
 
-@csrf_exempt
 def search_ldap(request):
     """
     Search the LDAP store for an alumna's record.
@@ -116,14 +115,13 @@ def search_ldap(request):
     update it if not. Lastly, display login form.
     If no record, allow the user to create one.
     """
-    #if request.method == "GET":
-    if request.GET.items():
-        logger.debug("get = %s" % request.GET)
-        form = RegistrationSearchForm(request.GET)
+    if request.method == "POST":
+        form = RegistrationSearchForm(request.POST)
+        logger.debug("post data = %s" % request.POST)
         if form.is_valid():
+            logger.debug("valid")
             # data dictionary
             data = form.cleaned_data
-            logger.debug("data = %s" % data)
             # search ldap
             l = LDAPManager()
             user = l.search(data["alumna"])
@@ -139,7 +137,7 @@ def search_ldap(request):
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
                 redir = reverse_lazy("alumni_directory_home")
-                extra_context = {'user':user,'form':form,'next':redir,}
+                extra_context = {'user':user,'form':form,'next':redir,'action':settings.LOGIN_URL,}
                 template = "login"
             else:
                 # display the create form
@@ -152,9 +150,6 @@ def search_ldap(request):
                 "registration/%s_ldap.inc.html" % template, extra_context,
                 context_instance=RequestContext(request)
             )
-        else:
-            logger.debug("form = %s" % form.errors)
-            return HttpResponse("error")
     else:
         # POST required
         # or doing something nefarious

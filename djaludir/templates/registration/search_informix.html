@@ -1,5 +1,4 @@
 {% autoescape off %}
-<form method="post" action="." class="form" id="ldap-profile">{% csrf_token %}
     <div style="display:none;">
     {% include "registration/search.inc.html" %}
     </div>
@@ -33,5 +32,4 @@
     {% endif %}
     </div>
     {#sql#}
-</form>
 {% endautoescape %}

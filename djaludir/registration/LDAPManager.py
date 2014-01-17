@@ -56,11 +56,11 @@ class LDAPManager(object):
         """
         user = modlist.addModlist(person)
 
-        dn = 'cn=%s,%s' % (person["mail"],settings.LDAP_BASE)
+        dn = 'cn=%s,%s' % (person["cn"],settings.LDAP_BASE)
         self.l.add_s(dn, user)
         return self.search(person["carthageNameID"])
 
-    def dj_create(self, username, data):
+    def dj_create(self, data):
         # We create a User object for LDAP users so we can get
         # permissions, however we -don't- want them to be able to
         # login without going through LDAP with this user. So we
@@ -73,10 +73,9 @@ class LDAPManager(object):
         data = data[0][1]
         email = data['mail'][0]
         uid = data['carthageNameID'][0]
-        if not email:
-            email = username
+        cn = data['cn'][0]
         password = User.objects.make_random_password(length=24)
-        user = User.objects.create(pk=uid,username=username,email=email)
+        user = User.objects.create(pk=uid,username=cn,email=email)
         user.set_password(password)
         user.first_name = data['givenName'][0]
         user.last_name = data['sn'][0]

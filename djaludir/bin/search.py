@@ -2,7 +2,8 @@ from djzbar.utils.informix import do_sql
 from djaludir.registration import SEARCH, SEARCH_ORDER_BY, SEARCH_GROUP_BY
 
 #data = {'first_name':'gary','last_name':'williams','email':'','college_id':'','dob':'',}
-data = {'first_name':'susan','last_name':'blust','email':'','college_id':'831458','dob':'',}
+#data = {'first_name':'susan','last_name':'blust','email':'','college_id':'831458','dob':'',}
+data = {'first_name':'martina','last_name':'ignesti','email':'','college_id':'','dob':'',}
 
 where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
          ' lower(aname_rec.line1) like "%%%s%%" )'

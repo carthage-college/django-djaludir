@@ -55,9 +55,10 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
+            logger.debug("dob = %s" % data["carthageDob"].strftime("%m/%d/%Y"))
             where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
                 ' lower(aname_rec.line1) like "%%%s%%" )'
-                % (data["givenName"],data["givenName"]))
+                % (data["givenName"].lower(),data["givenName"].lower()))
             where += ' AND'
             where += ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
             # if we have ID, we don't need anything else
@@ -86,11 +87,9 @@ def search_informix(request):
                 if ln < 1:
                     results = None
                     error = error_mess("No")
-                elif ln > 200:
-                    logger.debug("ln = %s" % ln)
+                elif ln > 10:
                     results = None
                     error = error_mess(ln)
-                    logger.debug("error = %s" % error)
                 else:
                     results = objects
             else:
@@ -129,11 +128,12 @@ def search_ldap(request):
                 # we have a user
                 user = user[0][1]
                 # update informix if no ldap_user
-                if data["ldap_name"]=='':
+                if not settings.DEBUG and data["ldap_name"] == '':
                     sql = """
                         UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
                     """ % (user["cn"][0], data["alumna"])
-                    results = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                    #results = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                    logger.debug("sql = %s" % sql)
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
                 redir = reverse_lazy("alumni_directory_home")
@@ -142,6 +142,7 @@ def search_ldap(request):
             else:
                 # display the create form
                 data["carthageNameID"] = data["alumna"]
+                request.session['ldap_name'] = data.get("ldap_name")
                 form = CreateLdapForm(initial=data)
                 action = reverse_lazy("registration_create_ldap")
                 extra_context = {'action':action,'form':form,}
@@ -168,8 +169,12 @@ def create_ldap(request):
             data = form.cleaned_data
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
-            # login (cn) will be email address
-            data["cn"] = data["mail"]
+            if request.session.get('ldap_name') != "":
+                # username (cn) will be ldap_name from informix
+                data["cn"] = request.session['ldap_name']
+            else:
+                # username (cn) will be email address
+                data["cn"] = data["mail"]
             # remove confirmation password
             data.pop('confPassword',None)
             # python ldap wants strings, not unicode
@@ -186,16 +191,17 @@ def create_ldap(request):
             l = LDAPManager()
             user = l.create(data)
             logger.debug("user = %s" % user)
-            if not settings.DEBUG:
+            if not settings.DEBUG and request.session.get('ldap_name') != "":
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
                 """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"])
-                ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                #ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                logger.debug("sql = %s" % sql)
             else:
                 logger.debug("data = %s" % data)
             # create the django user
-            djuser = l.dj_create(data["mail"],user)
+            djuser = l.dj_create(user)
             # send email to admins
             subject = "[LDAP][Create] %s %s" % (
                 user[0][1]["givenName"][0],

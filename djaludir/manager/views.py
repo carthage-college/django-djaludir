@@ -454,7 +454,7 @@ def search_activity(request):
     return HttpResponse(activity_search.fetchall())
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
-    clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
     do_sql(clear_sql, key="debug")
     relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
     do_sql(relation_sql, key="debug")
@@ -465,7 +465,7 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
         class_year = 0
     if masters_grad_year == '':
         masters_grad_year = 0
-    clear_sql = "UPDATE stg_aludir_alumni SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    clear_sql = "UPDATE stg_aludir_alumni SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
     do_sql(clear_sql, key="debug")
     alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
                   'job_title, submitted_on) '
@@ -476,7 +476,7 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
     return alumni_sql
 
 def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
-    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
     do_sql(clear_sql, key="debug")
     address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
                    'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
@@ -486,7 +486,7 @@ def insertAddress(aa_type, carthageID, address_line1, address_line2, address_lin
     return address_sql
 
 def insertActivity(carthageID, activityText):
-    clear_sql = "UPDATE stg_aludir_activity SET approved = 'N' WHERE id = %s AND approved = ''" % (carthageID)
+    clear_sql = "UPDATE stg_aludir_activity SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
     do_sql(clear_sql, key="debug")
     activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText, submitted_on) VALUES (%s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, activityText, getNow())
     do_sql(activity_sql, key="debug")
@@ -632,6 +632,10 @@ def emailDifferences(studentID):
         data["business"] = True
 
     #Section for home address
+    if(student.email != alumni.email):
+        data["email"] = alumni.email
+        data["original_email"] = student.email
+        data["home"] = True
     if(student.home_address1 != home_address.address_line1):
         data["home_address"] = home_address.address_line1
         data["original_homeaddress"] = student.home_address1

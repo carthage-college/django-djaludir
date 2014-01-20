@@ -19,6 +19,17 @@ $(function() {
 <div id="second">
     <div class="buffer">
         <h1>Carthage Alumni Directory</h1>
+        {% if username %}
+            <p>You are now logged in.</p>
+            <p>For future reference, your <strong>username</strong> is:</p>
+            <p><strong>{{username}}</strong></p>
+            <p>
+                Please take a moment to log into our
+                <a href="https://password.carthage.edu/" target="_top">password manager</a>
+                to create your challenge questions and anwsers that you will use to reset
+                your password in the event that you forgot it.
+            </p>
+        {% endif %}
         <ul>
             <li><a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></li>
             <li><a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a></li>

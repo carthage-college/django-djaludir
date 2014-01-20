@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth import login
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration.forms import RegistrationSearchForm, CreateLdapForm
@@ -191,17 +191,20 @@ def create_ldap(request):
             l = LDAPManager()
             user = l.create(data)
             logger.debug("user = %s" % user)
+            request.session['username'] = user[0][1]["cn"][0]
             if not settings.DEBUG and request.session.get('ldap_name') != "":
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
                 """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"])
-                #ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
-                logger.debug("sql = %s" % sql)
+                ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             else:
                 logger.debug("data = %s" % data)
             # create the django user
             djuser = l.dj_create(user)
+            # authenticate user
+            djuser.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, djuser)
             # send email to admins
             subject = "[LDAP][Create] %s %s" % (
                 user[0][1]["givenName"][0],
@@ -211,7 +214,7 @@ def create_ldap(request):
                 request,TO_LIST, subject, data["mail"],
                 "registration/create_ldap_email.html", data
             )
-            return HttpResponseRedirect(reverse_lazy("auth_login"))
+            return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
         else:
             return render_to_response(
                 "registration/create_ldap.html", {'form':form,},

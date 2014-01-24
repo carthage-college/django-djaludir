@@ -45,6 +45,7 @@ def update(request):
                    request.POST.get('major1'), request.POST.get('major2'), request.POST.get('major3'), request.POST.get('masters_grad_year'), request.POST.get('job_title'))
 
     #Loop through all the relatives' records
+    clearRelative(studentID)
     for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
         relFname = request.POST.get('relativeFname' + str(relativeIndex))
         relLname = request.POST.get('relativeLname' + str(relativeIndex))
@@ -453,9 +454,11 @@ def search_activity(request):
     activity_search = do_sql(activity_search_sql)
     return HttpResponse(activity_search.fetchall())
 
-def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
+def clearRelative(carthageID):
     clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
     do_sql(clear_sql, key="debug")
+
+def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
     relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
     do_sql(relation_sql, key="debug")
     return relation_sql
@@ -476,7 +479,7 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
     return alumni_sql
 
 def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
-    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
+    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND aa = '%s' AND NVL(approved,'') = ''" % (carthageID, aa_type)
     do_sql(clear_sql, key="debug")
     address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
                    'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
@@ -606,68 +609,73 @@ def emailDifferences(studentID):
         data["business"] = True
 
     #Section for work address
-    if(student.business_address != work_address.address_line1):
-        data["business_address"] = work_address.address_line1
-        data["original_businessaddress"] = student.business_address
+    if (work_address != None and len(work_address) > 0):
+        if(student.business_address != work_address.address_line1):
+            data["business_address"] = work_address.address_line1
+            data["original_businessaddress"] = student.business_address
+            data["business"] = True
+        if(student.business_city != work_address.city):
+            data["business_city"] = work_address.city
+            data["original_businesscity"] = student.business_city
+            data["business"] = True
+        if(student.business_state != work_address.state):
+            data["business_state"] = work_address.state
+            data["original_businessstate"] = student.business_state
+            data["business"] = True
+        if(student.business_zip != work_address.zip):
+            data["business_zip"] = work_address.zip
+            data["original_businesszip"] = student.business_zip
+            data["business"] = True
+        if(student.business_country != work_address.country):
+            data["business_country"] = work_address.country
+            data["original_businesscountry"] = student.business_country
+            data["business"] = True
+        if(student.business_phone != work_address.phone):
+            data["business_phone"] = work_address.phone
+            data["original_businessphone"] = student.business_phone
+            data["business"] = True
+    else:
         data["business"] = True
-    if(student.business_city != work_address.city):
-        data["business_city"] = work_address.city
-        data["original_businesscity"] = student.business_city
-        data["business"] = True
-    if(student.business_state != work_address.state):
-        data["business_state"] = work_address.state
-        data["original_businessstate"] = student.business_state
-        data["business"] = True
-    if(student.business_zip != work_address.zip):
-        data["business_zip"] = work_address.zip
-        data["original_businesszip"] = student.business_zip
-        data["business"] = True
-    if(student.business_country != work_address.country):
-        data["business_country"] = work_address.country
-        data["original_businesscountry"] = student.business_country
-        data["business"] = True
-    if(student.business_phone != work_address.phone):
-        data["business_phone"] = work_address.phone
-        data["original_businessphone"] = student.business_phone
-        data["business"] = True
+        data["business_address"] = workaddress_sql
 
     #Section for home address
     if(student.email != alumni.email):
         data["email"] = alumni.email
         data["original_email"] = student.email
         data["home"] = True
-    if(student.home_address1 != home_address.address_line1):
-        data["home_address"] = home_address.address_line1
-        data["original_homeaddress"] = student.home_address1
-        data["home"] = True
-    if(student.home_address2 != home_address.address_line2):
-        data["home_address2"] = home_address.address_line2
-        data["original_homeaddress2"] = student.home_address2
-        data["home"] = True
-    if(student.home_address3 != home_address.address_line3):
-        data["home_address3"] = home_address.address_line3
-        data["original_homeaddress3"] = student.home_address3
-        data["home"] = True
-    if(student.home_city != home_address.city):
-        data["home_city"] = home_address.city
-        data["original_homecity"] = student.home_city
-        data["home"] = True
-    if(student.home_state != home_address.state):
-        data["home_state"] = home_address.state
-        data["original_homestate"] = student.home_state
-        data["home"] = True
-    if(student.home_zip != home_address.zip):
-        data["home_zip"] = home_address.zip
-        data["original_homezip"] = student.home_zip
-        data["home"] = True
-    if(student.home_country != home_address.country):
-        data["home_country"] = home_address.country
-        data["original_homecountry"] = student.home_country
-        data["home"] = True
-    if(student.home_phone != home_address.phone):
-        data["home_phone"] = home_address.phone
-        data["original_homephone"] = student.home_phone
-        data["home"] = True
+    if(home_address != None and len(home_address) > 0):
+        if(student.home_address1 != home_address.address_line1):
+            data["home_address"] = home_address.address_line1
+            data["original_homeaddress"] = student.home_address1
+            data["home"] = True
+        if(student.home_address2 != home_address.address_line2):
+            data["home_address2"] = home_address.address_line2
+            data["original_homeaddress2"] = student.home_address2
+            data["home"] = True
+        if(student.home_address3 != home_address.address_line3):
+            data["home_address3"] = home_address.address_line3
+            data["original_homeaddress3"] = student.home_address3
+            data["home"] = True
+        if(student.home_city != home_address.city):
+            data["home_city"] = home_address.city
+            data["original_homecity"] = student.home_city
+            data["home"] = True
+        if(student.home_state != home_address.state):
+            data["home_state"] = home_address.state
+            data["original_homestate"] = student.home_state
+            data["home"] = True
+        if(student.home_zip != home_address.zip):
+            data["home_zip"] = home_address.zip
+            data["original_homezip"] = student.home_zip
+            data["home"] = True
+        if(student.home_country != home_address.country):
+            data["home_country"] = home_address.country
+            data["original_homecountry"] = student.home_country
+            data["home"] = True
+        if(student.home_phone != home_address.phone):
+            data["home_phone"] = home_address.phone
+            data["original_homephone"] = student.home_phone
+            data["home"] = True
     
     send_mail(
         None, ['mkishline@carthage.edu'], 'Alumni Directory Update', 'mkishline@carthage.edu',

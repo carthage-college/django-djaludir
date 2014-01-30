@@ -174,7 +174,7 @@ def search(request, messageSent = False, permissionDenied = False):
 
         academics = ['activity', 'major1.txt', 'major2.txt']
         if bool(set(academics) & set(fieldlist)) == True:
-            selectFromSQL += ' LEFT JOIN stg_aludir_privacy acad_priv ON ids.id = acad_priv.id AND acad_priv.fieldname = "Academics" AND'
+            selectFromSQL += ' LEFT JOIN stg_aludir_privacy acad_priv ON ids.id = acad_priv.id AND acad_priv.fieldname = "Academics"'
             if len(andSQL) > 0:
                 andSQL += ' AND'
             andSQL += ' NVL(acad_priv.display, "N") = "N"'

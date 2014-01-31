@@ -512,6 +512,8 @@ def emailDifferences(studentID):
     #Retrieve the existing information about the alumn(a|us)
     student = getStudent(studentID)
 
+    subject = "Alumni Directory Update for %s %s (%s)" % (student.fname, student.lname, studentID)
+
     #Get the most recent unapproved information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
                   "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1, TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3, masters_grad_year,"
@@ -678,6 +680,6 @@ def emailDifferences(studentID):
             data["home"] = True
     
     send_mail(
-        None, ['mkishline@carthage.edu'], 'Alumni Directory Update', 'mkishline@carthage.edu',
+        None, ['mkishline@carthage.edu'], subject, 'mkishline@carthage.edu',
         'manager/email.html', data
     )

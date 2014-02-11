@@ -526,7 +526,24 @@ def emailDifferences(studentID):
     alumni = alum.fetchone()
 
     #Get information about the alum's relatives
-    relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
+    relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, "
+                     "  CASE "
+                     "      WHEN	TRIM(relcode)	=	'HW'	AND	alum_primary	=	'N'	THEN	'Husband'"
+                     "      WHEN	TRIM(relcode)	=	'HW'	AND	alum_primary	=	'Y'	THEN	'Wife'"
+                     "      WHEN	TRIM(relcode)	=	'PC'	AND	alum_primary	=	'N'	THEN	'Parent'"
+                     "      WHEN	TRIM(relcode)	=	'PC'	AND	alum_primary	=	'Y'	THEN	'Child'"
+                     "      WHEN	TRIM(relcode)	=	'SBSB'								THEN	'Sibling'"
+                     "      WHEN	TRIM(relcode)	=	'COCO'								THEN	'Cousin'"
+                     "      WHEN	TRIM(relcode)	=	'GPGC'	AND	alum_primary	=	'N'	THEN	'Grandparent'"
+                     "      WHEN	TRIM(relcode)	=	'GPGC'	AND	alum_primary	=	'Y'	THEN	'Grandchild'"
+                     "      WHEN	TRIM(relcode)	=	'AUNN'	AND	alum_primary	=	'N'	THEN	'Aunt/Uncle'"
+                     "      WHEN	TRIM(relcode)	=	'AUNN'	AND	alum_primary	=	'Y'	THEN	'Niece/Nephew'"
+                     "                                                                      ELSE	TRIM(relcode)"
+                     "  END	AS	relcode "
+                     "FROM stg_aludir_relative "
+                     "WHERE id = %s AND NVL(approved, '') = '' "
+                    ) % (studentID)
+    #relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
     relatives = do_sql(relatives_sql, key="debug").fetchall()
 
     #Get address information (work and home)

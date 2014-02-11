@@ -8,7 +8,8 @@
     <p><a href="{% url 'alumni_directory_home' %}">Alumni Directory Home</a></p>
     <p>
     {% if not user.is_anonymous %}
-        <a href="{{logout_url}}?next={{request.path}}" style="text-decoration:none;">Logout from Alumni Directory</a>
+        <a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></p>
+        <p><a href="{{logout_url}}?next={{request.path}}" style="text-decoration:none;">Logout from Alumni Directory</a>
     {% else %}
         <a href="{{login_url}}?next={{request.path}}" style="text-decoration:none;">Login to Alumni Directory</a>
     {% endif %}

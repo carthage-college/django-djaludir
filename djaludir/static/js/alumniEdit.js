@@ -116,7 +116,7 @@ function setPrivacy(chkBoxName, isPrivate){
     //Loop through each checkbox name in the chkBoxName variable
     $.each(chkBoxName.split(','), function(index, value){
         $chkBox = $('input[name="privacy' + value + '"]');
-        $chkBox.parent().find('a.privacyToggle').text('Information is: ' + (isPrivate ? 'Private' : 'Public'));
+        $chkBox.parent().find('a.privacyToggle').text('Information is: ' + (isPrivate ? 'Private' : 'Visible to Alumni'));
         $chkBox.prop('checked', !isPrivate);
     });
 }

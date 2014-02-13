@@ -696,7 +696,8 @@ def emailDifferences(studentID):
             data["original_homephone"] = student.home_phone
             data["home"] = True
     
+    recipients = ['arobillard@carthage.edu','rjason@carthage.edu','lhansen@carthage.edu']
     send_mail(
-        None, ['mkishline@carthage.edu'], subject, 'mkishline@carthage.edu',
+        None, recipients, subject, 'confirmation@carthage.edu',
         'manager/email.html', data
     )

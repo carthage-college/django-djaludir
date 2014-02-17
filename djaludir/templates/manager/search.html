@@ -32,9 +32,6 @@
     <div class="buffer">
     {% if message %}<div class="message">{{message}}</div>{% endif %}
     <h1>Search</h1>
-    {% if perms.auth.delete_user %}
-        <p>w00t!</p>
-    {% endif %}
     <form action="{% url 'manager_search' %}" name="searchForm" method="post" class="form" id="profile">
         <input type="hidden" name="maxCriteria" value="0" />
         {% csrf_token %}
@@ -68,6 +65,6 @@
     </table>
     {% endif %}
 
-    {% if debug %}{{debug}}{% endif %}
+    {% comment %}{% if debug %}{{debug}}{% endif %}{% endcomment %}
     </div>
 {% endblock %}

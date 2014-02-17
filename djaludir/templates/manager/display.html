@@ -17,103 +17,105 @@
     </style>
 {% endblock %}
 {% block content %}
-    {% ifnotequal privacy.Personal "Y" %}
-        <fieldset>
-            <div class="form-row header">Personal Information</div>
-            <div class="form-row">
-                <label>Name:</label>{{person.prefix}} {{person.fname}} {% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %} {{person.lname}} {{person.suffix}}
-            </div>
-            {% if person.class_year %}<div class="form-row"><label>Class year:</label>{{person.class_year}}</div>{% endif %}
-        </fieldset>
-    {% endifnotequal %}
-
-    {% ifnotequal privacy.Family "Y" %}
-        {% if relatives %}
-        <fieldset>
-            <div class="form-row header">Family</div>
-            {% for relative in relatives %}
+    <div class="buffer">
+        {% ifnotequal privacy.Personal "Y" %}
+            <fieldset>
+                <div class="form-row header">Personal Information</div>
                 <div class="form-row">
-                    <label>Relative:</label>{{relative.firstname}} {{relative.lastname}}
-                    {% if relative.relText %}({{relative.relText}}){% endif %}<br />
-                    <label class="relative">&nbsp;</label>
+                    <label>Name:</label>{{person.prefix}} {{person.fname}} {% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %} {{person.lname}} {{person.suffix}}
                 </div>
-            {% endfor %}
-        </fieldset>
-        {% endif %}
-    {% endifnotequal%}
+                {% if person.class_year %}<div class="form-row"><label>Class year:</label>{{person.class_year}}</div>{% endif %}
+            </fieldset>
+        {% endifnotequal %}
     
-    {% ifnotequal privacy.Academics "Y" %}
-        <fieldset>
-            <div class="form-row header">Academics</div>
-        
-            {% if person.degree %}<div class="form-row"><label>Degree:</label>{{person.degree}}</div>{% endif %}
-            {% if person.major1 %}<div class="form-row"><label>Major 1:</label>{{person.major1}}</div>{% endif %}
-            {% if person.major2 %}<div class="form-row"><label>Major 2:</label>{{person.major2}}</div>{% endif %}
-            {% if person.major3 %}<div class="form-row"><label>Major 3:</label>{{person.major3}}</div>{% endif %}
-            {% if person.masters_grad_year %}<div class="form-row"><label>Masters Graduation Year:</label>{{person.masters_grad_year}}</div>{% endif %}
-        
-            {% if activities %}
-            <div class="form-row">
-                <label>Student Organization{{activities|pluralize}}:</label><br />
-                <ul>
-                    {% for org in activities %}
-                        <li>{{ org.activity }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+        {% ifnotequal privacy.Family "Y" %}
+            {% if relatives %}
+            <fieldset>
+                <div class="form-row header">Family</div>
+                {% for relative in relatives %}
+                    <div class="form-row">
+                        <label>Relative:</label>{{relative.firstname}} {{relative.lastname}}
+                        {% if relative.relText %}({{relative.relText}}){% endif %}<br />
+                        <label class="relative">&nbsp;</label>
+                    </div>
+                {% endfor %}
+            </fieldset>
             {% endif %}
+        {% endifnotequal%}
         
-            {% if athletics %}
-            <div class="form-row">
-                <label>Athletic Team{{athletics|pluralize}}</label><br />
-                <ul>
-                    {% for team in athletics %}
-                        <li>{{ team.sport }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-        </fieldset>
-    {% endifnotequal %}
-
-    {% ifnotequal privacy.Professional "Y" %}
-        <fieldset>
-            <div class="form-row header">Professional Information</div>
-            {% if person.business_name %}<div class="form-row"><label>Business name:</label>{{person.business_name}}</div>{% endif %}
-            <div class="form-row">
-                <label>Business address:</label>{% if person.business_address %}{{person.business_address}}<br />{% endif %}
-                {% if person.business_address %}<label class="business_address">&nbsp;</label>
-                    {% if person.business_city %}{{person.business_city}}, {% endif %}
-                    {% if person.business_state %}{{person.business_state}} {% endif %}
-                    {% if person.business_zip %} {{person.business_zip}}{% endif %}
+        {% ifnotequal privacy.Academics "Y" %}
+            <fieldset>
+                <div class="form-row header">Academics</div>
+            
+                {% if person.degree %}<div class="form-row"><label>Degree:</label>{{person.degree}}</div>{% endif %}
+                {% if person.major1 %}<div class="form-row"><label>Major 1:</label>{{person.major1}}</div>{% endif %}
+                {% if person.major2 %}<div class="form-row"><label>Major 2:</label>{{person.major2}}</div>{% endif %}
+                {% if person.major3 %}<div class="form-row"><label>Major 3:</label>{{person.major3}}</div>{% endif %}
+                {% if person.masters_grad_year %}<div class="form-row"><label>Masters Graduation Year:</label>{{person.masters_grad_year}}</div>{% endif %}
+            
+                {% if activities %}
+                <div class="form-row">
+                    <label>Student Organization{{activities|pluralize}}:</label><br />
+                    <ul>
+                        {% for org in activities %}
+                            <li>{{ org.activity }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endif %}
-            </div>
-            {% if person.business_phone %}
-            <div class="form-row">
-                <label>Business phone:</label>{{person.business_phone}}
-            </div>
-            {% endif %}
-        </fieldset>
-    {% endifnotequal %}
-
-    {% ifnotequal privacy.Address "Y" %}
-        <fieldset>
-            <div class="form-row header">Address</div>
-            {% if person.email %}<div class="form-row"><label>Email:</label><a href="mailto:{{person.email}}">{{person.email}}</a></div>{% endif %}
-            {% if person.home_phone %}
-            <div class="form-row">
-                    <label>Home phone:</label>{{person.home_phone}}
-            </div>
-            {% endif %}
-            <div class="form-row">
-                {% if person.home_address1 or person.home_address2 or person.home_address3 %}
-                    <label>Home address:</label>{{person.home_address1}}<br />
-                    {% if person.home_address2 %}<label class="home_address">&nbsp;</label>{{person.home_address2}}<br />{% endif %}
-                    {% if person.home_address3 %}<label class="home_address">&nbsp;</label>{{person.home_address3}}<br />{% endif %}
+            
+                {% if athletics %}
+                <div class="form-row">
+                    <label>Athletic Team{{athletics|pluralize}}</label><br />
+                    <ul>
+                        {% for team in athletics %}
+                            <li>{{ team.sport }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endif %}
-                <label class="home_address">&nbsp;</label>{{person.home_city}}, {{person.home_state}} {{person.home_zip}}
-            </div>
-        </fieldset>
-    {% endifnotequal %}
-    <p><a href="{% url 'manager_search' %}">Return to Search</a></p>
+            </fieldset>
+        {% endifnotequal %}
+    
+        {% ifnotequal privacy.Professional "Y" %}
+            <fieldset>
+                <div class="form-row header">Professional Information</div>
+                {% if person.business_name %}<div class="form-row"><label>Business name:</label>{{person.business_name}}</div>{% endif %}
+                <div class="form-row">
+                    <label>Business address:</label>{% if person.business_address %}{{person.business_address}}<br />{% endif %}
+                    {% if person.business_address %}<label class="business_address">&nbsp;</label>
+                        {% if person.business_city %}{{person.business_city}}, {% endif %}
+                        {% if person.business_state %}{{person.business_state}} {% endif %}
+                        {% if person.business_zip %} {{person.business_zip}}{% endif %}
+                    {% endif %}
+                </div>
+                {% if person.business_phone %}
+                <div class="form-row">
+                    <label>Business phone:</label>{{person.business_phone}}
+                </div>
+                {% endif %}
+            </fieldset>
+        {% endifnotequal %}
+    
+        {% ifnotequal privacy.Address "Y" %}
+            <fieldset>
+                <div class="form-row header">Address</div>
+                {% if person.email %}<div class="form-row"><label>Email:</label><a href="mailto:{{person.email}}">{{person.email}}</a></div>{% endif %}
+                {% if person.home_phone %}
+                <div class="form-row">
+                        <label>Home phone:</label>{{person.home_phone}}
+                </div>
+                {% endif %}
+                <div class="form-row">
+                    {% if person.home_address1 or person.home_address2 or person.home_address3 %}
+                        <label>Home address:</label>{{person.home_address1}}<br />
+                        {% if person.home_address2 %}<label class="home_address">&nbsp;</label>{{person.home_address2}}<br />{% endif %}
+                        {% if person.home_address3 %}<label class="home_address">&nbsp;</label>{{person.home_address3}}<br />{% endif %}
+                    {% endif %}
+                    <label class="home_address">&nbsp;</label>{{person.home_city}}, {{person.home_state}} {{person.home_zip}}
+                </div>
+            </fieldset>
+        {% endifnotequal %}
+        <p><a href="{% url 'manager_search' %}">Return to Search</a></p>
+    </div>
 {% endblock %}

@@ -9,10 +9,10 @@ from django.contrib.auth import login
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration.forms import RegistrationSearchForm, CreateLdapForm
-from djaludir.registration.LDAPManager import LDAPManager
 
 from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
+from djauth.LDAPManager import LDAPManager
 
 TO_LIST = ["larry@carthage.edu",]
 
@@ -78,8 +78,10 @@ def search_informix(request):
             xsql = SEARCH + where
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY
+            logger.debug("sql = %s" % xsql)
             results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
             objects = []
+            ln = None
             if results:
                 for r in results:
                     objects.append(r)

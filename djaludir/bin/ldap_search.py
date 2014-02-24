@@ -20,7 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djaludir.settings")
 # now we can import settings
 from django.conf import settings
 
-from djaludir.registration.LDAPManager import LDAPManager
+from djauth.LDAPManager import LDAPManager
 
 # set up command-line options
 desc = """

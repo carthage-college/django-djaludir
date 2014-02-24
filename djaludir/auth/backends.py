@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 
-from djaludir.registration.LDAPManager import LDAPManager
+from djauth.LDAPManager import LDAPManager
 
 import logging
 logger = logging.getLogger(__name__)

@@ -10,12 +10,24 @@ logger = logging.getLogger(__name__)
 
 class LDAPManager(object):
 
-    def __init__(self):
+    def __init__(self,protocol=None,port=None,server=None,user=None,password=None):
         # Authenticate the base user so we can search
+        if protocol is None:
+            protocol = settings.LDAP_PROTOCOL
+        if port is None:
+            port = settings.LDAP_PORT
+        if server is None:
+            server = settings.LDAP_SERVER
+        if user is None:
+            user = settings.LDAP_USER
+        if password is None:
+            password = settings.LDAP_PASS
         try:
-            self.l = ldap.initialize('%s://%s:%s' % ( settings.LDAP_PROTOCOL,settings.LDAP_SERVER, settings.LDAP_PORT))
+            self.l = ldap.initialize(
+                '%s://%s:%s' % (protocol,server,port)
+            )
             self.l.protocol_version = ldap.VERSION3
-            self.l.simple_bind_s(settings.LDAP_USER,settings.LDAP_PASS)
+            self.l.simple_bind_s(user,password)
         except ldap.LDAPError, e:
             raise Exception(e)
 
@@ -100,7 +112,7 @@ class LDAPManager(object):
         # Convert place-holders for modify-operation using modlist-module
         ldif = modlist.modifyModlist(old,new)
 
-        # Do the actual modification 
+        # Do the actual modification
         l.modify_s(dn,ldif)
 
     def delete(self, person):

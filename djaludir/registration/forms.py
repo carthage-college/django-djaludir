@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 
-from djaludir.registration.LDAPManager import LDAPManager
+from djauth.LDAPManager import LDAPManager
 
 class RegistrationSearchForm(forms.Form):
 

@@ -182,7 +182,7 @@ def create_ldap(request):
             # python ldap wants strings, not unicode
             for k,v in data.items():
                 data[k] = str(v)
-            data["objectclass"] = settings.LDAP_OJBECT_CLASS
+            data["objectclass"] = settings.LDAP_OJBECT_CLASS_LIST
             data["carthageFacultyStatus"] = ""
             data["carthageStaffStatus"] = ""
             data["carthageStudentStatus"] = ""

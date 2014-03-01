@@ -14,13 +14,33 @@ class LDAPBackend(object):
     supports_anonymous_user = False
     supports_inactive_user = False
 
-    def authenticate(self, username=None, password=None):
+    def get_questions(self, cn=None):
+        """
+        check to see whether or not the user has her
+        challenge question & answers set.
+        not the best place for this, but for now it will do.
+        """
+        l = LDAPManager(
+            protocol=settings.LDAP_PROTOCOL_PWM,
+            server=settings.LDAP_SERVER_PWM,
+            port=settings.LDAP_PORT_PWM,
+            user=settings.LDAP_USER_PWM,
+            password=settings.LDAP_PASS_PWM,
+            base=settings.LDAP_BASE_PWM
+        )
+
+        result = l.search(cn,field="cn",ret=settings.LDAP_RETURN_PWM)
+
+        try:
+            questions = result[0][1][settings.LDAP_CHALLENGE_ATTR][0]
+            return True
+        except:
+            return False
+
+    def authenticate(self, username=None, password=None, request=None):
         if not password:
             return None
         username = username.lower()
-        base = settings.LDAP_BASE
-        scope = ldap.SCOPE_SUBTREE
-        ret = settings.LDAP_RETURN
 
         l = LDAPManager()
 
@@ -44,7 +64,9 @@ class LDAPBackend(object):
             return user
         except ldap.INVALID_CREDENTIALS:
             # Name or password were bad. Fail permanently.
-            #raise PermissionDenied
+            del request.session['ldap_questions']
+            request.session.modified = True
+            request.session['ldap_questions'] = self.get_questions(username)
             return None
 
     def get_user(self, user_id):

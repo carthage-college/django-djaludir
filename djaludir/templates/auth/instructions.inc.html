@@ -1,4 +1,12 @@
 <div class="buffer">
-    <p><strong>Forgotten your password?</strong> You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.</p>
-    <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page.</p>
+    <h3>Forgotten your Password?</h3>
+    {% if not user.questions %}
+        <p>
+            You can reset it <a href="">here</a>.
+        </p>
+    {% else %}
+        <p>
+            You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+        </p>
+    {% endif %}
 </div>

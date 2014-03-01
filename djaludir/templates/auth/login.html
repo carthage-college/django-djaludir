@@ -1,10 +1,45 @@
-{% extends "accounts/login.html" %}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
 {% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
 {% block left_nav %}
     {% include "alumni/left_nav.html" %}
 {% endblock %}
-{% block extra_content %}
-    {% include "auth/instructions.inc.html" %}
+{% block content %}
+    <div class="buffer">
+        {% if user.is_anonymous %}
+            <h1>Login</h1>
+            <p>Please use your Carthage username and password to log in.</p>
+            {% if form.errors or errors %}
+                <p class="error">
+                    Please enter a correct username and password. Both fields are case-sensitive.
+                </p>
+                <h3>Forgotten your Password?</h3>
+                {% if not request.session.ldap_questions %}
+                    <p>
+                        You can reset it <a href="">here</a>.
+                    </p>
+                    <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
+                {% else %}
+                    <p>
+                        You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+                    </p>
+                {% endif %}
+            {% endif %}
+            {% include "accounts/login_form.inc.html" %}
+            {% if not form.errors and not request.session.ldap_questions %}
+            <div class="buffer">
+                <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
+            </div>
+            {% endif %}
+        {% else %}
+            <h2>You are already logged in</h2>
+            {% if next %}
+                <p><a href="{{next}}">Click here to continue on to your destination.</a><p>
+            {% else %}
+                <p><a href="../logout/">Do you want to log out and log in as a new user?</a></p>
+            {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}
 {% block sidebar %}
     {% include "side_bar.html" %}

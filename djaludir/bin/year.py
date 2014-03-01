@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, sys, datetime
+import os, sys
 
 # env
 sys.path.append('/usr/local/lib/python2.7/dist-packages/')

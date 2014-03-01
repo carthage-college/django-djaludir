@@ -9,6 +9,7 @@ from django.contrib.auth import login
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration.forms import RegistrationSearchForm, CreateLdapForm
+from djaludir.auth.backends import LDAPBackend
 
 from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
@@ -55,7 +56,6 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            logger.debug("dob = %s" % data["carthageDob"].strftime("%m/%d/%Y"))
             where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
                 ' lower(aname_rec.line1) like "%%%s%%" )'
                 % (data["givenName"].lower(),data["givenName"].lower()))
@@ -78,7 +78,6 @@ def search_informix(request):
             xsql = SEARCH + where
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY
-            logger.debug("sql = %s" % xsql)
             results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
             objects = []
             ln = None
@@ -118,9 +117,7 @@ def search_ldap(request):
     """
     if request.method == "POST":
         form = RegistrationSearchForm(request.POST)
-        logger.debug("post data = %s" % request.POST)
         if form.is_valid():
-            logger.debug("valid")
             # data dictionary
             data = form.cleaned_data
             # search ldap
@@ -134,8 +131,11 @@ def search_ldap(request):
                     sql = """
                         UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
                     """ % (user["cn"][0], data["alumna"])
-                    #results = do_sql(sql, key=settings.INFORMIX_DEBUG)
-                    logger.debug("sql = %s" % sql)
+                    results = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                # check for challenge questions
+                l = LDAPBackend()
+                user["questions"] = l.get_questions(user["cn"][0])
+
                 # display the login form
                 form = {'data':{'username':user["cn"][0],},}
                 redir = reverse_lazy("alumni_directory_home")

@@ -2,7 +2,16 @@
 <div class="span-11" style="background-color: #FCFAEB;border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;">
 <div class="buffer">
     <p>Your username is: <strong>{{user.cn.0}}</strong>. Use the form below to log in.</p>
-    <p><strong>Forgotten your password?</strong> You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>, if you have set up your challenge questions and answers. If you have not done so, please contact the <a href="mailto:alumni@carthage.edu">Alumni Office</a> to reset your password.</p>
+    <h4>Forgotten your password?</h4>
+    {% if not user.questions %}
+        <p>
+            You can reset it <a href="">here</a>.
+        </p>
+    {% else %}
+        <p>
+            You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+        </p>
+    {% endif %}
 </div>
 {% include "accounts/login_form.inc.html" %}
 </div>

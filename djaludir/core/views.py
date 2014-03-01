@@ -4,9 +4,9 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
+#@login_required(login_url='/alumni/directory/auth/login?next=/alumni/directory')
 @login_required
 def home(request):
-
     username = None
     if request.session.get('username'):
         username = request.session['username']

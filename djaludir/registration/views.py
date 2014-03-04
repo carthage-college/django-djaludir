@@ -8,7 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
-from djaludir.registration.forms import RegistrationSearchForm, CreateLdapForm
+from djaludir.registration.forms import RegistrationSearchForm
+from djaludir.registration.forms import CreateLdapForm
+from djaludir.registration.forms import UpdateLdapPasswordForm
 from djaludir.auth.backends import LDAPBackend
 
 from djzbar.utils.informix import do_sql
@@ -20,7 +22,16 @@ TO_LIST = ["larry@carthage.edu",]
 import logging
 logger = logging.getLogger(__name__)
 
-def search(request):
+def error_mess(val):
+    error = '''
+        %s results returned. Please try your search again,
+        or contact the
+        <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
+        for further assistance.
+    ''' % val
+    return error
+
+def search_home(request):
     """
     Search home, from where we begin the search for an alumna's
     record in Informix and then in LDAP.
@@ -32,15 +43,6 @@ def search(request):
         {'informix_earl':informix_earl,'ldap_earl':ldap_earl},
         context_instance=RequestContext(request)
     )
-
-def error_mess(val):
-    error = '''
-        %s results returned. Please try your search again,
-        or contact the
-        <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
-        for further assistance.
-    ''' % val
-    return error
 
 def search_informix(request):
     """
@@ -134,12 +136,14 @@ def search_ldap(request):
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # check for challenge questions
                 l = LDAPBackend()
-                user["questions"] = l.get_questions(user["cn"][0])
-
+                request.session['ldap_questions'] = self.get_questions(username)
                 # display the login form
-                form = {'data':{'username':user["cn"][0],},}
+                form = {'data':{'username':user["cn"][0],}}
                 redir = reverse_lazy("alumni_directory_home")
-                extra_context = {'user':user,'form':form,'next':redir,'action':settings.LOGIN_URL,}
+                extra_context = {
+                    'user':user,'form':form,
+                    'next':redir,'action':settings.LOGIN_URL
+                }
                 template = "login"
             else:
                 # display the create form
@@ -192,8 +196,8 @@ def create_ldap(request):
             # create the ldap user
             l = LDAPManager()
             user = l.create(data)
-            logger.debug("user = %s" % user)
-            request.session['username'] = user[0][1]["cn"][0]
+            # set session ldap_cn, why?
+            request.session['ldap_cn'] = user[0][1]["cn"][0]
             if not settings.DEBUG and request.session.get('ldap_name') != "":
                 # update informix cvid_rec.ldap_user
                 sql = """
@@ -232,3 +236,21 @@ def create_ldap(request):
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
 
+def update_ldap_password(request):
+    """
+    Updates the password for an LDAP account.
+    Requires POST.
+    """
+    if request.method == "POST":
+        form = UpdateLdapPasswordForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            # initial the ldap manager
+            l = LDAPManager()
+    else:
+        form = UpdateLdapPasswordForm()
+
+    return render_to_response(
+        "registration/update_ldap_password.html", {'form':form,},
+        context_instance=RequestContext(request)
+    )

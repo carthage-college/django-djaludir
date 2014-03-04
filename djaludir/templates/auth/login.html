@@ -8,25 +8,32 @@
     <div class="buffer">
         {% if user.is_anonymous %}
             <h1>Login</h1>
-            <p>Please use your Carthage username and password to log in.</p>
             {% if form.errors or errors %}
-                <p class="error">
+                {% if request.session.ldap_account %}
+                    <p class="error">
                     Please enter a correct username and password. Both fields are case-sensitive.
-                </p>
-                <h3>Forgotten your Password?</h3>
-                {% if not request.session.ldap_questions %}
-                    <p>
-                        You can reset it <a href="">here</a>.
+                    </p>
+                    <h3>Forgotten your Password?</h3>
+                    {% if not request.session.ldap_questions %}
+                        <p>
+                            You can reset it <a href="{% url 'registration_update_ldap_password' %}">here</a>.
+                        </p>
+                    {% else %}
+                        <p>
+                        You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="error">
+                        The username you provided is not valid.
                     </p>
                     <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
-                {% else %}
-                    <p>
-                        You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
-                    </p>
                 {% endif %}
+            {% else %}
+                <p>Please use your Carthage username and password to log in.</p>
             {% endif %}
             {% include "accounts/login_form.inc.html" %}
-            {% if not form.errors and not request.session.ldap_questions %}
+            {% if not form.errors and not errors%}
             <div class="buffer">
                 <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
             </div>

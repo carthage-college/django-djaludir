@@ -5,12 +5,12 @@ from djauth.LDAPManager import LDAPManager
 
 class RegistrationSearchForm(forms.Form):
 
-    givenName      = forms.CharField(required=True,max_length=64)
-    sn             = forms.CharField(required=True,max_length=64)
+    givenName       = forms.CharField(required=True,max_length=64)
+    sn              = forms.CharField(required=True,max_length=64)
     carthageDob     = forms.DateField(required=True, help_text="Format: mm/dd/yyyy")
     postal_code     = forms.CharField(required=False,max_length=10)
     carthageNameID  = forms.CharField(required=False,max_length=8)
-    mail           = forms.EmailField(required=False,max_length=128)
+    mail            = forms.EmailField(required=False,max_length=128)
     alumna          = forms.CharField(required=False,max_length=8)
     ldap_name       = forms.CharField(required=False,max_length=32)
 
@@ -44,3 +44,40 @@ class CreateLdapForm(forms.Form):
         if user:
             raise forms.ValidationError("That email already exists in the system. Use another.")
         return cleaned_data["mail"]
+
+class UpdateLdapPasswordForm(forms.Form):
+    """
+    update a user's ldap password
+    """
+    givenName       = forms.CharField(required=True,
+                            max_length=64, label="First name")
+    sn              = forms.CharField(required=True,
+                            max_length=64, label="Last name")
+    ssn             = forms.CharField(required=True,
+                            max_length=4, label="Last four digits of " \
+                            "your Social Security Number")
+    carthageDob     = forms.DateField(required=True,
+                            label="Date of birth",
+                            help_text="Format: mm/dd/yyyy")
+    userPassword    = forms.CharField(required=True,
+                            max_length=64, label="Password",
+                            widget=forms.PasswordInput(),
+                            help_text="Minimum 8 characters.")
+    confPassword    = forms.CharField(required=True,
+                            max_length=64, label="Confirm password",
+                            widget=forms.PasswordInput())
+
+    def clean_userPassword(self):
+        if len(self.cleaned_data.get("userPassword")) < 8:
+            raise forms.ValidationError(
+                "Password must be at least 8 characters."
+            )
+        return self.cleaned_data.get("userPassword")
+
+    def clean_confPassword(self):
+        cleaned_data = self.cleaned_data
+        p1 = cleaned_data.get("userPassword")
+        p2 = cleaned_data.get("confPassword")
+        if p1 != p2:
+            raise forms.ValidationError("Passwords do not match")
+        return cleaned_data["confPassword"]

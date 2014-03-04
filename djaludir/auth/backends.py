@@ -48,24 +48,25 @@ class LDAPBackend(object):
             result_data = l.search(username,field="cn")
             # If the user does not exist in LDAP, Fail.
             if not result_data:
+                request.session['ldap_account'] = False
                 return None
 
             # Attempt to bind to the user's DN.
             l.bind(result_data[0][0],password)
-
-            # The user existed and authenticated.
+            # Success. The user existed and authenticated.
             # Get the user record or create one with no privileges.
             try:
                 user = User.objects.get(username__exact=username)
             except:
                 # Create a User object.
                 user = l.dj_create(username,result_data)
-            # Success.
+
+            # TODO: update the alumni container
             return user
         except ldap.INVALID_CREDENTIALS:
             # Name or password were bad. Fail permanently.
-            del request.session['ldap_questions']
-            request.session.modified = True
+            request.session['ldap_cn'] = username
+            request.session['ldap_account'] = True
             request.session['ldap_questions'] = self.get_questions(username)
             return None
 

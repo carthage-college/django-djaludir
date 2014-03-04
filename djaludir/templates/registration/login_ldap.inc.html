@@ -3,9 +3,9 @@
 <div class="buffer">
     <p>Your username is: <strong>{{user.cn.0}}</strong>. Use the form below to log in.</p>
     <h4>Forgotten your password?</h4>
-    {% if not user.questions %}
+    {% if not request.session.ldap_questions %}
         <p>
-            You can reset it <a href="">here</a>.
+            You can reset it <a href="{% url 'registration_update_ldap_password' %}">here</a>.
         </p>
     {% else %}
         <p>

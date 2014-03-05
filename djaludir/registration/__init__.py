@@ -27,30 +27,18 @@ SEARCH_GROUP_BY = """
 SEARCH_ORDER_BY = """
     ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date
 """
-
-'''
-SELECT DISTINCT
-    alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name,
-    ids.lastname, ids.id, LOWER(ids.lastname) AS sort1,
-    LOWER(ids.firstname) AS sort2
-FROM
-    alum_rec alum
-INNER JOIN
-    id_rec ids ON alum.id = ids.id
-LEFT JOIN (
-    SELECT prim_id, MAX(active_date) active_date
-    FROM addree_rec
-    WHERE style = "M"
-    GROUP BY prim_id
-    ) prevmap ON ids.id = prevmap.prim_id
-LEFT JOIN
-    addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"
-WHERE
-    LOWER(TRIM(ids.lastname::varchar(250))) LIKE "%williams%"
-AND
-    LOWER(TRIM(ids.firstname::varchar(250))) LIKE "%gary%"
-AND
-    LOWER(TRIM(alum.cl_yr::varchar(250))) LIKE "%0%"
-ORDER BY
-    LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr
-'''
+CONFIRM_USER = """
+    SELECT
+        id_rec.id,profile_rec.birth_date,
+        id_rec.firstname, aname_rec.line1,
+        id_rec.lastname, SUBSTRING(id_rec.ss_no FROM 8 FOR 4) as ss_no,
+        cvid_rec.ldap_name
+    FROM
+        id_rec
+    LEFT JOIN
+        cvid_rec on id_rec.id = cvid_rec.cx_id
+    LEFT JOIN aa_rec as aname_rec on
+        (id_rec.id = aname_rec.id AND aname_rec.aa = "ANDR")
+    LEFT JOIN
+        profile_rec on id_rec.id = profile_rec.id
+"""

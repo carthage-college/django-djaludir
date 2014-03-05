@@ -56,7 +56,12 @@ def main():
 
     print sql
     objs = do_sql(sql, key="debug")
-    for obj in objs:
+    print objs
+    objects = objs.fetchall()
+    print len(objects)
+    print objects[0].id
+    for obj in objects:
+        print obj.id
         print obj
 
 ######################

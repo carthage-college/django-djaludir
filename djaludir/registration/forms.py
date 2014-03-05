@@ -49,10 +49,10 @@ class UpdateLdapPasswordForm(forms.Form):
     """
     update a user's ldap password
     """
-    givenName       = forms.CharField(required=True,
-                            max_length=64, label="First name")
+    cn              = forms.CharField(required=True,
+                            max_length=128, label="Carthage Username")
     sn              = forms.CharField(required=True,
-                            max_length=64, label="Last name")
+                            max_length=64, label="Your Last name")
     ssn             = forms.CharField(required=True,
                             max_length=4, label="Last four digits of " \
                             "your Social Security Number")

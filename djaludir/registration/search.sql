@@ -20,7 +20,7 @@ AND
 AND
     ( id_rec.zip like "%60091%" or NVL(id_rec.zip,'') = '' )
 AND
-    (profile_rec.birth_date = "1969-04-02" or profile_rec.birth_date is null);
+    (profile_rec.birth_date = "1974-02-02" or profile_rec.birth_date is null);
 
 
 SELECT count(*) FROM id_rec WHERE id_rec.zip = '';

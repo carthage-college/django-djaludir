@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
+from djaludir.registration import CONFIRM_USER
 from djaludir.registration.forms import RegistrationSearchForm
 from djaludir.registration.forms import CreateLdapForm
 from djaludir.registration.forms import UpdateLdapPasswordForm
@@ -81,22 +82,17 @@ def search_informix(request):
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY
             results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
-            objects = []
-            ln = None
-            if results:
-                for r in results:
-                    objects.append(r)
-                ln = len(objects)
-                if ln < 1:
-                    results = None
-                    error = error_mess("No")
-                elif ln > 10:
-                    results = None
-                    error = error_mess(ln)
-                else:
-                    results = objects
-            else:
+
+            objects = objs.fetchall()
+            ln = len(objects)
+            if ln < 1:
+                results = None
+                error = error_mess("No")
+            elif ln > 10:
+                results = None
                 error = error_mess(ln)
+            else:
+                results = objects
         else:
             error = form.errors
         extra_context = {'form':form,'error':error,'results':results,'sql':xsql,}
@@ -241,12 +237,42 @@ def update_ldap_password(request):
     Updates the password for an LDAP account.
     Requires POST.
     """
+    errors = {}
     if request.method == "POST":
         form = UpdateLdapPasswordForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            # initial the ldap manager
-            l = LDAPManager()
+            where = ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
+            where+= ' AND'
+            where+= '''
+                 (profile_rec.birth_date = "%s"
+            ''' % data["carthageDob"].strftime("%m/%d/%Y")
+            where+= ' OR profile_rec.birth_date is null)'
+            where+= ' AND'
+            where+= '''
+                SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "%s" )
+            ''' % data["ssn"]
+            sql = CONFIRM_USER + where
+            results = do_sql(sql, key=settings.INFORMIX_DEBUG)
+
+            objects = results.fetchall()
+            if len(objects) == 1:
+                # initial the ldap manager
+                l = LDAPManager()
+                search = l.search(objects[0].id)
+                if search:
+                    # now update password
+                    status = l.update_password(dn=search[0][0],data["password"])
+                    if status[0] == 120:
+                        # success
+                        return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
+                    else:
+                        # fail
+                        errors["ldap"] = "We failed to update your password."
+                else:
+                    errors["ldap"] = "We failed to find your Alumni account."
+            else:
+                errors["informix"] = "We could not find you in the database."
     else:
         form = UpdateLdapPasswordForm()
 

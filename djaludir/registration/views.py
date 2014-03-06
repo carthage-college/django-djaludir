@@ -39,9 +39,13 @@ def search_home(request):
     """
     informix_earl = reverse_lazy("registration_search_informix")
     ldap_earl = reverse_lazy("registration_search_ldap")
+    message = False
+    if request.session['ldap_password_success']:
+        del request.session['ldap_password_success']
+        message = "You have successfully changed your password."
     return render_to_response(
         "registration/search.html",
-        {'informix_earl':informix_earl,'ldap_earl':ldap_earl},
+        {'informix_earl':informix_earl,'ldap_earl':ldap_earl,'message':message},
         context_instance=RequestContext(request)
     )
 
@@ -188,7 +192,6 @@ def create_ldap(request):
             data["carthageStudentStatus"] = ""
             data["carthageFormerStudentStatus"] = "A"
             data["carthageOtherStatus"] = ""
-            logger.debug("data = %s" % data)
             # create the ldap user
             l = LDAPManager()
             user = l.create(data)
@@ -242,7 +245,8 @@ def update_ldap_password(request):
         form = UpdateLdapPasswordForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            where = ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
+            where = 'WHERE'
+            where+= ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
             where+= ' AND'
             where+= '''
                  (profile_rec.birth_date = "%s"
@@ -250,21 +254,25 @@ def update_ldap_password(request):
             where+= ' OR profile_rec.birth_date is null)'
             where+= ' AND'
             where+= '''
-                SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "%s" )
+                SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "%s"
             ''' % data["ssn"]
             sql = CONFIRM_USER + where
             results = do_sql(sql, key=settings.INFORMIX_DEBUG)
-
             objects = results.fetchall()
             if len(objects) == 1:
                 # initial the ldap manager
                 l = LDAPManager()
                 search = l.search(objects[0].id)
+                logger.debug("carthageNameID = %s" % objects[0].id)
                 if search:
                     # now update password
-                    status = l.update_password(dn=search[0][0],data["password"])
+                    logger.debug("search status = %s" % search)
+                    logger.debug("dn = %s" % search[0][0])
+                    logger.debug("password = %s" % data["userPassword"])
+                    status = l.update_password(search[0][0],data["userPassword"])
                     if status[0] == 120:
                         # success
+                        request.session['ldap_password_success'] = True
                         return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
                     else:
                         # fail
@@ -277,6 +285,6 @@ def update_ldap_password(request):
         form = UpdateLdapPasswordForm()
 
     return render_to_response(
-        "registration/update_ldap_password.html", {'form':form,},
+        "registration/update_ldap_password.html", {'form':form,'errors':errors},
         context_instance=RequestContext(request)
     )

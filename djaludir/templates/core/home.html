@@ -1,16 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Directory &mdash; Alumni &mdash; Carthage College{% endblock %}
 {% block jquery %}<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>{% endblock %}
-{% block extra_javascript %}
-<script type="text/javascript" charset="utf-8">
-$(function() {
-});
-</script>
-{% endblock %}
-{% block extra_style %}
-<style type="text/css">
-</style>
-{% endblock %}
 {% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
 {% block left_nav %}
     {% include "alumni/left_nav.html" %}
@@ -23,6 +13,17 @@ $(function() {
             <p>You are now logged in.</p>
             <p>For future reference, your <strong>username</strong> is:</p>
             <p><strong>{{username}}</strong></p>
+            <p>
+                Please take a moment to log into our
+                <a href="https://password.carthage.edu/" target="_top">password manager</a>
+                to create your challenge questions and anwsers that you will use to reset
+                your password in the event that you forgot it.
+            </p>
+        {% endif %}
+        {% if message %}
+            <p class="notice">
+                {{message}}
+            </p>
             <p>
                 Please take a moment to log into our
                 <a href="https://password.carthage.edu/" target="_top">password manager</a>

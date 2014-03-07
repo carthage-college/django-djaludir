@@ -42,12 +42,20 @@ class LDAPBackend(object):
             return None
         username = username.lower()
 
-        l = LDAPManager()
+        #l = LDAPManager()
+        l = LDAPManager(
+            protocol=settings.LDAP_PROTOCOL_PWM,
+            server=settings.LDAP_SERVER_PWM,
+            port=settings.LDAP_PORT_PWM,
+            user=settings.LDAP_USER_PWM,
+            password=settings.LDAP_PASS_PWM,
+            base=settings.LDAP_BASE_PWM
+        )
 
         try:
             result_data = l.search(username,field="cn")
             # If the user does not exist in LDAP, Fail.
-            if not result_data:
+            if not result_data and request:
                 request.session['ldap_account'] = False
                 return None
 
@@ -59,7 +67,7 @@ class LDAPBackend(object):
                 user = User.objects.get(username__exact=username)
             except:
                 # Create a User object.
-                user = l.dj_create(username,result_data)
+                user = l.dj_create(result_data)
 
             # TODO: update the alumni container
             return user

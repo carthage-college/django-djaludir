@@ -32,7 +32,7 @@ def login_user(request):
         form = LoginForm()
 
     return render_to_response(
-        'auth/login.html',{'form': form,'errors':errors,},
+        'auth/login.html',{'form': form,'errors':errors},
         context_instance=RequestContext(request)
     )
 

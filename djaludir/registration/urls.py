@@ -8,8 +8,8 @@ urlpatterns = patterns('djaludir.registration.views',
         'create_ldap', name="registration_create_ldap"
     ),
     url(
-        r'^update/ldap/password/$',
-        'update_ldap_password', name="registration_update_ldap_password"
+        r'^modify/ldap/password/$',
+        'modify_ldap_password', name="registration_modify_ldap_password"
     ),
     url(
         r'^search/informix/$',

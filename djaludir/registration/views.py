@@ -11,7 +11,7 @@ from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration import CONFIRM_USER
 from djaludir.registration.forms import RegistrationSearchForm
 from djaludir.registration.forms import CreateLdapForm
-from djaludir.registration.forms import UpdateLdapPasswordForm
+from djaludir.registration.forms import ModifyLdapPasswordForm
 from djaludir.auth.backends import LDAPBackend
 
 from djzbar.utils.informix import do_sql
@@ -39,13 +39,9 @@ def search_home(request):
     """
     informix_earl = reverse_lazy("registration_search_informix")
     ldap_earl = reverse_lazy("registration_search_ldap")
-    message = False
-    if request.session['ldap_password_success']:
-        del request.session['ldap_password_success']
-        message = "You have successfully changed your password."
     return render_to_response(
         "registration/search.html",
-        {'informix_earl':informix_earl,'ldap_earl':ldap_earl,'message':message},
+        {'informix_earl':informix_earl,'ldap_earl':ldap_earl},
         context_instance=RequestContext(request)
     )
 
@@ -235,14 +231,14 @@ def create_ldap(request):
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
 
-def update_ldap_password(request):
+def modify_ldap_password(request):
     """
-    Updates the password for an LDAP account.
+    Modifies the password for an LDAP account.
     Requires POST.
     """
     errors = {}
     if request.method == "POST":
-        form = UpdateLdapPasswordForm(request.POST)
+        form = ModifyLdapPasswordForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             where = 'WHERE'
@@ -261,30 +257,54 @@ def update_ldap_password(request):
             objects = results.fetchall()
             if len(objects) == 1:
                 # initial the ldap manager
-                l = LDAPManager()
+
+                l = LDAPManager(
+                    protocol=settings.LDAP_PROTOCOL_PWM,
+                    server=settings.LDAP_SERVER_PWM,
+                    port=settings.LDAP_PORT_PWM,
+                    user=settings.LDAP_USER_PWM,
+                    password=settings.LDAP_PASS_PWM,
+                    base=settings.LDAP_BASE_PWM
+                )
+
+                logger.debug("ID = %s" % objects[0].id)
                 search = l.search(objects[0].id)
-                logger.debug("carthageNameID = %s" % objects[0].id)
                 if search:
-                    # now update password
-                    logger.debug("search status = %s" % search)
-                    logger.debug("dn = %s" % search[0][0])
-                    logger.debug("password = %s" % data["userPassword"])
-                    status = l.update_password(search[0][0],data["userPassword"])
-                    if status[0] == 120:
+                    # now modify password
+                    # modify_s() returns a tuple with status code
+                    # and an empty list: (103, [])
+                    status = l.modify(search[0][0],"userPassword",data["userPassword"])
+                    # success = 103
+                    if status[0] == 103:
                         # success
                         request.session['ldap_password_success'] = True
+
+                        # Get the user record or create one with no privileges.
+                        try:
+                            logger.debug("cn = %s" % search[0][1]["cn"][0])
+                            user = User.objects.get(username__exact=search[0][1]["cn"][0])
+                        except:
+                            # Create a User object.
+                            user = l.dj_create(search)
+
+                        # authenticate user
+                        user.backend = 'django.contrib.auth.backends.ModelBackend'
+                        login(request, user)
                         return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
                     else:
                         # fail
                         errors["ldap"] = "We failed to update your password."
+                        logger.debug("fail: %s" % errors["ldap"])
                 else:
                     errors["ldap"] = "We failed to find your Alumni account."
+                    logger.debug("fail: %s" % errors["ldap"])
             else:
                 errors["informix"] = "We could not find you in the database."
+                logger.debug("fail: %s" % errors["informix"])
     else:
-        form = UpdateLdapPasswordForm()
+        form = ModifyLdapPasswordForm()
 
     return render_to_response(
-        "registration/update_ldap_password.html", {'form':form,'errors':errors},
+        "registration/modify_ldap_password.html", {'form':form,'errors':errors},
         context_instance=RequestContext(request)
     )

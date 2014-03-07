@@ -45,9 +45,9 @@ class CreateLdapForm(forms.Form):
             raise forms.ValidationError("That email already exists in the system. Use another.")
         return cleaned_data["mail"]
 
-class UpdateLdapPasswordForm(forms.Form):
+class ModifyLdapPasswordForm(forms.Form):
     """
-    update a user's ldap password
+    modify a user's ldap password
     """
     cn              = forms.CharField(required=True,
                             max_length=128, label="Carthage Username")

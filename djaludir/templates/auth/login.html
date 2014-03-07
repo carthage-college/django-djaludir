@@ -16,7 +16,7 @@
                     <h3>Forgotten your Password?</h3>
                     {% if not request.session.ldap_questions %}
                         <p>
-                            You can reset it <a href="{% url 'registration_update_ldap_password' %}">here</a>.
+                            You can reset it <a href="{% url 'registration_modify_ldap_password' %}">here</a>.
                         </p>
                     {% else %}
                         <p>

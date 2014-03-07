@@ -12,7 +12,12 @@ def home(request):
         username = request.session['username']
         del request.session['username']
 
+    message = False
+    if 'ldap_password_success' in request.session:
+        del request.session['ldap_password_success']
+        message = "You have successfully changed your password, and are now logged in."
+
     return render_to_response(
-        "core/home.html",{'action':reverse_lazy("auth_login"),},
+        "core/home.html",{'action':reverse_lazy("auth_login"),'message':message},
         context_instance=RequestContext(request)
     )

@@ -1,9 +1,6 @@
-{% extends "base.html" %}
+{% extends "core/home.html" %}
 {% block title %}Login{% endblock %}
 {% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
-{% block left_nav %}
-    {% include "alumni/left_nav.html" %}
-{% endblock %}
 {% block content %}
     <div class="buffer">
         {% if user.is_anonymous %}
@@ -20,7 +17,7 @@
                         </p>
                     {% else %}
                         <p>
-                        You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+                        You can reset it at <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>.
                         </p>
                     {% endif %}
                 {% else %}
@@ -47,7 +44,4 @@
             {% endif %}
         {% endif %}
     </div>
-{% endblock %}
-{% block sidebar %}
-    {% include "side_bar.html" %}
 {% endblock %}

@@ -2,6 +2,32 @@
 {% block title %}Directory &mdash; Alumni &mdash; Carthage College{% endblock %}
 {% block jquery %}<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>{% endblock %}
 {% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
+{% block extra_style %}
+<link rel="stylesheet" href="/static/djaludir/css/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+<style type="text/css" media="screen, projection">
+iframe{
+    overflow:hidden;
+}
+</style>
+{% endblock %}
+{% block extra_javascript %}
+<script type="text/javascript" src="/static/djaludir/js/jquery.fancybox.pack.js?v=2.1.5"></script>
+<script type="text/javascript">
+    $(function() {
+        $(".fancybox").fancybox({
+            maxWidth    : 800,
+            maxHeight   : 800,
+            fitToView   : false,
+            width       : '70%',
+            height      : '70%',
+            autoSize    : false,
+            closeClick  : false,
+            openEffect  : 'none',
+            closeEffect : 'none'
+        });
+    });
+</script>
+{% endblock %}
 {% block left_nav %}
     {% include "alumni/left_nav.html" %}
 {% endblock %}
@@ -14,8 +40,8 @@
             <p>For future reference, your <strong>username</strong> is:</p>
             <p><strong>{{username}}</strong></p>
             <p>
-                Please take a moment to log into our
-                <a href="https://password.carthage.edu/" target="_top">password manager</a>
+                Please take a moment to log into
+                <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>
                 to create your challenge questions and anwsers that you will use to reset
                 your password in the event that you forgot it.
             </p>
@@ -25,8 +51,8 @@
                 {{message}}
             </p>
             <p>
-                Please take a moment to log into our
-                <a href="https://password.carthage.edu/" target="_top">password manager</a>
+                Please take a moment to log into
+                <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>
                 to create your challenge questions and anwsers that you will use to reset
                 your password in the event that you forgot it.
             </p>

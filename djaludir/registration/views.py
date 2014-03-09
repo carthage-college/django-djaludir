@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.contrib.auth import login
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import login
+
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY
 from djaludir.registration import CONFIRM_USER
@@ -267,7 +269,6 @@ def modify_ldap_password(request):
                     base=settings.LDAP_BASE_PWM
                 )
 
-                logger.debug("ID = %s" % objects[0].id)
                 search = l.search(objects[0].id)
                 if search:
                     # now modify password
@@ -278,15 +279,12 @@ def modify_ldap_password(request):
                     if status[0] == 103:
                         # success
                         request.session['ldap_password_success'] = True
-
                         # Get the user record or create one with no privileges.
                         try:
-                            logger.debug("cn = %s" % search[0][1]["cn"][0])
                             user = User.objects.get(username__exact=search[0][1]["cn"][0])
                         except:
                             # Create a User object.
                             user = l.dj_create(search)
-
                         # authenticate user
                         user.backend = 'django.contrib.auth.backends.ModelBackend'
                         login(request, user)
@@ -294,13 +292,10 @@ def modify_ldap_password(request):
                     else:
                         # fail
                         errors["ldap"] = "We failed to update your password."
-                        logger.debug("fail: %s" % errors["ldap"])
                 else:
                     errors["ldap"] = "We failed to find your Alumni account."
-                    logger.debug("fail: %s" % errors["ldap"])
             else:
                 errors["informix"] = "We could not find you in the database."
-                logger.debug("fail: %s" % errors["informix"])
     else:
         form = ModifyLdapPasswordForm()
 

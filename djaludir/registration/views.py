@@ -6,7 +6,6 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import User, Group
-from django.views.decorators.csrf import csrf_exempt
 
 from djaludir.core.models import YEARS
 from djaludir.registration import SEARCH, SEARCH_GROUP_BY, SEARCH_ORDER_BY

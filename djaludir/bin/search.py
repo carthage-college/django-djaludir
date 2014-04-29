@@ -61,7 +61,7 @@ def main():
     print len(objects)
     print objects[0].id
     for obj in objects:
-        print obj.id
+        print "obj dict id = %s" % obj["id"]
         print obj
 
 ######################

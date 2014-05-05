@@ -22,10 +22,16 @@ ATHLETIC_IDS = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','
 def display(request, student_id):
     #Get information about the alumn(a|us)
     alumni = getStudent(student_id)
-    activities = getStudentActivities(student_id, False)
-    athletics = getStudentActivities(student_id, True)
-    relatives = getRelatives(student_id)
-    privacy = getPrivacy(student_id)
+    if alumni != None:
+        activities = getStudentActivities(student_id, False)
+        athletics = getStudentActivities(student_id, True)
+        relatives = getRelatives(student_id)
+        privacy = getPrivacy(student_id)
+    else:
+        activities = None
+        athletics = None
+        relatives = None
+        privacy = None
 
     return render_to_response(
         "manager/display.html",

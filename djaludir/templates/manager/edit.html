@@ -230,7 +230,7 @@
                 </select>
             </div>
         </fieldset>
-        <input type="submit" name="submit" value="Submit Changes" />
+        {% if person %}<input type="submit" name="submit" value="Submit Changes" />{% else %}You are not listed as an alumni. Please contact the Alumni Office at <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>, call 800-551-1518, or stop by Lentz Hall #414.{% endif %}
     </form>
     </div>
 {% endblock %}

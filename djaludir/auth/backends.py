@@ -1,7 +1,6 @@
 import ldap
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 
 from djauth.LDAPManager import LDAPManager

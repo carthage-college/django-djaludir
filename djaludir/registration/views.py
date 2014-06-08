@@ -84,7 +84,7 @@ def search_informix(request):
             xsql += SEARCH_ORDER_BY
             results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
 
-            objects = objs.fetchall()
+            objects = results.fetchall()
             ln = len(objects)
             if ln < 1:
                 results = None

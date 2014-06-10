@@ -1,15 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Directory &mdash; Alumni &mdash; Carthage College{% endblock %}
+{% block title %}
+    Directory &mdash; Alumni &mdash; Carthage College
+{% endblock %}
 {% block extra_style %}
-<link rel="stylesheet" href="//www.carthage.edu/static/vendor/jquery/plugins/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+<link href="//www.carthage.edu/static/vendor/jquery/plugins/fancybox/jquery.fancybox.css"
+    type="text/css" media="screen" />
 <style type="text/css" media="screen, projection">
 iframe{
     overflow:hidden;
 }
+.column2 {background-color: #FCFAEB;
+margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;padding-left:3px;}
 </style>
 {% endblock %}
 {% block extra_javascript %}
-<script type="text/javascript" src="//www.carthage.edu/static/vendor/jquery/plugins/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//www.carthage.edu/static/vendor/jquery/plugins/fancybox/jquery.fancybox.pack.js"
+    type="text/javascript"></script>
 <script type="text/javascript">
     $(function() {
         $(".fancybox").fancybox({
@@ -29,38 +35,50 @@ iframe{
 {% block left_nav %}
     {% include "alumni/left_nav.html" %}
 {% endblock %}
+{% block content_head %}
+    <h1 id="page_title">
+        Carthage Alumni Directory
+        <small class="fright" style="margin-right:20px;">
+            <a href="{% url 'alumni_directory_home' %}"><i class="fa fa-home fa-2x green"></i></a>
+        </small>
+        <span id="secondary-dropdown"></span>
+    </h1>
+{% endblock %}
 {% block content %}
-<div id="second">
-    <div class="buffer">
-        <h1>Carthage Alumni Directory</h1>
-        {% if username %}
-            <p>You are now logged in.</p>
-            <p>For future reference, your <strong>username</strong> is:</p>
-            <p><strong>{{username}}</strong></p>
-            <p>
-                Please take a moment to log into
-                <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>
-                to create your challenge questions and anwsers that you will use to reset
-                your password in the event that you forgot it.
-            </p>
-        {% endif %}
-        {% if message %}
-            <p class="notice">
-                {{message}}
-            </p>
-            <p>
-                Please take a moment to log into
-                <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>
-                to create your challenge questions and anwsers that you will use to reset
-                your password in the event that you forgot it.
-            </p>
-        {% endif %}
-        <ul>
-            <li><a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></li>
-            <li><a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a></li>
-        </ul>
-    </div>
-</div>
+    {% if username %}
+        <p>You are now logged in.</p>
+        <p>For future reference, your <strong>username</strong> is:</p>
+        <p><strong>{{username}}</strong></p>
+        <p>
+            Please take a moment to log into
+            <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">
+                password.carthage.edu
+            </a>
+            to create your challenge questions and anwsers that you will use to reset
+            your password in the event that you forgot it.
+        </p>
+    {% endif %}
+    {% if message %}
+        <p class="notice">
+            {{message}}
+        </p>
+        <p>
+            Please take a moment to log into
+            <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">
+                password.carthage.edu
+            </a>
+            to create your challenge questions and anwsers that you will use to reset
+            your password in the event that you forgot it.
+        </p>
+    {% endif %}
+    <ul>
+        <li>
+            <a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a>
+        </li>
+        <li>
+            <a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a>
+        </li>
+    </ul>
 {% endblock %}
 {% block sidebar %}
     {% include "side_bar.html" %}

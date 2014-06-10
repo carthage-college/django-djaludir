@@ -1,39 +1,53 @@
 {% extends "core/home.html" %}
 {% block title %}Login{% endblock %}
-{% block columns %}<link href="//www.carthage.edu/media/css/douglasfir/3_column.css" rel="stylesheet" type="text/css" />{% endblock %}
 {% block content %}
-    <div class="buffer">
+    <div class="forms-container">
         {% if user.is_anonymous %}
             <h1>Login</h1>
             {% if form.errors or errors %}
                 {% if request.session.ldap_account %}
                     <p class="error">
-                    Please enter a correct username and password. Both fields are case-sensitive.
+                    Please enter a correct username and password.
+                    Both fields are case-sensitive.
                     </p>
                     <h3>Forgotten your Password?</h3>
                     {% if not request.session.ldap_questions %}
                         <p>
-                            You can reset it <a href="{% url 'registration_modify_ldap_password' %}">here</a>.
+                            You can reset it
+                            <a href="{% url 'registration_modify_ldap_password' %}">here</a>.
                         </p>
                     {% else %}
                         <p>
-                        You can reset it at <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">password.carthage.edu</a>.
+                            You can reset it at
+                            <a class="fancybox fancybox.iframe" href="https://password.carthage.edu/">
+                                password.carthage.edu
+                            </a>.
                         </p>
                     {% endif %}
                 {% else %}
                     <p class="error">
                         The username you provided is not valid.
                     </p>
-                    <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
+                    <p>
+                        <strong>NOTE:</strong>
+                        If you are not certain if you have a Carthage Alumni account,
+                        please visit our
+                        <a href="{% url 'registration_search' %}">account services</a>
+                        page to search for it.
+                    </p>
                 {% endif %}
             {% else %}
                 <p>Please use your Carthage username and password to log in.</p>
             {% endif %}
             {% include "accounts/login_form.inc.html" %}
             {% if not form.errors and not errors%}
-            <div class="buffer">
-                <p><strong>NOTE:</strong> If you are not certain if you have a Carthage Alumni account, please visit our <a href="{% url 'registration_search' %}">account services</a> page to search for it.</p>
-            </div>
+                <p>
+                    <strong>NOTE:</strong>
+                    If you are not certain if you have a Carthage Alumni account,
+                    please visit our
+                    <a href="{% url 'registration_search' %}">account services</a>
+                    page to search for it.
+                </p>
             {% endif %}
         {% else %}
             <h2>You are already logged in</h2>

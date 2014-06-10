@@ -1,20 +1,30 @@
-<div id="third">
-    <div class="buffer">
-        <h2>Support</h2>
-        <p>If you have any questions about the Alumni Directory, please contact <a href="mailto:lhansen@carthage.edu">lhansen@carthage.edu</a></p>
-        <p>As always, you may contact the Alumni Office by email at <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>, by phone at 800-551-1518, or by stopping in to see us in Lentz Hall, #414.</p>
-        <h2>Links</h2>
-        <p><a href="{% url 'alumni_directory_home' %}">Alumni Directory Home</a></p>
-        <p>
-        {% if not user.is_anonymous %}
-            <a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></p>
-            <p><a href="{{logout_url}}?next={{request.path}}" style="text-decoration:none;">Logout from Alumni Directory</a>
-        {% else %}
-            <a href="{{login_url}}?next={{request.path}}" style="text-decoration:none;">Login to Alumni Directory</a>
-        {% endif %}
-        </p>
-        <p><a href="/alumni/distinguished-alumni/nomination/">Distinguished Alumni Nomination Form</a></p>
-        <p>Visit the <a href="/giving/">online giving</a> pages.</p>
-    </div>
+<div class="forms-sidebar">
+    <h2>Support</h2>
+    <p>
+        If you have any questions about the Alumni Directory,
+        please contact
+        <a href="mailto:lhansen@carthage.edu">lhansen@carthage.edu</a>
+    </p>
+    <p>
+        As always, you may contact the Alumni Office by email at
+        <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>,
+        by phone at 800-551-1518, or by stopping in to see us in Lentz Hall, #414.
+    </p>
+    <h2>Links</h2>
+    <p><a href="{% url 'alumni_directory_home' %}">Alumni Directory Home</a></p>
+    <p>
+    {% if not user.is_anonymous %}
+        <a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></p>
+        <p><a href="{{logout_url}}?next={{request.path}}">Logout from Alumni Directory</a>
+    {% else %}
+        <a href="{{login_url}}?next={{request.path}}">Login to Alumni Directory</a>
+    {% endif %}
+    </p>
+    <p>
+        <a href="/alumni/distinguished-alumni/nomination/">
+            Distinguished Alumni Nomination Form
+        </a>
+    </p>
+    <p>Visit the <a href="/giving/">online giving</a> pages.</p>
     {% include "alumni/side_bar.html" %}
 </div>

@@ -2,7 +2,7 @@
     <div style="display:none;">
     {% include "registration/search.inc.html" %}
     </div>
-    <div class="buffer" style="background-color:#FCFAEB;border-radius: 3px 3px 3px 3px;width:320px;">
+    <div>
     {% if not error %}
         {% if results %}
             <ol>
@@ -11,7 +11,7 @@
                     <input type="radio" name="alumna" value="{{r.id}}" id="id_alumna" />
                     <label for="id_alumna"> {{r.firstname}} {{r.lastname}}</label>
                     <input type="hidden" name="ldap_name" value="{{r.ldap_name|default_if_none:''}}" />
-                    <dl style="margin-left:25px;">
+                    <dl>
                     {% if r.ss_no %}
                     <dt>Last four digits of Social Security Number</dt><dd>{{r.ss_no}}</dd>
                     {% endif %}

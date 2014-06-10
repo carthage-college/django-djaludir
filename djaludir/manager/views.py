@@ -534,18 +534,18 @@ def emailDifferences(studentID):
     #Get information about the alum's relatives
     relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, "
                      "  CASE "
-                     "      WHEN	TRIM(relcode)	=	'HW'	AND	alum_primary	=	'N'	THEN	'Husband'"
-                     "      WHEN	TRIM(relcode)	=	'HW'	AND	alum_primary	=	'Y'	THEN	'Wife'"
-                     "      WHEN	TRIM(relcode)	=	'PC'	AND	alum_primary	=	'N'	THEN	'Parent'"
-                     "      WHEN	TRIM(relcode)	=	'PC'	AND	alum_primary	=	'Y'	THEN	'Child'"
-                     "      WHEN	TRIM(relcode)	=	'SBSB'								THEN	'Sibling'"
-                     "      WHEN	TRIM(relcode)	=	'COCO'								THEN	'Cousin'"
-                     "      WHEN	TRIM(relcode)	=	'GPGC'	AND	alum_primary	=	'N'	THEN	'Grandparent'"
-                     "      WHEN	TRIM(relcode)	=	'GPGC'	AND	alum_primary	=	'Y'	THEN	'Grandchild'"
-                     "      WHEN	TRIM(relcode)	=	'AUNN'	AND	alum_primary	=	'N'	THEN	'Aunt/Uncle'"
-                     "      WHEN	TRIM(relcode)	=	'AUNN'	AND	alum_primary	=	'Y'	THEN	'Niece/Nephew'"
-                     "                                                                      ELSE	TRIM(relcode)"
-                     "  END	AS	relcode "
+                     "      WHEN    TRIM(relcode)    =    'HW'    AND    alum_primary    =    'N'    THEN    'Husband'"
+                     "      WHEN    TRIM(relcode)    =    'HW'    AND    alum_primary    =    'Y'    THEN    'Wife'"
+                     "      WHEN    TRIM(relcode)    =    'PC'    AND    alum_primary    =    'N'    THEN    'Parent'"
+                     "      WHEN    TRIM(relcode)    =    'PC'    AND    alum_primary    =    'Y'    THEN    'Child'"
+                     "      WHEN    TRIM(relcode)    =    'SBSB'                                THEN    'Sibling'"
+                     "      WHEN    TRIM(relcode)    =    'COCO'                                THEN    'Cousin'"
+                     "      WHEN    TRIM(relcode)    =    'GPGC'    AND    alum_primary    =    'N'    THEN    'Grandparent'"
+                     "      WHEN    TRIM(relcode)    =    'GPGC'    AND    alum_primary    =    'Y'    THEN    'Grandchild'"
+                     "      WHEN    TRIM(relcode)    =    'AUNN'    AND    alum_primary    =    'N'    THEN    'Aunt/Uncle'"
+                     "      WHEN    TRIM(relcode)    =    'AUNN'    AND    alum_primary    =    'Y'    THEN    'Niece/Nephew'"
+                     "                                                                      ELSE    TRIM(relcode)"
+                     "  END    AS    relcode "
                      "FROM stg_aludir_relative "
                      "WHERE id = %s AND NVL(approved, '') = '' "
                     ) % (studentID)
@@ -701,8 +701,8 @@ def emailDifferences(studentID):
             data["home_phone"] = home_address.phone
             data["original_homephone"] = student.home_phone
             data["home"] = True
-    
-    recipients = ['arobillard@carthage.edu','rjason@carthage.edu','lhansen@carthage.edu']
+
+    recipients = ['arobillard@carthage.edu','rjason@carthage.edu','lhansen@carthage.edu','mkishline@carthage.edu']
     send_mail(
         None, recipients, subject, 'confirmation@carthage.edu',
         'manager/email.html', data

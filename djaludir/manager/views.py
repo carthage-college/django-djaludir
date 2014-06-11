@@ -702,7 +702,7 @@ def emailDifferences(studentID):
             data["original_homephone"] = student.home_phone
             data["home"] = True
 
-    recipients = ['arobillard@carthage.edu','rjason@carthage.edu','lhansen@carthage.edu','mkishline@carthage.edu']
+    recipients = ['arobillard@carthage.edu','jtamraz@carthage.edu','lhansen@carthage.edu','mkishline@carthage.edu']
     send_mail(
         None, recipients, subject, 'confirmation@carthage.edu',
         'manager/email.html', data

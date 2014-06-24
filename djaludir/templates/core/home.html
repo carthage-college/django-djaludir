@@ -33,11 +33,12 @@ margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;paddi
 </script>
 {% endblock %}
 {% block left_nav %}
+    <h4>Alumni</h4>
     {% include "alumni/left_nav.html" %}
 {% endblock %}
 {% block content_head %}
     <h1 id="page_title">
-        Carthage Alumni Directory
+        Alumni Directory
         <small class="fright" style="margin-right:20px;">
             <a href="{% url 'alumni_directory_home' %}"><i class="fa fa-home fa-2x green"></i></a>
         </small>

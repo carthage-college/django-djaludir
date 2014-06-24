@@ -12,9 +12,6 @@
                     <label for="id_alumna"> {{r.firstname}} {{r.lastname}}</label>
                     <input type="hidden" name="ldap_name" value="{{r.ldap_name|default_if_none:''}}" />
                     <dl>
-                    {% if r.ss_no %}
-                    <dt>Last four digits of Social Security Number</dt><dd>{{r.ss_no}}</dd>
-                    {% endif %}
                     <dt>Postal code</dt><dd>{{r.postal_code}}</dd>
                     {% if r.start_year %}
                     <dt>Years attended</dt><dd>{{r.start_year}}&mdash;{{r.end_year}}</dd>

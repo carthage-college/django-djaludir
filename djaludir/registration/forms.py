@@ -21,12 +21,12 @@ class CreateLdapForm(forms.Form):
     mail            = forms.EmailField(required=True,max_length=128, label="Email")
     carthageDob     = forms.DateField(required=True, label="Date of birth", help_text="Format: mm/dd/yyyy")
     carthageNameID  = forms.CharField(required=True,max_length=8, label="College ID", widget=forms.HiddenInput())
-    userPassword    = forms.CharField(required=True,max_length=64, label="Password", widget=forms.PasswordInput(), help_text="Minimum 8 characters.")
+    userPassword    = forms.CharField(required=True,max_length=64, label="Password", widget=forms.PasswordInput(), help_text="Minimum 12 characters.")
     confPassword    = forms.CharField(required=True,max_length=64, label="Confirm password", widget=forms.PasswordInput())
 
     def clean_userPassword(self):
-        if len(self.cleaned_data.get("userPassword")) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters.")
+        if len(self.cleaned_data.get("userPassword")) < 12:
+            raise forms.ValidationError("Password must be at least 12 characters.")
         return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):

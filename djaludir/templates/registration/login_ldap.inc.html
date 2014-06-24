@@ -1,17 +1,21 @@
 <h2>We found your account</h2>
-<div class="span-11" style="background-color: #FCFAEB;border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;">
-<div class="buffer">
+<div class="large-12 medium-12 small-12 search-results">
     <p>Your username is: <strong>{{user.cn.0}}</strong>. Use the form below to log in.</p>
     <h4>Forgotten your password?</h4>
     {% if not request.session.ldap_questions %}
         <p>
-            You can reset it <a href="{% url 'registration_modify_ldap_password' %}">here</a>.
+            You can reset it
+            <a href="{% url 'registration_modify_ldap_password' %}"
+                rel="popupperson">here</a>.
         </p>
     {% else %}
         <p>
-            You can reset it at <a href="https://password.carthage.edu/" target="_blank">password.carthage.edu</a>.
+            You can reset it at
+            <a href="https://password.carthage.edu/"
+                rel="popupperson">password.carthage.edu</a>.
         </p>
     {% endif %}
 </div>
+<div class="large-12 medium-12 small-12">
 {% include "accounts/login_form.inc.html" %}
 </div>

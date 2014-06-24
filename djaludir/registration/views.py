@@ -133,7 +133,7 @@ def search_ldap(request):
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # check for challenge questions
                 l = LDAPBackend()
-                request.session['ldap_questions'] = self.get_questions(username)
+                request.session['ldap_questions'] = l.get_questions(user["cn"][0])
                 # display the login form
                 form = {'data':{'username':user["cn"][0],}}
                 redir = reverse_lazy("alumni_directory_home")
@@ -183,7 +183,7 @@ def create_ldap(request):
             # python ldap wants strings, not unicode
             for k,v in data.items():
                 data[k] = str(v)
-            data["objectclass"] = settings.LDAP_OJBECT_CLASS_LIST
+            data["objectclass"] = settings.LDAP_OBJECT_CLASS_LIST
             data["carthageFacultyStatus"] = ""
             data["carthageStaffStatus"] = ""
             data["carthageStudentStatus"] = ""

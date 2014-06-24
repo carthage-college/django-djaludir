@@ -1,6 +1,8 @@
 {% extends "core/home.html" %}
 {% block extra_style %}
 {{block.super}}
+<link rel="stylesheet" href="//www.carthage.edu/static/vendor/jquery/plugins/wowwindow/wowwindow.css"
+    type="text/css" />
 <style type="text/css" media="screen, projection">
 #id_postal_code,#id_carthageDob,#id_carthageNameID {
     width: 100px;
@@ -9,13 +11,25 @@ div.growlUI { background: url(//www.carthage.edu/assets/img/ico/check48.png) no-
 div.growlUI h1, div.growlUI h2 {
     color: white; padding: 5px 5px 5px 75px; text-align: left;
 }
+.search-results {padding:9px; background-color: #FCFAEB;border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;}
+dl dt {
+    background: none;
+    float: left;
+    font-weight: bold;
+    margin-right: 10px;
+    margin-left: 20px;
+    padding: 5px;
+    width: 200px;
+}
 </style>
 {% endblock %}
 {% block extra_javascript %}
 <script src="https://malsup.github.io/min/jquery.blockUI.min.js" type="text/javascript"></script>
 <script src="//www.carthage.edu/static/vendor/js/spin.min.js" type="text/javascript"></script>
+<script src="//www.carthage.edu/static/vendor/jquery/plugins/wowwindow/jquery.wowwindow.min.js"
+    type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
-$(function() {
+$(document).ready(function() {
     var opts = {
         lines: 13, // The number of lines to draw
         length: 20, // The length of each line
@@ -47,14 +61,14 @@ $(function() {
             beforeSend: function(){
                 spinner.spin(target);
                 // disable form submit button
-                $('#submit').attr('disabled', 'disabled');
+                $('#id_submit').attr('disabled', 'disabled');
             },
             success: function(data){
                 spinner.stop(target);
                 $.growlUI('Search Results', 'Did we find you...?');
                 $('#search-results').html(data);
                 // enable form submit button
-                $('#submit').removeAttr('disabled');
+                $('#id_submit').removeAttr('disabled');
             },
             error: function (){
                 console.log("error");
@@ -62,7 +76,7 @@ $(function() {
         });
         return false; // avoid executing the actual submit
     });
-    $('input[name="alumna"]:radio').on('click', function () {
+    $('body').on('click',':radio',function(){
         $.ajax({
             url:  '{{ldap_earl}}',
             type: 'POST',
@@ -73,7 +87,7 @@ $(function() {
                 console.log($("#ldap-profile").serialize());
                 spinner.spin(target);
                 // disable form submit button
-                $('#submit').attr('disabled', 'disabled');
+                $('#id_submit').attr('disabled', 'disabled');
             },
             success: function(data){
                 spinner.stop(target);
@@ -93,57 +107,35 @@ $(function() {
             }
         });
     });
+    $('a[rel=popupperson]').wowwindow({
+        draggable: true,
+        height: 600,
+        width: 800,
+        videoIframe: false
+    });
 });
 </script>
 {% endblock %}
 {% block content %}
-<div id="second">
-    <div class="buffer">
-        <h1>Carthage Alumni Directory Registration</h1>
-        {% if form.errors %}
-            <p class="error">There were errors with the data submitted, see below.</p>
-        {% endif %}
-            <div id="form-container">
-                <form method="post" action="." class="form" id="informix-profile">{% csrf_token %}
-                    <div class="span-10">
-                        {% include "registration/search.inc.html" %}
-                    </div>
-                </form>
-                <form method="post" action="." class="form" id="ldap-profile">{% csrf_token %}
-                    <div class="span-9" style="background-color: #FCFAEB;border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;">
-                        <h4 class="buffer-left" style="padding-top:5px;">Search Results</h4>
-                        <div id="search-results" class="search-results"></div>
-                    </div>
-                </form>
-            </div>
-        <div class="clear buffer-top">&nbsp;</div>
+<div class="large-12 medium-12 small-12">
+    <h1>Carthage Alumni Directory Registration</h1>
+    {% include "includes/errors_text.html" %}
+    <div id="form-container" class="forms-container">
+        <div class="large-6 medium-7 small-7">
+            <form method="post" action="." class="form" id="informix-profile">
+                {% csrf_token %}
+                {% include "registration/search.inc.html" %}
+            </form>
+        </div>
+        <div class="large-5 medium-8 small-8 fright search-results">
+            <form method="post" action="." class="form" id="ldap-profile">
+                {% csrf_token %}
+                <h4 style="padding-left:5px; padding-top:5px;">Search Results</h4>
+                <div id="search-results"></div>
+            </form>
+        </div>
     </div>
 </div>
-
-
-<div class="large-12">
-    <h2>Carthage Alumni Directory Registration</h2>
-<div class="forms-container large-6 medium-7 small-12">
-    {% if form.errors %}
-        <p class="error">
-            There were errors with the data submitted, see below.
-        </p>
-    {% endif %}
-    <form method="post" action="." class="form" id="informix-profile">
-    {% csrf_token %}
-        {% include "registration/search.inc.html" %}
-    </form>
-</div>
-<div class="forms-container column2 large-5 medium-6 small-12">
-    <form method="post" action="." class="form" id="ldap-profile">
-    {% csrf_token %}
-        <h3>Search Results</h3>
-        <div id="search-results" class="search-results"></div>
-    </form>
-</div>
-</div>
 {% endblock %}
-{% block extra_content %}
-{% endblock %}
-{% block sidebar %}
-{% endblock %}
+{% block extra_content %}{% endblock %}
+{% block sidebar %}{% endblock %}

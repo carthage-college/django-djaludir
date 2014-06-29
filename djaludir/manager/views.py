@@ -207,7 +207,7 @@ def search(request, messageSent = False, permissionDenied = False):
                 andSQL = 'AND %s' % (andSQL)
             sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
-            matches = do_sql(sql, key="debug")
+            matches = do_sql(sql)
             matches = matches.fetchall()
 
     if messageSent == True:
@@ -436,7 +436,7 @@ def getMajors():
 
 def getStates():
     states_sql = 'SELECT TRIM(st) AS st FROM st_table WHERE NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)'
-    states = do_sql(states_sql, key="debug")
+    states = do_sql(states_sql)
     return states.fetchall()
 
 def getCountries():
@@ -450,7 +450,7 @@ def getMessageInfo(studentID):
         ' FROM id_rec ids LEFT JOIN aa_rec email ON ids.id = email.id AND email.aa = "EML2" AND TODAY BETWEEN email.beg_date AND NVL(email.end_date, TODAY)'
         ' WHERE ids.id = %s' % (studentID)
     )
-    message = do_sql(message_sql, key="debug")
+    message = do_sql(message_sql)
     return message.fetchone()
 
 @login_required
@@ -462,11 +462,11 @@ def search_activity(request):
 
 def clearRelative(carthageID):
     clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
-    do_sql(clear_sql, key="debug")
+    do_sql(clear_sql)
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
     relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
-    do_sql(relation_sql, key="debug")
+    do_sql(relation_sql)
     return relation_sql
 
 def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title):
@@ -475,40 +475,40 @@ def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, de
     if masters_grad_year == '':
         masters_grad_year = 0
     clear_sql = "UPDATE stg_aludir_alumni SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
-    do_sql(clear_sql, key="debug")
+    do_sql(clear_sql)
     alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
                   'job_title, submitted_on) '
                   'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
                   % (carthageID, fname, lname, suffix, prefix, email, maidenname.replace("(","").replace(")",""), degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, getNow())
     )
-    do_sql(alumni_sql, key="debug")
+    do_sql(alumni_sql)
     return alumni_sql
 
 def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
     clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND aa = '%s' AND NVL(approved,'') = ''" % (carthageID, aa_type)
-    do_sql(clear_sql, key="debug")
+    do_sql(clear_sql)
     address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
                    'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
                    % (aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone, getNow())
     )
-    do_sql(address_sql, key="debug")
+    do_sql(address_sql)
     return address_sql
 
 def insertActivity(carthageID, activityText):
     clear_sql = "UPDATE stg_aludir_activity SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
-    do_sql(clear_sql, key="debug")
+    do_sql(clear_sql)
     activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText, submitted_on) VALUES (%s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, activityText, getNow())
-    do_sql(activity_sql, key="debug")
+    do_sql(activity_sql)
     return activity_sql
 
 def clearPrivacy(carthageID):
     privacy_sql = 'DELETE FROM stg_aludir_privacy WHERE id = %s' % (carthageID)
-    do_sql(privacy_sql, key="debug")
+    do_sql(privacy_sql)
     return privacy_sql
 
 def insertPrivacy(carthageID, field, display):
     privacy_sql = 'INSERT INTO stg_aludir_privacy (id, fieldname, display, lastupdated) VALUES (%s, "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, field, display, getNow())
-    do_sql(privacy_sql, key="debug")
+    do_sql(privacy_sql)
     return privacy_sql
 
 def getNow():
@@ -528,7 +528,7 @@ def emailDifferences(studentID):
                   "LEFT JOIN major_table major2 ON alum.major2 = major2.major "
                   "LEFT JOIN major_Table major3 ON alum.major3 = major3.major "
                   "WHERE id = %s AND NVL(approved, '') = '' ORDER BY alum_no DESC") % (studentID)
-    alum = do_sql(alumni_sql, key="debug")
+    alum = do_sql(alumni_sql)
     alumni = alum.fetchone()
 
     #Get information about the alum's relatives
@@ -550,12 +550,12 @@ def emailDifferences(studentID):
                      "WHERE id = %s AND NVL(approved, '') = '' "
                     ) % (studentID)
     #relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
-    relatives = do_sql(relatives_sql, key="debug").fetchall()
+    relatives = do_sql(relatives_sql).fetchall()
 
     #Get address information (work and home)
     homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' AND NVL(approved, '') = '' ORDER BY aa_no DESC") % (studentID, 'HOME')
-    homeaddress = do_sql(homeaddress_sql, key="debug")
+    homeaddress = do_sql(homeaddress_sql)
     if(homeaddress != None):
         home_address = homeaddress.fetchone()
     else:
@@ -563,7 +563,7 @@ def emailDifferences(studentID):
 
     workaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' AND NVL(approved, '') = '' ORDER BY aa_no DESC") % (studentID, 'WORK')
-    workaddress = do_sql(workaddress_sql, key="debug")
+    workaddress = do_sql(workaddress_sql)
     if(workaddress != None):
         work_address = workaddress.fetchone()
     else:
@@ -571,7 +571,7 @@ def emailDifferences(studentID):
 
     #Get organization information
     activities_sql = ("SELECT activityText FROM stg_aludir_activity WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
-    alum_activities = do_sql(activities_sql, key="debug").fetchall()
+    alum_activities = do_sql(activities_sql).fetchall()
 
     data = {'studentID':studentID,'personal':False,'academics':False,'business':False,'home':False}
     #Section for personal information

@@ -83,17 +83,17 @@ def search_informix(request):
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY
             results = do_sql(xsql, key=settings.INFORMIX_DEBUG)
-
-            objects = results.fetchall()
-            ln = len(objects)
-            if ln < 1:
-                results = None
-                error = error_mess("No")
-            elif ln > 10:
-                results = None
-                error = error_mess(ln)
-            else:
-                results = objects
+            if results:
+                objects = results.fetchall()
+                ln = len(objects)
+                if ln < 1:
+                    results = None
+                    error = error_mess("No")
+                elif ln > 10:
+                    results = None
+                    error = error_mess(ln)
+                else:
+                    results = objects
         else:
             error = form.errors
         extra_context = {'form':form,'error':error,'results':results,'sql':xsql,}
@@ -172,9 +172,11 @@ def create_ldap(request):
             data = form.cleaned_data
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
+            ldap_name = False
             if request.session.get('ldap_name') != "":
                 # username (cn) will be ldap_name from informix
                 data["cn"] = request.session['ldap_name']
+                ldap_name = True
             else:
                 # username (cn) will be email address
                 data["cn"] = data["mail"]
@@ -194,7 +196,7 @@ def create_ldap(request):
             user = l.create(data)
             # set session ldap_cn, why?
             request.session['ldap_cn'] = user[0][1]["cn"][0]
-            if not settings.DEBUG and request.session.get('ldap_name') != "":
+            if not settings.DEBUG and not ldap_name:
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'

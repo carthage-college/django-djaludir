@@ -25,8 +25,16 @@ class CreateLdapForm(forms.Form):
     confPassword    = forms.CharField(required=True,max_length=64, label="Confirm password", widget=forms.PasswordInput())
 
     def clean_userPassword(self):
-        if len(self.cleaned_data.get("userPassword")) < 12:
+        import re
+        pw = self.cleaned_data.get("userPassword")
+        if len(pw) < 12:
             raise forms.ValidationError("Password must be at least 12 characters.")
+
+        if not re.search('[a-zA-Z]+', pw) or not re.search('[0-9]+', pw):
+            raise forms.ValidationError(u'Your password must include at least \
+                                       one letter and at least one number.')
+
+        #if self.cleaned_data.get("userPassword"):
         return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):

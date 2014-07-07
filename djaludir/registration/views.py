@@ -200,7 +200,8 @@ def create_ldap(request):
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s' WHERE cx_id = '%s'
-                """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"])
+                """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"][0])
+                logger.debug("update ldap_name sql = %s" % sql)
                 ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             else:
                 logger.debug("data = %s" % data)

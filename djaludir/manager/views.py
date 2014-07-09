@@ -207,8 +207,7 @@ def search(request, messageSent = False, permissionDenied = False):
                 andSQL = 'AND %s' % (andSQL)
             sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
-            matches = do_sql(sql)
-            matches = matches.fetchall()
+            matches = do_sql(sql).fetchall()
 
     if messageSent == True:
         message = "Your message was sent successfully!"
@@ -276,8 +275,8 @@ def send_message(request):
         sender = {
             'id':0,
             'email':'confirmation@carthage.edu',
-            'firstname':'TestMike',
-            'lastname':'TestKishline',
+            'firstname':'a',
+            'lastname':'friend',
         }
 
     autoAddOn = ''
@@ -287,9 +286,9 @@ def send_message(request):
     #Initialize necessary components to generate email
     data = {'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender}
 
-    subject_line = "Message from '%s' '%s' via the Carthage Alumni Directory" % (type(sender), len(sender)) #(sender.firstname, sender.lastname)
+    subject_line = "Message from %s %s via the Carthage Alumni Directory" % (sender.firstname, sender.lastname)
     send_mail(
-        None, ['mkishline@gmail.com'], subject_line, 'mkishline@carthage.edu',
+        None, recipient, subject_line, sender,
         'manager/send_message.html', data
     )
 

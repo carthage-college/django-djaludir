@@ -16,13 +16,35 @@ class RegistrationSearchForm(forms.Form):
 
 class CreateLdapForm(forms.Form):
 
-    givenName       = forms.CharField(required=True,max_length=64, label="First name")
-    sn              = forms.CharField(required=True,max_length=64, label="Last name")
-    mail            = forms.EmailField(required=True,max_length=128, label="Email")
-    carthageDob     = forms.DateField(required=True, label="Date of birth", help_text="Format: mm/dd/yyyy")
-    carthageNameID  = forms.CharField(required=True,max_length=8, label="College ID", widget=forms.HiddenInput())
-    userPassword    = forms.CharField(required=True,max_length=64, label="Password", widget=forms.PasswordInput(), help_text="Minimum 12 characters.")
-    confPassword    = forms.CharField(required=True,max_length=64, label="Confirm password", widget=forms.PasswordInput())
+    givenName = forms.CharField(
+        label="First name",
+        required=True, max_length=64
+    )
+    sn = forms.CharField(
+        label="Last name",
+        required=True, max_length=64
+    )
+    mail = forms.EmailField(
+        label="Email",
+        required=True, max_length=128
+    )
+    carthageDob = forms.DateField(
+        label="Date of birth", required=True,
+        help_text="Format: mm/dd/yyyy"
+    )
+    carthageNameID = forms.CharField(
+        label="College ID", required=True, max_length=8,
+        widget=forms.HiddenInput()
+    )
+    userPassword = forms.CharField(
+        label="Password", required=True, max_length=64,
+        widget=forms.PasswordInput(),
+        help_text="Minimum 12 characters and at least one letter and one number."
+    )
+    confPassword = forms.CharField(
+        label="Confirm password", required=True, max_length=64,
+        widget=forms.PasswordInput()
+    )
 
     def clean_userPassword(self):
         import re
@@ -33,8 +55,6 @@ class CreateLdapForm(forms.Form):
         if not re.search('[a-zA-Z]+', pw) or not re.search('[0-9]+', pw):
             raise forms.ValidationError(u'Your password must include at least \
                                        one letter and at least one number.')
-
-        #if self.cleaned_data.get("userPassword"):
         return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):
@@ -70,16 +90,20 @@ class ModifyLdapPasswordForm(forms.Form):
     userPassword    = forms.CharField(required=True,
                             max_length=64, label="Password",
                             widget=forms.PasswordInput(),
-                            help_text="Minimum 8 characters.")
+                            help_text="Minimum 12 characters and at least one letter and one number.")
     confPassword    = forms.CharField(required=True,
                             max_length=64, label="Confirm password",
                             widget=forms.PasswordInput())
 
     def clean_userPassword(self):
-        if len(self.cleaned_data.get("userPassword")) < 8:
-            raise forms.ValidationError(
-                "Password must be at least 8 characters."
-            )
+        import re
+        pw = self.cleaned_data.get("userPassword")
+        if len(pw) < 12:
+            raise forms.ValidationError("Password must be at least 12 characters.")
+
+        if not re.search('[a-zA-Z]+', pw) or not re.search('[0-9]+', pw):
+            raise forms.ValidationError(u'Your password must include at least \
+                                       one letter and at least one number.')
         return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):

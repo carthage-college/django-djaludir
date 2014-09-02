@@ -149,12 +149,13 @@ def search(request, messageSent = False, permissionDenied = False):
                     andSQL += ' LOWER(TRIM(%s::varchar(250))) LIKE "%%%s%%"' % (fieldname, searchterm.lower())
 
         #Based on the criteria specified by the user, add the necessary tables to the search query
-        selectFromSQL = ('SELECT DISTINCT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
+        selectFromSQL = ('SELECT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
                      ' NVL(TRIM(aaEmail.line1) || TRIM(aaEmail.line2) || TRIM(aaEmail.line3), "") AS email, LOWER(ids.lastname) AS sort1, LOWER(ids.firstname) AS sort2'
                      ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
                      ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"'
-                     ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)')
+                     ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)'
+                     ' LEFT JOIN hold_rec holds ON alum.id = holds.id AND holds.hld = "DDIR" AND CURRENT BETWEEN holds.beg_date AND NVL(holds.end_date, CURRENT)')
         #If search criteria includes activity or sport add the involvement tables
         if 'activity' in fieldlist:
             selectFromSQL += (
@@ -204,8 +205,8 @@ def search(request, messageSent = False, permissionDenied = False):
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
             if len(andSQL) > 0 and len(orSQL) > 0:
-                andSQL = 'AND %s' % (andSQL)
-            sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
+                andSQL = ' AND %s' % (andSQL)
+            sql = '%s WHERE %s %s AND holds.hld_no IS NULL GROUP BY class_year, firstname, maiden_name, lastname, id, email, sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
             matches = do_sql(sql).fetchall()
 

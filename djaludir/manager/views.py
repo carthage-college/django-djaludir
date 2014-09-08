@@ -154,7 +154,8 @@ def search(request, messageSent = False, permissionDenied = False):
                      ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
                      ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"'
-                     ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)')
+                     ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)'
+                     ' LEFT JOIN hold_rec holds ON alum.id = holds.id AND holds.hld = "DDIR" AND CURRENT BETWEEN holds.beg_date AND NVL(holds.end_date, CURRENT)')
         #If search criteria includes activity or sport add the involvement tables
         if 'activity' in fieldlist:
             selectFromSQL += (
@@ -204,7 +205,7 @@ def search(request, messageSent = False, permissionDenied = False):
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
             if len(andSQL) > 0 and len(orSQL) > 0:
-                andSQL = 'AND %s' % (andSQL)
+                andSQL = 'AND holds.hld_no IS NULL AND %s' % (andSQL)
             sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
             matches = do_sql(sql)

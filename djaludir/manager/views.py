@@ -80,7 +80,7 @@ def update(request):
     for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
         athleticText = request.POST.get('athletic' + str(athleticIndex))
 
-        if(len(athleticText) > 0):
+        if athleticText and (len(athleticText) > 0):
             insertActivity(studentID, athleticText)
 
     #Insert home and work address information

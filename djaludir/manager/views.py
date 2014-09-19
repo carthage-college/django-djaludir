@@ -208,7 +208,9 @@ def search(request, messageSent = False, permissionDenied = False):
                 andSQL = ' AND %s' % (andSQL)
             sql = '%s WHERE %s %s AND holds.hld_no IS NULL GROUP BY class_year, firstname, maiden_name, lastname, id, email, sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
-            matches = do_sql(sql).fetchall()
+            objs = do_sql(sql)
+            if objs:
+                matches = objs.fetchall()
 
     if messageSent == True:
         message = "Your message was sent successfully!"

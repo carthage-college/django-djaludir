@@ -80,7 +80,7 @@ def update(request):
     for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
         athleticText = request.POST.get('athletic' + str(athleticIndex))
 
-        if(len(athleticText) > 0):
+        if athleticText and (len(athleticText) > 0):
             insertActivity(studentID, athleticText)
 
     #Insert home and work address information
@@ -149,7 +149,7 @@ def search(request, messageSent = False, permissionDenied = False):
                     andSQL += ' LOWER(TRIM(%s::varchar(250))) LIKE "%%%s%%"' % (fieldname, searchterm.lower())
 
         #Based on the criteria specified by the user, add the necessary tables to the search query
-        selectFromSQL = ('SELECT DISTINCT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
+        selectFromSQL = ('SELECT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
                      ' NVL(TRIM(aaEmail.line1) || TRIM(aaEmail.line2) || TRIM(aaEmail.line3), "") AS email, LOWER(ids.lastname) AS sort1, LOWER(ids.firstname) AS sort2'
                      ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
                      ' LEFT JOIN (SELECT prim_id, MAX(active_date) active_date FROM addree_rec WHERE style = "M" GROUP BY prim_id) prevmap ON ids.id = prevmap.prim_id'
@@ -205,11 +205,11 @@ def search(request, messageSent = False, permissionDenied = False):
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
             if len(andSQL) > 0 and len(orSQL) > 0:
-                andSQL = 'AND holds.hld_no IS NULL AND %s' % (andSQL)
-            sql = '%s WHERE %s %s ORDER BY LOWER(ids.lastname), LOWER(ids.firstname), alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
-            matches = do_sql(sql)
-            matches = matches.fetchall()
+                andSQL = ' AND %s' % (andSQL)
+            sql = '%s WHERE %s %s AND holds.hld_no IS NULL GROUP BY class_year, firstname, maiden_name, lastname, id, email, sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
+
+            matches = do_sql(sql).fetchall()
 
     if messageSent == True:
         message = "Your message was sent successfully!"
@@ -277,8 +277,8 @@ def send_message(request):
         sender = {
             'id':0,
             'email':'confirmation@carthage.edu',
-            'firstname':'TestMike',
-            'lastname':'TestKishline',
+            'firstname':'a',
+            'lastname':'friend',
         }
 
     autoAddOn = ''
@@ -288,9 +288,9 @@ def send_message(request):
     #Initialize necessary components to generate email
     data = {'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender}
 
-    subject_line = "Message from '%s' '%s' via the Carthage Alumni Directory" % (type(sender), len(sender)) #(sender.firstname, sender.lastname)
+    subject_line = "Message from %s %s via the Carthage Alumni Directory" % (sender.firstname, sender.lastname)
     send_mail(
-        None, ['mkishline@gmail.com'], subject_line, 'mkishline@carthage.edu',
+        None, recipient, subject_line, sender,
         'manager/send_message.html', data
     )
 

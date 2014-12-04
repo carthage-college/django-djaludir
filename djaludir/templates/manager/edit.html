@@ -187,7 +187,7 @@
                         <li class="ctrlHolder"><h3><label>Relationship</label></h3>
                             <select name="relativeText{{forloop.counter}}">
                                 {% for relationshipCode, relationshipText in relationships.items %}
-                                    <option value="{{relationshipCode}}" {% ifequal relative.relCode relationshipCode %}selected="selected"{% endifequal %}>{{relationshipText}}</option>
+                                    <option value="{{relationshipCode}}" {% ifequal relative.relcode relationshipCode %}selected="selected"{% endifequal %}>{{relationshipText}}</option>
                                 {% endfor %}
                             </select>
                         </li>

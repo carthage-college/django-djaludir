@@ -84,7 +84,6 @@ $(document).ready(function() {
             data: $("#ldap-profile").serialize(),
             dataType: 'html',
             beforeSend: function(){
-                console.log($("#ldap-profile").serialize());
                 spinner.spin(target);
                 // disable form submit button
                 $('#id_submit').attr('disabled', 'disabled');

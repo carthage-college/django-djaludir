@@ -263,10 +263,12 @@ def modify_ldap_password(request):
             ''' % data["ssn"]
             sql = CONFIRM_USER + where
             results = do_sql(sql, key=settings.INFORMIX_DEBUG)
-            objects = results.fetchall()
+            try:
+                objects = results.fetchall()
+            except:
+                objects = ""
             if len(objects) == 1:
                 # initial the ldap manager
-
                 l = LDAPManager(
                     protocol=settings.LDAP_PROTOCOL_PWM,
                     server=settings.LDAP_SERVER_PWM,

@@ -52,36 +52,39 @@ def update(request):
 
     #Loop through all the relatives' records
     clearRelative(studentID)
-    for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
-        relFname = request.POST.get('relativeFname' + str(relativeIndex))
-        relLname = request.POST.get('relativeLname' + str(relativeIndex))
-        relRelation = request.POST.get('relativeText' + str(relativeIndex))
-
-        #Because of the way relationships are stored in CX, we must identify if the alumn(a|us) matches the first or second role in the relationship
-        alumPrimary = 'Y'
-        if(relRelation[-1:] == '1'):
-            alumPrimary = 'N'
-
-        if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-            relRelation = relRelation[0:-1]
-
-        #If the relative has some value in their name and a specified relationship, insert the record
-        if(len(relFname + relLname) > 0 and relRelation != ''):
-            insertRelative(studentID, relRelation, relFname, relLname, alumPrimary)
+    if request.POST.get('relativeCount'):
+        for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
+            relFname = request.POST.get('relativeFname' + str(relativeIndex))
+            relLname = request.POST.get('relativeLname' + str(relativeIndex))
+            relRelation = request.POST.get('relativeText' + str(relativeIndex))
+    
+            #Because of the way relationships are stored in CX, we must identify if the alumn(a|us) matches the first or second role in the relationship
+            alumPrimary = 'Y'
+            if(relRelation[-1:] == '1'):
+                alumPrimary = 'N'
+    
+            if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
+                relRelation = relRelation[0:-1]
+    
+            #If the relative has some value in their name and a specified relationship, insert the record
+            if(len(relFname + relLname) > 0 and relRelation != ''):
+                insertRelative(studentID, relRelation, relFname, relLname, alumPrimary)
 
 
     #Insert organizationa and athletic involvement
-    for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
-        activityText = request.POST.get('activity' + str(activityIndex))
+    if request.POST.get('activityCount'):
+        for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
+            activityText = request.POST.get('activity' + str(activityIndex))
+    
+            if(len(activityText) > 0):
+                insertActivity(studentID, activityText)
 
-        if(len(activityText) > 0):
-            insertActivity(studentID, activityText)
-
-    for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
-        athleticText = request.POST.get('athletic' + str(athleticIndex))
-
-        if athleticText and (len(athleticText) > 0):
-            insertActivity(studentID, athleticText)
+    if request.POST.get('athleticCount'):
+        for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
+            athleticText = request.POST.get('athletic' + str(athleticIndex))
+    
+            if athleticText and (len(athleticText) > 0):
+                insertActivity(studentID, athleticText)
 
     #Insert home and work address information
     insertAddress('WORK', studentID, request.POST.get('business_address'), '', '',
@@ -411,8 +414,16 @@ def getRelatives(student_id):
                      ' FROM    relation_rec    rel    INNER JOIN    id_rec      prim    ON    rel.prim_id   =    prim.id'
                      '                                INNER JOIN    id_rec      sec     ON    rel.sec_id    =    sec.id'
                      '                                INNER JOIN    rel_table   reltbl  ON    rel.rel       =    reltbl.rel'
-                     ' WHERE prim_id =   %s'
-                     ' OR    sec_id  =   %s' % (student_id, student_id, student_id, student_id, student_id, student_id)
+                     ' WHERE'
+                     '      TODAY   BETWEEN rel.beg_date    AND NVL(rel.end_date, TODAY)'
+                     '      AND'
+                     '      rel.rel IN  ("AUNN","COCO","GPGC","HW","HWNI","PC","SBSB")'
+                     '      AND'
+                     ' ('
+                     '      prim_id =   %s'
+                     '      OR'
+                     '      sec_id  =   %s'
+                     ' )' % (student_id, student_id, student_id, student_id, student_id, student_id)
     )
     relatives = do_sql(relatives_sql)
     return relatives.fetchall()

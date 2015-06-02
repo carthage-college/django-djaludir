@@ -39,7 +39,45 @@
             {% else %}
                 <p>Please use your Carthage username and password to log in.</p>
             {% endif %}
-            {% include "accounts/login_form.inc.html" %}
+            <form name="djauth" method="post" action="{{action|default:'.'}}"
+                class="form" id="profile">{% csrf_token %}
+                <input type="hidden" name="next" value="{% if next %}{{ next }}{% endif %}" />
+                <fieldset class="blockLabels">
+                    <ol>
+                        <li class="ctrlHolder">
+                            <label for="id_username"><h3>Username</h3></label>
+                            {% if form.username.errors %}
+                                <span class="error-message">
+                                    {{ form.username.errors|join:", " }}
+                                </span>
+                            {% endif %}
+                            <input type="text" id="id_username" name="username"
+                                class="textInput required" size="15"
+                                value="{{form.data.username}}" maxlength="128" />
+                        </li>
+                        <li class="ctrlHolder">
+                            <label for="id_password"><h3>Password</h3></label>
+                            {% if form.password.errors %}
+                                <span class="error-message">
+                                    {{ form.password.errors|join:", " }}
+                                </span>
+                            {% endif %}
+                            <input type="password" id="id_password"
+                                class="vPasswordField required" name="password" size="15"
+                                value="{{form.data.password}}" maxlength="64" />
+                        </li>
+                    </ol>
+                </fieldset>
+                <fieldset class="btnHolder">
+                    <ol>
+                        <li class="btnHolder">
+                            <label>&nbsp;</label>
+                            <input id="id_submit" type="submit" class="button"
+                                value="Log in" />
+                        </li>
+                    </ol>
+                </fieldset>
+            </form>
             {% if not form.errors and not errors%}
                 <p>
                     <strong>NOTE:</strong>

@@ -11,11 +11,6 @@ from djzbar.utils.informix import do_sql
 
 import datetime
 
-if settings.DEBUG:
-    TO_LIST = ["mkishline@carthage.edu",]
-else:
-    TO_LIST = ["mkishline@carthage.edu",]
-
 ATHLETIC_IDS = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','S073','S079','S080','S083','S090','S095','S220','S100','S101','S109','S126','S131','S156','S161','S172','S173','S176','S186','S187','S196','S197','S204','S205','S207','S208','S253','S215','S216'"
 
 @login_required
@@ -76,7 +71,7 @@ def update(request):
         for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
             activityText = request.POST.get('activity' + str(activityIndex))
     
-            if(len(activityText) > 0):
+            if(activityText):
                 insertActivity(studentID, activityText)
 
     if request.POST.get('athleticCount'):
@@ -295,8 +290,8 @@ def send_message(request):
 
     subject_line = "Message from %s %s via the Carthage Alumni Directory" % (sender.firstname, sender.lastname)
     send_mail(
-        None, recipient, subject_line, sender,
-        'manager/send_message.html', data
+        request, [recipient.email,], subject_line, sender.email,
+        'manager/send_message.html', data, settings.MANAGERS
     )
 
     #Reuse the search page
@@ -367,7 +362,10 @@ def getStudent(student_id):
            ' AND     ids.id              =   %s' %   (student_id)
     )
     student = do_sql(sql)
-    return student.fetchone()
+    if student:
+        return student.fetchone()
+    else:
+        return None
 
 def getStudentActivities(student_id, isSports = False):
     #Conditional statements to provide the correct logic and terminology depending whether activities or athletics are being returned
@@ -382,8 +380,11 @@ def getStudentActivities(student_id, isSports = False):
         ' AND    invl_table.invl %s IN  (%s)'
         ' ORDER BY   TRIM(invl_table.txt)'   %   (fieldname, student_id, comparison, ATHLETIC_IDS)
     )
-    activities = do_sql(activities_sql)
-    return activities.fetchall()
+    objs = do_sql(activities_sql)
+    if objs:
+        return objs.fetchall()
+    else:
+        return objs
 
 def getRelatives(student_id):
     #Retrieve collection of relatives (regardless of whether the alumn(a|us) is the primary or secondary relationship)
@@ -425,8 +426,11 @@ def getRelatives(student_id):
                      '      sec_id  =   %s'
                      ' )' % (student_id, student_id, student_id, student_id, student_id, student_id)
     )
-    relatives = do_sql(relatives_sql)
-    return relatives.fetchall()
+    objs = do_sql(relatives_sql)
+    if objs:
+        return objs.fetchall()
+    else:
+        return objs
 
 def getPrivacy(student_id):
     privacy_sql = ("SELECT TRIM(fieldname) AS fieldname, TRIM(display) AS display FROM stg_aludir_privacy WHERE id = %s ORDER BY fieldname") % (student_id)
@@ -445,18 +449,27 @@ def getRelationships():
 
 def getMajors():
     major_sql = 'SELECT DISTINCT TRIM(major) AS major_code, TRIM(txt) AS major_name FROM major_table ORDER BY TRIM(txt)'
-    majors = do_sql(major_sql)
-    return majors.fetchall()
+    objs = do_sql(major_sql)
+    if objs:
+        return objs.fetchall()
+    else:
+        return objs
 
 def getStates():
     states_sql = 'SELECT TRIM(st) AS st FROM st_table WHERE NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)'
-    states = do_sql(states_sql)
-    return states.fetchall()
+    objs = do_sql(states_sql)
+    if objs:
+        return objs.fetchall()
+    else:
+        return objs
 
 def getCountries():
     countries_sql = 'SELECT TRIM(ctry) AS ctry, TRIM(txt) AS txt FROM ctry_table ORDER BY web_ord, TRIM(txt)'
-    countries = do_sql(countries_sql)
-    return countries.fetchall()
+    objs = do_sql(countries_sql)
+    if objs:
+        return objs.fetchall()
+    else:
+        return objs
 
 def getMessageInfo(studentID):
     message_sql = (
@@ -471,8 +484,11 @@ def getMessageInfo(studentID):
 def search_activity(request):
     search_string = request.GET.get("term","Football")
     activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())
-    activity_search = do_sql(activity_search_sql)
-    return HttpResponse(activity_search.fetchall())
+    objs = do_sql(activity_search_sql)
+    if objs:
+        return HttpResponse(objs.fetchall())
+    else:
+        return HttpResponse(objs)
 
 def clearRelative(carthageID):
     clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
@@ -716,7 +732,11 @@ def emailDifferences(studentID):
             data["original_homephone"] = student.home_phone
             data["home"] = True
 
-    recipients = ['arobillard@carthage.edu','jtamraz@carthage.edu','lhansen@carthage.edu','mkishline@carthage.edu']
+    if settings.DEBUG:
+        recipients = ["mkishline@carthage.edu",]
+    else:
+        recipients = settings.MANAGER_RECIPIENTS
+
     send_mail(
         None, recipients, subject, 'confirmation@carthage.edu',
         'manager/email.html', data

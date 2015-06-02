@@ -2,6 +2,15 @@
 
 {% block title %}Personal Information &mdash; {{block.super}}{% endblock %}
 
+{% block extra_javascript %}
+    {{block.super}}
+    <script type="text/javascript">
+    {% if not student %}
+        alert("There was a problem retrieving the data.\n\
+        Please reload the page.");
+    {% endif %}
+    </script>
+{% endblock %}
 {% block extra_style %}
     {{block.super}}
     <style type="text/css">

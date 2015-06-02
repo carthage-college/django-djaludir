@@ -19,8 +19,6 @@ from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
 from djauth.LDAPManager import LDAPManager
 
-TO_LIST = ["larry@carthage.edu",]
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -212,16 +210,24 @@ def create_ldap(request):
                 logger.info("data = %s" % data)
             # create the django user
             djuser = l.dj_create(user)
+            data["djuser"] = djuser
             # authenticate user
             djuser.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, djuser)
+
             # send email to admins
             subject = "[LDAP][Create] %s %s" % (
                 user[0][1]["givenName"][0],
                 user[0][1]["sn"][0]
             )
+
+            if settings.DEBUG:
+                to_list = [settings.SERVER_EMAIL]
+            else:
+                to_list = settings.LDAP_CREATE_TO_LIST
+
             send_mail(
-                request,TO_LIST, subject, data["mail"],
+                request,to_list, subject, data["mail"],
                 "registration/create_ldap_email.html", data
             )
             return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))

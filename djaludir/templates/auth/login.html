@@ -3,7 +3,7 @@
 {% block content %}
     <div class="forms-container">
         {% if user.is_anonymous %}
-            <h1>Login</h1>
+            <h2>Login</h2>
             {% if form.errors or errors %}
                 {% if request.session.ldap_account %}
                     <p class="error">

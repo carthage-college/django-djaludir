@@ -59,7 +59,7 @@ class CreateLdapForm(forms.Form):
                 """
             )
 
-          if not re.search('[a-z]+',pw) or not re.search('[0-9]+', pw):
+        if not re.search('[a-z]+',pw) or not re.search('[0-9]+', pw):
             raise forms.ValidationError(
                 """
                 Your password must include at least one lowercase letter

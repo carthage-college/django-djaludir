@@ -5,7 +5,7 @@
 {% block extra_javascript %}
     {{block.super}}
     <script type="text/javascript">
-    {% if not student %}
+    {% if not studentID %}
         alert("There was a problem retrieving the data.\n\
         Please reload the page.");
     {% endif %}

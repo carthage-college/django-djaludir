@@ -120,6 +120,7 @@ def search_ldap(request):
             # search ldap
             l = LDAPManager()
             user = l.search(data["alumna"])
+            logger.info("data = {}".format(data))
             if user:
                 # we have a user
                 user = user[0][1]
@@ -130,7 +131,7 @@ def search_ldap(request):
                         ldap_add_date = TODAY
                         WHERE cx_id = '%s'
                     """ % (user["cn"][0], data["alumna"])
-                    logger.info("update ldap_name sql = %s" % sql)
+                    logger.info("update ldap_name sql = {}".format(sql))
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # check for challenge questions
                 l = LDAPBackend()
@@ -204,10 +205,10 @@ def create_ldap(request):
                     ldap_add_date = TODAY
                     WHERE cx_id = '%s'
                 """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"][0])
-                logger.info("update ldap_name sql = %s" % sql)
+                logger.info("update ldap_name sql = {}".format(sql))
                 ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             else:
-                logger.info("data = %s" % data)
+                logger.info("data = {}".format(data))
             # create the django user
             djuser = l.dj_create(user)
             data["djuser"] = djuser

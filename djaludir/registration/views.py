@@ -170,11 +170,14 @@ def create_ldap(request):
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
             ldap_name = False
-            if request.session.get('ldap_name') != "":
+            try:
                 # username (cn) will be ldap_name from informix
-                data["cn"] = request.session['ldap_name']
-                ldap_name = True
-            else:
+                if request.session.get('ldap_name') != "":
+                    data["cn"] = request.session['ldap_name']
+                    ldap_name = True
+                else:
+                    data["cn"] = data["mail"]
+            except:
                 # username (cn) will be email address
                 data["cn"] = data["mail"]
             # remove confirmation password

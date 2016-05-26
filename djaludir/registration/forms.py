@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import forms
+from django.conf import settings
 
 from djauth.LDAPManager import LDAPManager
 
@@ -78,7 +79,14 @@ class CreateLdapForm(forms.Form):
 
     def clean_mail(self):
         cleaned_data = self.cleaned_data
-        l = LDAPManager()
+        l = LDAPManager(
+            protocol=settings.LDAP_PROTOCOL_PWM,
+            server=settings.LDAP_SERVER_PWM,
+            port=settings.LDAP_PORT_PWM,
+            user=settings.LDAP_USER_PWM,
+            password=settings.LDAP_PASS_PWM,
+            base=settings.LDAP_BASE_PWM
+        )
         user = l.search(cleaned_data.get("mail"),field="cn")
         if user:
             raise forms.ValidationError("That email already exists in the system. Use another.")

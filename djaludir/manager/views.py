@@ -82,7 +82,7 @@ def update(request):
                 insertActivity(studentID, athleticText)
 
     #Insert home and work address information
-    insertAddress('WORK', studentID, request.POST.get('business_address'), '', '',
+    insertAddress('WORK', studentID, request.POST.get('business_address'), request.POST.get('business_address2'), '',
                   request.POST.get('business_city'), request.POST.get('business_state'), request.POST.get('business_zip'), '', request.POST.get('business_phone'))
 
     insertAddress('HOME', studentID, request.POST.get('home_address1'), request.POST.get('home_address2'), request.POST.get('home_address3'),
@@ -309,10 +309,10 @@ def getStudent(student_id):
            '    CASE'
            '        WHEN    TRIM(progs.deg)    IN    ("BA","BS")           THEN    alum.cl_yr'
            '                                                               ELSE    0'
-           '    END    AS    class_year, TRIM(NVL(aawork.line1, "")) AS business_name, TRIM(NVL(aawork.line2,"")) AS business_address, TRIM(NVL(aawork.city,"")) AS business_city,'
-           '    TRIM(aawork.st) AS business_state, TRIM(NVL(aawork.zip,"")) AS business_zip, TRIM(aawork.ctry) AS business_country, TRIM(NVL(aawork.phone,"")) AS business_phone,'
-           '    TRIM(ids.addr_line1) AS home_address1, TRIM(ids.addr_line2) AS home_address2, TRIM(ids.addr_line3) AS home_address3, TRIM(ids.city) AS home_city, TRIM(ids.st) AS home_state,'
-           '    TRIM(ids.zip) AS home_zip, TRIM(ids.ctry) AS home_country, TRIM(ids.phone) AS home_phone,'
+           '    END    AS    class_year, TRIM(NVL(aawork.line1, "")) AS business_name, TRIM(NVL(aawork.line2,"")) AS business_address, TRIM(NVL(aawork.line3,"")) AS business_address2,'
+           '    TRIM(NVL(aawork.city,"")) AS business_city, TRIM(aawork.st) AS business_state, TRIM(NVL(aawork.zip,"")) AS business_zip, TRIM(aawork.ctry) AS business_country,'
+           '    TRIM(NVL(aawork.phone,"")) AS business_phone, TRIM(ids.addr_line1) AS home_address1, TRIM(ids.addr_line2) AS home_address2, TRIM(ids.addr_line3) AS home_address3,'
+           '    TRIM(ids.city) AS home_city, TRIM(ids.st) AS home_state, TRIM(ids.zip) AS home_zip, TRIM(ids.ctry) AS home_country, TRIM(ids.phone) AS home_phone,'
            '    TRIM('
            '        CASE'
            '              WHEN    TRIM(progs.deg) IN    ("BA","BS")        THEN    major1.txt'
@@ -668,6 +668,10 @@ def emailDifferences(studentID):
         if(student.business_address != work_address.address_line1):
             data["business_address"] = work_address.address_line1
             data["original_businessaddress"] = student.business_address
+            data["business"] = True
+        if(student.business_address2 != work_address.address_line2):
+            data["business_address"] = work_address.address_line2
+            data["original_businessaddress2"] = student.business_address2
             data["business"] = True
         if(student.business_city != work_address.city):
             data["business_city"] = work_address.city

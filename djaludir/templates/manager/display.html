@@ -91,7 +91,10 @@
                 <div class="form-row header">Professional Information</div>
                 {% if person.business_name %}<div class="form-row"><label>Business name:</label>{{person.business_name}}</div>{% endif %}
                 <div class="form-row">
-                    <label>Business address:</label>{% if person.business_address %}{{person.business_address}}<br />{% endif %}
+                    <label>Business address:</label>
+                    {% if person.business_address %}{{person.business_address}}<br />{% endif %}
+                    {% if person.business_address2 %}<label class="business_address">&nbsp;</label>{{person.business_address2}}<br />{% endif %}
+                    
                     {% if person.business_address %}<label class="business_address">&nbsp;</label>
                         {% if person.business_city %}{{person.business_city}}, {% endif %}
                         {% if person.business_state %}{{person.business_state}} {% endif %}

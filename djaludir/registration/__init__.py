@@ -20,7 +20,10 @@ SEARCH = """
     LEFT JOIN aa_rec as email_rec on
         (id_rec.id = email_rec.id AND email_rec.aa = "EML1")
     WHERE
+        NVL(UPPER(id_rec.valid), '') = 'Y'
+    AND
 """
+
 SEARCH_GROUP_BY = """
     GROUP by id,birth_date,firstname,line1,lastname,ss_no,city,st,postal_code,phone,email,ldap_name
 """

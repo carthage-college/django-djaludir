@@ -19,6 +19,10 @@ from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
 from djauth.LDAPManager import LDAPManager
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 def error_mess(val):
     error = '''
         %s results returned. Please try your search again,
@@ -242,8 +246,6 @@ def create_ldap(request):
         # POST required
         return HttpResponseRedirect(reverse_lazy("registration_search"))
 
-import logging
-logger = logging.getLogger(__name__)
 
 def modify_ldap_password(request):
     """

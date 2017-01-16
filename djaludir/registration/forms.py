@@ -3,17 +3,37 @@ from django import forms
 from django.conf import settings
 
 from djauth.LDAPManager import LDAPManager
+from djtools.fields.validators import validate_epoch
+
 
 class RegistrationSearchForm(forms.Form):
 
-    givenName       = forms.CharField(required=True,max_length=64)
-    sn              = forms.CharField(required=True,max_length=64)
-    carthageDob     = forms.DateField(required=True, help_text="Format: mm/dd/yyyy")
-    postal_code     = forms.CharField(required=False,max_length=10)
-    carthageNameID  = forms.CharField(required=False,max_length=8)
-    mail            = forms.EmailField(required=False,max_length=128)
-    alumna          = forms.CharField(required=False,max_length=8)
-    ldap_name       = forms.CharField(required=False,max_length=32)
+    givenName = forms.CharField(
+        required=True,max_length=64
+    )
+    sn = forms.CharField(
+        required=True,max_length=64
+    )
+    carthageDob = forms.DateField(
+        required=True,
+        validators=[validate_epoch],
+        help_text="Format: mm/dd/yyyy",
+    )
+    postal_code = forms.CharField(
+        required=False,max_length=10
+    )
+    carthageNameID = forms.CharField(
+        required=False,max_length=8
+    )
+    mail = forms.EmailField(
+        required=False,max_length=128
+    )
+    alumna = forms.CharField(
+        required=False,max_length=8
+    )
+    ldap_name = forms.CharField(
+        required=False,max_length=32
+    )
 
 class CreateLdapForm(forms.Form):
 
@@ -31,6 +51,7 @@ class CreateLdapForm(forms.Form):
     )
     carthageDob = forms.DateField(
         label="Date of birth", required=True,
+        validators=[validate_epoch],
         help_text="Format: mm/dd/yyyy"
     )
     carthageNameID = forms.CharField(
@@ -89,40 +110,61 @@ class CreateLdapForm(forms.Form):
         )
         user = l.search(cleaned_data.get("mail"),field="cn")
         if user:
-            raise forms.ValidationError("That email already exists in the system. Use another.")
+            raise forms.ValidationError(
+                "That email already exists in the system. Use another."
+            )
         return cleaned_data["mail"]
 
 class ModifyLdapPasswordForm(forms.Form):
     """
     modify a user's ldap password
     """
-    cn              = forms.CharField(required=True,
-                            max_length=128, label="Carthage Username")
-    sn              = forms.CharField(required=True,
-                            max_length=64, label="Your Last name")
-    ssn             = forms.CharField(required=True,
-                            max_length=4, label="Last four digits of " \
-                            "your Social Security Number")
-    carthageDob     = forms.DateField(required=True,
-                            label="Date of birth",
-                            help_text="Format: mm/dd/yyyy")
-    userPassword    = forms.CharField(required=True,
-                            max_length=64, label="Password",
-                            widget=forms.PasswordInput(),
-                            help_text="Minimum 12 characters and at least one letter and one number.")
-    confPassword    = forms.CharField(required=True,
-                            max_length=64, label="Confirm password",
-                            widget=forms.PasswordInput())
+    cn = forms.CharField(
+        required=True,
+        max_length=128, label="Carthage Username"
+    )
+    sn = forms.CharField(
+        required=True,
+        max_length=64, label="Your Last name"
+    )
+    ssn = forms.CharField(
+        required=True,
+        max_length=4,
+        label="Last four digits of your Social Security Number"
+    )
+    carthageDob = forms.DateField(
+        required=True,
+        validators=[validate_epoch],
+        label="Date of birth",
+        help_text="Format: mm/dd/yyyy"
+    )
+    userPassword = forms.CharField(
+        required=True,
+        max_length=64, label="Password",
+        widget=forms.PasswordInput(),
+        help_text="""
+            Minimum 12 characters and at least one letter and one number.
+        """
+    )
+    confPassword = forms.CharField(
+        required=True,
+        max_length=64, label="Confirm password",
+        widget=forms.PasswordInput()
+    )
 
     def clean_userPassword(self):
         import re
         pw = self.cleaned_data.get("userPassword")
         if len(pw) < 12:
-            raise forms.ValidationError("Password must be at least 12 characters.")
+            raise forms.ValidationError(
+                "Password must be at least 12 characters."
+            )
 
         if not re.search('[a-zA-Z]+', pw) or not re.search('[0-9]+', pw):
-            raise forms.ValidationError(u'Your password must include at least \
-                                       one letter and at least one number.')
+            raise forms.ValidationError(
+                u'Your password must include at least \
+                  one letter and at least one number.'
+            )
         return self.cleaned_data.get("userPassword")
 
     def clean_confPassword(self):

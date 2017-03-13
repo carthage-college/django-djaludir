@@ -119,6 +119,7 @@ def search_ldap(request):
             # data dictionary
             data = form.cleaned_data
             # search ldap
+            # we use the regular ldap server here
             l = LDAPManager()
             user = l.search(data["alumna"])
             if user:
@@ -195,8 +196,18 @@ def create_ldap(request):
             data["carthageStudentStatus"] = ""
             data["carthageFormerStudentStatus"] = "A"
             data["carthageOtherStatus"] = ""
+
             # create the ldap user
-            l = LDAPManager()
+            # we have to use the PWM server here
+            l = LDAPManager(
+                protocol=settings.LDAP_PROTOCOL_PWM,
+                server=settings.LDAP_SERVER_PWM,
+                port=settings.LDAP_PORT_PWM,
+                user=settings.LDAP_USER_PWM,
+                password=settings.LDAP_PASS_PWM,
+                base=settings.LDAP_BASE_PWM
+            )
+
             user = l.create(data)
             # set session ldap_cn, why?
             request.session['ldap_cn'] = user[0][1]["cn"][0]
@@ -277,6 +288,7 @@ def modify_ldap_password(request):
                 objects = ""
             if len(objects) == 1:
                 # initial the ldap manager
+                # we have to use the PWM server here
                 l = LDAPManager(
                     protocol=settings.LDAP_PROTOCOL_PWM,
                     server=settings.LDAP_SERVER_PWM,

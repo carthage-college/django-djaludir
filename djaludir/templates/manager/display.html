@@ -94,7 +94,6 @@
                     <label>Business address:</label>
                     {% if person.business_address %}{{person.business_address}}<br />{% endif %}
                     {% if person.business_address2 %}<label class="business_address">&nbsp;</label>{{person.business_address2}}<br />{% endif %}
-                    
                     {% if person.business_address %}<label class="business_address">&nbsp;</label>
                         {% if person.business_city %}{{person.business_city}}, {% endif %}
                         {% if person.business_state %}{{person.business_state}} {% endif %}
@@ -108,7 +107,6 @@
                 {% endif %}
             </fieldset>
         {% endifnotequal %}
-    
         {% ifnotequal privacy.Address "Y" %}
             <fieldset>
                 <div class="form-row header">Address</div>

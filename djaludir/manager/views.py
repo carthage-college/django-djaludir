@@ -1,3 +1,4 @@
+#-- coding: utf-8 --
 from datetime import date
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -30,8 +31,11 @@ def display(request, student_id):
 
     return render_to_response(
         "manager/display.html",
-        {'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics, 'relatives':relatives,
-         'privacy':privacy},
+        {
+            'studentID':student_id, 'person':alumni, 'activities':activities,
+            'athletics':athletics, 'relatives':relatives,
+            'privacy':privacy
+        },
         context_instance=RequestContext(request)
     )
 

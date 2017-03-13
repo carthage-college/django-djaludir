@@ -41,7 +41,8 @@ class LDAPBackend(object):
             return None
         username = username.lower()
 
-        #l = LDAPManager()
+        l = LDAPManager()
+        '''
         l = LDAPManager(
             protocol=settings.LDAP_PROTOCOL_PWM,
             server=settings.LDAP_SERVER_PWM,
@@ -50,6 +51,7 @@ class LDAPBackend(object):
             password=settings.LDAP_PASS_PWM,
             base=settings.LDAP_BASE_PWM
         )
+        '''
 
         try:
             result_data = l.search(username,field="cn")

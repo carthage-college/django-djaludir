@@ -367,7 +367,14 @@ def getStudent(student_id):
     )
     student = do_sql(sql)
     if student:
-        return student.fetchone()
+        # we need to sanitize strings which may contain funky
+        # windows characters that informix does not convert to
+        # utf-8
+        stu = dict(student.fetchone())
+        for key, value in stu.iteritems():
+            if type(value) is str:
+                stu[key] = value.decode('cp1252').encode('utf-8')
+        return stu
     else:
         return None
 

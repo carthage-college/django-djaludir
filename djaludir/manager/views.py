@@ -366,11 +366,12 @@ def getStudent(student_id):
            ' AND     ids.id              =   %s' %   (student_id)
     )
     student = do_sql(sql)
-    if student:
+    obj = student.fetchone()
+    if obj:
+        stu = dict(student.fetchone())
         # we need to sanitize strings which may contain funky
         # windows characters that informix does not convert to
         # utf-8
-        stu = dict(student.fetchone())
         for key, value in stu.iteritems():
             if type(value) is str:
                 stu[key] = value.decode('cp1252').encode('utf-8')
@@ -559,7 +560,10 @@ def emailDifferences(studentID):
     #Retrieve the existing information about the alumn(a|us)
     student = getStudent(studentID)
 
-    subject = "Alumni Directory Update for %s %s (%s)" % (student.fname, student.lname, studentID)
+    fname = student.fname
+    if not fname:
+        fname = '[missing first name]'
+    subject = "Alumni Directory Update for %s %s (%s)" % (fname, student.lname, studentID)
 
     #Get the most recent unapproved information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
@@ -620,9 +624,9 @@ def emailDifferences(studentID):
         data["prefix"] = alumni.prefix
         data["original_prefix"] = student.prefix
         data["personal"] = True
-    if(student.fname != alumni.fname):
+    if(fname != alumni.fname):
         data["fname"] = alumni.fname
-        data["original_fname"] = student.fname
+        data["original_fname"] = fname
         data["personal"] = True
     if(student.birth_lname != alumni.maidenname):
         data["maidenname"] = alumni.maidenname

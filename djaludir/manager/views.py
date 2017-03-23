@@ -368,7 +368,7 @@ def getStudent(student_id):
     student = do_sql(sql)
     obj = student.fetchone()
     if obj:
-        stu = dict(student.fetchone())
+        stu = dict(obj)
         # we need to sanitize strings which may contain funky
         # windows characters that informix does not convert to
         # utf-8

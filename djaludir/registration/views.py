@@ -174,18 +174,8 @@ def create_ldap(request):
             data = form.cleaned_data
             # dob format: YYYY-MM-DD
             data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
-            ldap_name = False
-            try:
-                # username (cn) will be ldap_name from informix
-                if request.session.get('ldap_name') != '':
-                    data["cn"] = request.session['ldap_name']
-                    request.session['ldap_name'] = ''
-                    ldap_name = True
-                else:
-                    data["cn"] = data["mail"]
-            except:
-                # username (cn) will be email address
-                data["cn"] = data["mail"]
+            # username (cn) will be email address
+            data["cn"] = data["mail"]
             # remove confirmation password
             data.pop('confPassword',None)
             # python ldap wants strings, not unicode
@@ -212,7 +202,7 @@ def create_ldap(request):
             user = l.create(data)
             # set session ldap_cn, why?
             request.session['ldap_cn'] = user[0][1]["cn"][0]
-            if not settings.DEBUG and not ldap_name:
+            if not settings.DEBUG:
                 # update informix cvid_rec.ldap_user
                 sql = """
                     UPDATE cvid_rec SET ldap_name='%s',

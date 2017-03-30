@@ -177,8 +177,9 @@ def create_ldap(request):
             ldap_name = False
             try:
                 # username (cn) will be ldap_name from informix
-                if request.session.get('ldap_name') != "":
+                if request.session.get('ldap_name') != '':
                     data["cn"] = request.session['ldap_name']
+                    request.session['ldap_name'] = ''
                     ldap_name = True
                 else:
                     data["cn"] = data["mail"]

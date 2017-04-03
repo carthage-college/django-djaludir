@@ -560,9 +560,10 @@ def emailDifferences(studentID):
     #Retrieve the existing information about the alumn(a|us)
     student = getStudent(studentID)
 
-    fname = student.fname
-    if not fname:
+    if not student.fname:
         fname = '[missing first name]'
+    else:
+        fname = student.fname
     subject = "Alumni Directory Update for %s %s (%s)" % (fname, student.lname, studentID)
 
     #Get the most recent unapproved information about the person

@@ -560,11 +560,13 @@ def emailDifferences(studentID):
     #Retrieve the existing information about the alumn(a|us)
     student = getStudent(studentID)
 
-    if not student.fname:
-        fname = '[missing first name]'
+    if student['fname']:
+        fname = student['fname']
     else:
-        fname = student.fname
-    subject = "Alumni Directory Update for %s %s (%s)" % (fname, student.lname, studentID)
+        fname = '[missing first name]'
+    subject = "Alumni Directory Update for {} {} ({})".format(
+        fname, student['lname'], studentID
+    )
 
     #Get the most recent unapproved information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
@@ -621,135 +623,135 @@ def emailDifferences(studentID):
 
     data = {'studentID':studentID,'personal':False,'academics':False,'business':False,'home':False}
     #Section for personal information
-    if(student.prefix.lower() != alumni.prefix.lower()):
+    if(student['prefix'].lower() != alumni.prefix.lower()):
         data["prefix"] = alumni.prefix
-        data["original_prefix"] = student.prefix
+        data["original_prefix"] = student['prefix']
         data["personal"] = True
     if(fname != alumni.fname):
         data["fname"] = alumni.fname
         data["original_fname"] = fname
         data["personal"] = True
-    if(student.birth_lname != alumni.maidenname):
+    if(student['birth_lname'] != alumni.maidenname):
         data["maidenname"] = alumni.maidenname
-        data["original_maidenname"] = student.birth_lname
+        data["original_maidenname"] = student['birth_lname']
         data["personal"] = True
-    if(student.lname != alumni.lname):
+    if(student['lname'] != alumni.lname):
         data["lname"] = alumni.lname
-        data["original_lname"] = student.lname
+        data["original_lname"] = student['lname']
         data["personal"] = True
-    if(student.suffix.lower() != alumni.suffix.lower()):
+    if(student['suffix'].lower() != alumni.suffix.lower()):
         data["suffix"] = alumni.suffix
-        data["original_suffix"] = student.suffix
+        data["original_suffix"] = student['suffix']
         data["personal"] = True
 
     #Section for relatives
     data["relatives"] = relatives
 
     #Section for academics
-    if(student.degree != alumni.degree):
+    if(student['degree'] != alumni.degree):
         data["degree"] = alumni.degree
-        data["original_degree"] = student.degree
+        data["original_degree"] = student['degree']
         data["academics"] = True
-    if(student.major1 != alumni.major1):
+    if(student['major1'] != alumni.major1):
         data["major1"] = alumni.major1
-        data["original_major1"] = student.major1
+        data["original_major1"] = student['major1']
         data["academics"] = True
-    if(student.major2 != alumni.major2):
+    if(student['major2'] != alumni.major2):
         data["major2"] = alumni.major2
-        data["original_major2"] = student.major2
+        data["original_major2"] = student['major2']
         data["academics"] = True
-    if(student.major3 != alumni.major3):
+    if(student['major3'] != alumni.major3):
         data["major3"] = alumni.major3
-        data["original_major3"] = student.major3
+        data["original_major3"] = student['major3']
         data["academics"] = True
-    if(student.masters_grad_year != alumni.masters_grad_year):
+    if(student['masters_grad_year'] != alumni.masters_grad_year):
         data["masters_grad_year"] = alumni.masters_grad_year
-        data["original_mastersgradyear"] = student.masters_grad_year
+        data["original_mastersgradyear"] = student['masters_grad_year']
         data["academics"] = True
 
     #Section for activities (this may get split out into organizations vs athletics in the future)
     data["organizations"] = alum_activities
 
-    if(student.business_name != alumni.business_name):
+    if(student['business_name'] != alumni.business_name):
         data["business_name"] = alumni.business_name
-        data["original_businessname"] = student.business_name
+        data["original_businessname"] = student['business_name']
         data["business"] = True
-    if(student.job_title != alumni.job_title):
+    if(student['job_title'] != alumni.job_title):
         data["job_title"] = alumni.job_title
-        data["original_jobtitle"] = student.job_title
+        data["original_jobtitle"] = student['job_title']
         data["business"] = True
 
     #Section for work address
     if (work_address != None and len(work_address) > 0):
-        if(student.business_address != work_address.address_line1):
+        if(student['business_address'] != work_address.address_line1):
             data["business_address"] = work_address.address_line1
-            data["original_businessaddress"] = student.business_address
+            data["original_businessaddress"] = student['business_address']
             data["business"] = True
-        if(student.business_address2 != work_address.address_line2):
+        if(student['business_address2'] != work_address.address_line2):
             data["business_address"] = work_address.address_line2
-            data["original_businessaddress2"] = student.business_address2
+            data["original_businessaddress2"] = student['business_address2']
             data["business"] = True
-        if(student.business_city != work_address.city):
+        if(student['business_city'] != work_address.city):
             data["business_city"] = work_address.city
-            data["original_businesscity"] = student.business_city
+            data["original_businesscity"] = student['business_city']
             data["business"] = True
-        if(student.business_state != work_address.state):
+        if(student['business_state'] != work_address.state):
             data["business_state"] = work_address.state
-            data["original_businessstate"] = student.business_state
+            data["original_businessstate"] = student['business_state']
             data["business"] = True
-        if(student.business_zip != work_address.zip):
+        if(student['business_zip'] != work_address.zip):
             data["business_zip"] = work_address.zip
-            data["original_businesszip"] = student.business_zip
+            data["original_businesszip"] = student['business_zip']
             data["business"] = True
-        if(student.business_country != work_address.country):
+        if(student['business_country'] != work_address.country):
             data["business_country"] = work_address.country
-            data["original_businesscountry"] = student.business_country
+            data["original_businesscountry"] = student['business_country']
             data["business"] = True
-        if(student.business_phone != work_address.phone):
+        if(student['business_phone'] != work_address.phone):
             data["business_phone"] = work_address.phone
-            data["original_businessphone"] = student.business_phone
+            data["original_businessphone"] = student['business_phone']
             data["business"] = True
     else:
         data["business"] = True
         data["business_address"] = workaddress_sql
 
     #Section for home address
-    if(student.email != alumni.email):
+    if(student['email'] != alumni.email):
         data["email"] = alumni.email
-        data["original_email"] = student.email
+        data["original_email"] = student['email']
         data["home"] = True
     if(home_address != None and len(home_address) > 0):
-        if(student.home_address1 != home_address.address_line1):
+        if(student['home_address1']!= home_address.address_line1):
             data["home_address"] = home_address.address_line1
-            data["original_homeaddress"] = student.home_address1
+            data["original_homeaddress"] = student['home_address1']
             data["home"] = True
-        if(student.home_address2 != home_address.address_line2):
+        if(student['home_address2'] != home_address.address_line2):
             data["home_address2"] = home_address.address_line2
-            data["original_homeaddress2"] = student.home_address2
+            data["original_homeaddress2"] = student['home_address2']
             data["home"] = True
-        if(student.home_address3 != home_address.address_line3):
+        if(student['home_address3'] != home_address.address_line3):
             data["home_address3"] = home_address.address_line3
-            data["original_homeaddress3"] = student.home_address3
+            data["original_homeaddress3"] = student['home_address3']
             data["home"] = True
-        if(student.home_city != home_address.city):
+        if(student['home_city'] != home_address.city):
             data["home_city"] = home_address.city
-            data["original_homecity"] = student.home_city
+            data["original_homecity"] = student['home_city']
             data["home"] = True
-        if(student.home_state != home_address.state):
+        if(student['home_state'] != home_address.state):
             data["home_state"] = home_address.state
-            data["original_homestate"] = student.home_state
+            data["original_homestate"] = student['home_state']
             data["home"] = True
-        if(student.home_zip != home_address.zip):
+        if(student['home_zip'] != home_address.zip):
             data["home_zip"] = home_address.zip
-            data["original_homezip"] = student.home_zip
+            data["original_homezip"] = student['home_zip']
             data["home"] = True
-        if(student.home_country != home_address.country):
+        if(student['home_country'] != home_address.country):
             data["home_country"] = home_address.country
-            data["original_homecountry"] = student.home_country
+            data["original_homecountry"] = student['home_country']
             data["home"] = True
-        if(student.home_phone != home_address.phone):
+        if(student['home_phone'] != home_address.phone):
             data["home_phone"] = home_address.phone
-            data["original_homephone"] = student.home_phone
+            data["original_homephone"] = student['home_phone']
             data["home"] = True
 
     if settings.DEBUG:

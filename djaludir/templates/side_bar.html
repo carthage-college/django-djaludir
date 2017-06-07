@@ -1,3 +1,4 @@
+{% load livewhale_api %}
 <div class="forms-sidebar">
     <h2>Links</h2>
     <p>
@@ -14,17 +15,7 @@
             Distinguished Alumni Nomination Form
         </a>
     </p>
-    <p>Visit the <a href="/giving/">online giving</a> pages.</p>
-    <h2>Support</h2>
-    <p>
-        If you have any questions about the Alumni Directory,
-        please contact
-        <a href="mailto:lhansen@carthage.edu">lhansen@carthage.edu</a>
-    </p>
-    <p>
-        As always, you may contact the Alumni Office by email at
-        <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>,
-        by phone at 800-551-1518, or by stopping in to see us in Lentz Hall, #414.
-    </p>
-    {% include "alumni/side_bar.html" %}
+    {% get_lw_content as supp blurbs 2487 %}
+    {{supp.body}}
 </div>
+{% include "alumni/side_bar.html" %}

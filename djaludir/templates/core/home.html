@@ -11,6 +11,15 @@ iframe{
 }
 .column2 {background-color: #FCFAEB;
 margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;padding-left:3px;}
+
+.forms-sidebar a {
+    color: #7a232f;
+    text-decoration: none;
+    line-height: 1.125em
+}
+.forms-sidebar a:hover {
+    color:#6ba2b8;
+}
 </style>
 {% endblock %}
 {% block extra_javascript %}
@@ -77,6 +86,9 @@ margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;paddi
         </li>
         <li>
             <a href="{% url 'manager_search' %}">Search for fellow Carthage Alumni</a>
+        </li>
+        <li>
+            <a href="https://password.carthage.edu/">Password Manager</a>
         </li>
     </ul>
 {% endblock %}

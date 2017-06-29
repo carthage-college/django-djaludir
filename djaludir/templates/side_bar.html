@@ -1,20 +1,37 @@
 {% load livewhale_api %}
 <div class="forms-sidebar">
     <h2>Links</h2>
-    <p>
-    {% if not user.is_anonymous %}
-        <a href="{% url 'manager_user_edit' user.id %}">Manage your alumni profile</a></p>
-        <p><a href="{{logout_url}}?next={{request.path}}">Logout from Alumni Directory</a>
-    {% else %}
-        <a href="{{login_url}}?next={{request.path}}">Login to Alumni Directory</a>
-    {% endif %}
-    </p>
-    <p><a href="{% url 'alumni_directory_home' %}">Alumni Directory Home</a></p>
-    <p>
+    <ul>
+      {% if not user.is_anonymous %}
+        <li>
+          <a href="{% url 'manager_user_edit' user.id %}">
+            Manage your alumni profile
+          </a>
+        </li>
+        <li>
+          <a href="{{logout_url}}?next={{request.path}}">
+            Logout from Alumni Directory
+          </a>
+        </li>
+      {% else %}
+        <li>
+          <a href="{{login_url}}?next={{request.path}}">
+            Login to Alumni Directory
+          </a>
+        </li>
+      {% endif %}
+      <li>
+        <a href="https://password.carthage.edu/">Password Manager</a>
+      </li>
+      <li>
+        <a href="{% url 'alumni_directory_home' %}">Alumni Directory Home</a>
+      </li>
+      <li>
         <a href="/alumni/distinguished-alumni/nomination/">
             Distinguished Alumni Nomination Form
         </a>
-    </p>
+      </li>
+    </ul>
     {% get_lw_content as supp blurbs 2487 %}
     {{supp.body}}
 </div>

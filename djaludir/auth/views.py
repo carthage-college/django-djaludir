@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
 
 from django import forms
+
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -19,11 +20,15 @@ def login_user(request):
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
-            user = authenticate(username=username, password=password, request=request)
+            user = authenticate(
+                username=username, password=password, request=request
+            )
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return HttpResponseRedirect(reverse('alumni_directory_home'))
+                    return HttpResponseRedirect(
+                        reverse('alumni_directory_home')
+                    )
                 else:
                     errors = True
             else:
@@ -31,8 +36,8 @@ def login_user(request):
     else:
         form = LoginForm()
 
-    return render_to_response(
-        'auth/login.html',{'form': form,'errors':errors},
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'auth/login.html',{'form': form,'errors':errors}
     )
 

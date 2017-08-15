@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import User, Group
 
@@ -25,25 +25,27 @@ logger = logging.getLogger(__name__)
 
 def error_mess(val):
     error = '''
-        %s results returned. Please try your search again,
+        {} results returned. Please try your search again,
         or contact the
         <a href="mailto:alumnioffice@carthage.edu">Alumni Office</a>
         for further assistance.
-    ''' % val
+    '''.format(val)
     return error
+
 
 def search_home(request):
     """
     Search home, from where we begin the search for an alumna's
     record in Informix and then in LDAP.
     """
-    informix_earl = reverse_lazy("registration_search_informix")
-    ldap_earl = reverse_lazy("registration_search_ldap")
-    return render_to_response(
-        "registration/search.html",
-        {'informix_earl':informix_earl,'ldap_earl':ldap_earl},
-        context_instance=RequestContext(request)
+    informix_earl = reverse_lazy('registration_search_informix')
+    ldap_earl = reverse_lazy('registration_search_ldap')
+    return render(
+        request,
+        'registration/search.html',
+        {'informix_earl':informix_earl,'ldap_earl':ldap_earl}
     )
+
 
 def search_informix(request):
     """
@@ -51,7 +53,7 @@ def search_informix(request):
     Requires POST, which is sent as Ajax request.
     Returns a list of possible candidates.
     """
-    if request.method == "POST":
+    if request.method == 'POST':
         results = None
         error = None
         xsql = None
@@ -59,25 +61,28 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            where = (' ( lower(id_rec.firstname) like "%%%s%%" OR'
-                ' lower(aname_rec.line1) like "%%%s%%" )'
-                % (data["givenName"].lower(),data["givenName"].lower()))
+            where = (' ( lower(id_rec.firstname) like "%%{}%%" OR'
+                ' lower(aname_rec.line1) like "%%{}%%" )'.format(
+                data['givenName'].lower(), data['givenName'].lower()
+            )
             where += ' AND'
-            where += ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
+            where += ' ( lower(id_rec.lastname) = "{}" )'.format(
+                data['sn'].lower()
+            )
             # if we have ID, we don't need anything else
-            if data["carthageNameID"]:
-                where+= 'AND id_rec.id = "%s"' % data["carthageNameID"]
+            if data['carthageNameID']:
+                where+= 'AND id_rec.id = "{}"'.format(data['carthageNameID'])
             else:
                 where+= ' AND'
                 where+= '''
-                     (profile_rec.birth_date = "%s"
-                ''' % data["carthageDob"].strftime("%m/%d/%Y")
+                     (profile_rec.birth_date = "{}"
+                '''.format(data['carthageDob'].strftime('%m/%d/%Y'))
                 where+= ' OR profile_rec.birth_date is null)'
-                if data["postal_code"]:
+                if data['postal_code']:
                     where+= ' AND'
                     where+= '''
-                        ( id_rec.zip like "%%%s%%" or NVL(id_rec.zip,"") = "" )
-                    ''' % data["postal_code"]
+                        ( id_rec.zip like "%%{}%%" or NVL(id_rec.zip,"") = "" )
+                    '''.format(data['postal_code'])
             xsql = SEARCH + where
             xsql += SEARCH_GROUP_BY
             xsql += SEARCH_ORDER_BY
@@ -95,14 +100,17 @@ def search_informix(request):
                     results = objects
         else:
             error = form.errors
-        extra_context = {'form':form,'error':error,'results':results,'sql':xsql,}
-        return render_to_response(
-            "registration/search_informix.html", extra_context,
-            context_instance=RequestContext(request)
+        extra_context = {
+            'form':form,'error':error,'results':results,'sql':xsql
+        }
+        return render(
+            request,
+            'registration/search_informix.html', extra_context
         )
     else:
         # POST required
-        return HttpResponseRedirect(reverse_lazy("registration_search"))
+        return HttpResponseRedirect(reverse_lazy('registration_search'))
+
 
 def search_ldap(request):
     """
@@ -113,7 +121,7 @@ def search_ldap(request):
     update it if not. Lastly, display login form.
     If no record, allow the user to create one.
     """
-    if request.method == "POST":
+    if request.method == 'POST':
         form = RegistrationSearchForm(request.POST)
         if form.is_valid():
             # data dictionary
@@ -121,45 +129,49 @@ def search_ldap(request):
             # search ldap
             # we use the regular ldap server here
             l = LDAPManager()
-            user = l.search(data["alumna"])
+            user = l.search(data['alumna'])
             if user:
                 # we have a user
                 user = user[0][1]
                 # update informix if no ldap_user
-                if not settings.DEBUG and data["ldap_name"] == '':
-                    sql = """
-                        UPDATE cvid_rec SET ldap_name='%s',
+                if not settings.DEBUG and data['ldap_name'] == '':
+                    sql = '''
+                        UPDATE cvid_rec SET ldap_name='{}',
                         ldap_add_date = TODAY
-                        WHERE cx_id = '%s'
-                    """ % (user["cn"][0], data["alumna"])
+                        WHERE cx_id = '{}'
+                    '''.format(user['cn'][0], data['alumna'])
                     results = do_sql(sql, key=settings.INFORMIX_DEBUG)
                 # check for challenge questions
                 l = LDAPBackend()
-                request.session['ldap_questions'] = l.get_questions(user["cn"][0])
+                request.session['ldap_questions'] = l.get_questions(
+                    user['cn'][0]
+                )
                 # display the login form
-                form = {'data':{'username':user["cn"][0],}}
-                redir = reverse_lazy("alumni_directory_home")
+                form = {'data':{'username':user['cn'][0],}}
+                redir = reverse_lazy('alumni_directory_home')
                 extra_context = {
                     'user':user,'form':form,
                     'next':redir,'action':settings.LOGIN_URL
                 }
-                template = "login"
+                template = 'login'
             else:
                 # display the create form
-                data["carthageNameID"] = data["alumna"]
-                request.session['ldap_name'] = data.get("ldap_name")
+                data['carthageNameID'] = data['alumna']
+                request.session['ldap_name'] = data.get('ldap_name')
                 form = CreateLdapForm(initial=data)
-                action = reverse_lazy("registration_create_ldap")
+                action = reverse_lazy('registration_create_ldap')
                 extra_context = {'action':action,'form':form,}
-                template = "create"
-            return render_to_response(
-                "registration/%s_ldap.inc.html" % template, extra_context,
-                context_instance=RequestContext(request)
+                template = 'create'
+            return render(
+                request,
+                'registration/{}_ldap.inc.html'.format(template),
+                extra_context
             )
     else:
         # POST required
         # or doing something nefarious
-        return HttpResponseRedirect(reverse_lazy("registration_search"))
+        return HttpResponseRedirect(reverse_lazy('registration_search'))
+
 
 def create_ldap(request):
     """
@@ -168,25 +180,25 @@ def create_ldap(request):
     After successful create, we update Informix with
     the LDAP username.
     """
-    if request.method == "POST":
+    if request.method == 'POST':
         form = CreateLdapForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             # dob format: YYYY-MM-DD
-            data["carthageDob"] = data["carthageDob"].strftime("%Y-%m-%d")
+            data['carthageDob'] = data['carthageDob'].strftime('%Y-%m-%d')
             # username (cn) will be email address
-            data["cn"] = data["mail"]
+            data['cn'] = data['mail']
             # remove confirmation password
             data.pop('confPassword',None)
             # python ldap wants strings, not unicode
             for k,v in data.items():
                 data[k] = str(v)
-            data["objectclass"] = settings.LDAP_OBJECT_CLASS_LIST
-            data["carthageFacultyStatus"] = ""
-            data["carthageStaffStatus"] = ""
-            data["carthageStudentStatus"] = ""
-            data["carthageFormerStudentStatus"] = "A"
-            data["carthageOtherStatus"] = ""
+            data['objectclass'] = settings.LDAP_OBJECT_CLASS_LIST
+            data['carthageFacultyStatus'] = ''
+            data['carthageStaffStatus'] = ''
+            data['carthageStudentStatus'] = ''
+            data['carthageFormerStudentStatus'] = 'A'
+            data['carthageOtherStatus'] = ''
 
             # create the ldap user
             # we have to use the PWM server here
@@ -201,26 +213,28 @@ def create_ldap(request):
 
             user = l.create(data)
             # set session ldap_cn, why?
-            request.session['ldap_cn'] = user[0][1]["cn"][0]
+            request.session['ldap_cn'] = user[0][1]['cn'][0]
             if not settings.DEBUG:
                 # update informix cvid_rec.ldap_user
-                sql = """
+                sql = '''
                     UPDATE cvid_rec SET ldap_name='%s',
                     ldap_add_date = TODAY
                     WHERE cx_id = '%s'
-                """ % (user[0][1]["cn"][0],user[0][1]["carthageNameID"][0])
+                '''.format(
+                    user[0][1]['cn'][0], user[0][1]['carthageNameID'][0]
+                )
                 ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
             # create the django user
             djuser = l.dj_create(user)
-            data["djuser"] = djuser
+            data['djuser'] = djuser
             # authenticate user
             djuser.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, djuser)
 
             # send email to admins
-            subject = "[LDAP][Create] %s %s" % (
-                user[0][1]["givenName"][0],
-                user[0][1]["sn"][0]
+            subject = "[LDAP][Create] {} {}".format(
+                user[0][1]['givenName'][0],
+                user[0][1]['sn'][0]
             )
 
             if settings.DEBUG:
@@ -229,24 +243,24 @@ def create_ldap(request):
                 to_list = settings.LDAP_CREATE_TO_LIST
 
             send_mail(
-                request,to_list, subject, data["mail"],
-                "registration/create_ldap_email.html", data
+                request,to_list, subject, data['mail'],
+                'registration/create_ldap_email.html', data
             )
-            return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
+            return HttpResponseRedirect(reverse_lazy('alumni_directory_home'))
         else:
-            return render_to_response(
-                "registration/create_ldap.html", {'form':form,},
-                context_instance=RequestContext(request)
+            return render(
+                request,
+                'registration/create_ldap.html', {'form':form,}
             )
     elif settings.DEBUG:
-        form = CreateLdapForm(initial={"carthageNameID":'901257',})
-        return render_to_response(
-            "registration/create_ldap.html", {'form':form,},
-            context_instance=RequestContext(request)
+        form = CreateLdapForm(initial={'carthageNameID':'901257',})
+        return render(
+            request,
+            'registration/create_ldap.html', {'form':form,}
         )
     else:
         # POST required
-        return HttpResponseRedirect(reverse_lazy("registration_search"))
+        return HttpResponseRedirect(reverse_lazy('registration_search'))
 
 
 def modify_ldap_password(request):
@@ -255,28 +269,30 @@ def modify_ldap_password(request):
     Requires POST.
     """
     errors = {}
-    if request.method == "POST":
+    if request.method == 'POST':
         form = ModifyLdapPasswordForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             where = 'WHERE'
-            where+= ' ( lower(id_rec.lastname) = "%s" )' % data['sn'].lower()
+            where+= ' ( lower(id_rec.lastname) = "{}" )'.format(
+                data['sn'].lower()
+            )
             where+= ' AND'
             where+= '''
-                 (profile_rec.birth_date = "%s"
-            ''' % data["carthageDob"].strftime("%m/%d/%Y")
+                 (profile_rec.birth_date = "{}"
+            '''.format(data['carthageDob'].strftime('%m/%d/%Y'))
             where+= ' OR profile_rec.birth_date is null)'
             where+= ' AND'
             where+= '''
-                SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "%s"
-            ''' % data["ssn"]
+                SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "{}"
+            '''.format(data['ssn'])
             sql = CONFIRM_USER + where
-            logger.debug("sql = {}".format(sql))
+            logger.debug('sql = {}'.format(sql))
             results = do_sql(sql, key=settings.INFORMIX_DEBUG)
             try:
                 objects = results.fetchall()
             except:
-                objects = ""
+                objects = ''
             if len(objects) == 1:
                 # initial the ldap manager
                 # we have to use the PWM server here
@@ -294,32 +310,40 @@ def modify_ldap_password(request):
                     # now modify password
                     # modify_s() returns a tuple with status code
                     # and an empty list: (103, [])
-                    status = l.modify(search[0][0],"userPassword",data["userPassword"])
+                    status = l.modify(
+                        search[0][0], 'userPassword',
+                        data['userPassword']
+                    )
                     # success = 103
                     if status[0] == 103:
                         # success
                         request.session['ldap_password_success'] = True
                         # Get the user record or create one with no privileges.
                         try:
-                            user = User.objects.get(username__exact=search[0][1]["cn"][0])
+                            user = User.objects.get(
+                                username__exact=search[0][1]['cn'][0]
+                            )
                         except:
                             # Create a User object.
                             user = l.dj_create(search)
                         # authenticate user
                         user.backend = 'django.contrib.auth.backends.ModelBackend'
                         login(request, user)
-                        return HttpResponseRedirect(reverse_lazy("alumni_directory_home"))
+                        return HttpResponseRedirect(
+                            reverse_lazy('alumni_directory_home')
+                        )
                     else:
                         # fail
-                        errors["ldap"] = "We failed to update your password."
+                        errors['ldap'] = "We failed to update your password."
                 else:
-                    errors["ldap"] = "We failed to find your Alumni account."
+                    errors['ldap'] = "We failed to find your Alumni account."
             else:
-                errors["informix"] = "We could not find you in the database."
+                errors['informix'] = "We could not find you in the database."
     else:
         form = ModifyLdapPasswordForm()
 
-    return render_to_response(
-        "registration/modify_ldap_password.html", {'form':form,'errors':errors},
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'registration/modify_ldap_password.html',
+        {'form':form,'errors':errors}
     )

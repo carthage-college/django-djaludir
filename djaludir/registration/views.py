@@ -61,10 +61,14 @@ def search_informix(request):
         if form.is_valid():
             # data dictionary
             data = form.cleaned_data
-            where = (' ( lower(id_rec.firstname) like "%%{}%%" OR'
-                ' lower(aname_rec.line1) like "%%{}%%" )'.format(
+            where = '''
+                (
+                    lower(id_rec.firstname) like "%%{}%%" OR
+                    lower(aname_rec.line1) like "%%{}%%"
+                )
+            '''.format(
                 data['givenName'].lower(), data['givenName'].lower()
-            ))
+            )
             where += ' AND'
             where += ' ( lower(id_rec.lastname) = "{}" )'.format(
                 data['sn'].lower()

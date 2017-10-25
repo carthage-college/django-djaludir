@@ -912,5 +912,5 @@ def emailDifferences(studentID):
 
     send_mail(
         None, recipients, subject, 'confirmation@carthage.edu',
-        'manager/email.html', data
+        'manager/email.html', data, [settings.MANAGERS[0][1],]
     )

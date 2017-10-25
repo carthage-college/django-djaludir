@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext, loader, Context
 
 from djtools.utils.mail import send_mail
@@ -16,7 +16,7 @@ ATHLETIC_IDS = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','
 
 @login_required
 def display(request, student_id):
-    #Get information about the alumn(a|us)
+    # Get information about the alumn(a|us)
     alumni = getStudent(student_id)
     if alumni != None:
         activities = getStudentActivities(student_id, False)
@@ -29,74 +29,95 @@ def display(request, student_id):
         relatives = None
         privacy = None
 
-    return render_to_response(
-        "manager/display.html",
+    return render(
+        request,
+        'manager/display.html',
         {
             'studentID':student_id, 'person':alumni, 'activities':activities,
             'athletics':athletics, 'relatives':relatives,
             'privacy':privacy
-        },
-        context_instance=RequestContext(request)
+        }
     )
+
 
 @login_required
 def update(request):
-    #Retrieve the ID of the alumn(a|us)
+    # Retrieve the ID of the alumn(a|us)
     studentID = request.POST.get('carthageID')
 
-    #Insert personal information
-    alumni_sql = insertAlumni(studentID, request.POST.get('fname'), request.POST.get('lname'), request.POST.get('suffix'), request.POST.get('prefix'),
-                   request.POST.get('email'), request.POST.get('maidenname'), request.POST.get('degree'), request.POST.get('class_year'), request.POST.get('business_name'),
-                   request.POST.get('major1'), request.POST.get('major2'), request.POST.get('major3'), request.POST.get('masters_grad_year'), request.POST.get('job_title'))
+    # Insert personal information
+    alumni_sql = insertAlumni(
+        studentID, request.POST.get('fname'), request.POST.get('lname'),
+        request.POST.get('suffix'), request.POST.get('prefix'),
+        request.POST.get('email'), request.POST.get('maidenname'),
+        request.POST.get('degree'), request.POST.get('class_year'),
+        request.POST.get('business_name'), request.POST.get('major1'),
+        request.POST.get('major2'), request.POST.get('major3'),
+        request.POST.get('masters_grad_year'), request.POST.get('job_title')
+    )
 
-    #Loop through all the relatives' records
+    # Loop through all the relatives' records
     clearRelative(studentID)
     if request.POST.get('relativeCount'):
         for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
             relFname = request.POST.get('relativeFname' + str(relativeIndex))
             relLname = request.POST.get('relativeLname' + str(relativeIndex))
             relRelation = request.POST.get('relativeText' + str(relativeIndex))
-    
-            #Because of the way relationships are stored in CX, we must identify if the alumn(a|us) matches the first or second role in the relationship
+
+            # Because of the way relationships are stored in CX,
+            # we must identify if the alumn(a|us) matches the first or
+            # second role in the relationship
             alumPrimary = 'Y'
             if(relRelation[-1:] == '1'):
                 alumPrimary = 'N'
-    
+
             if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
                 relRelation = relRelation[0:-1]
-    
-            #If the relative has some value in their name and a specified relationship, insert the record
+
+            # If the relative has some value in their name and a specified
+            # relationship, insert the record
             if(len(relFname + relLname) > 0 and relRelation != ''):
-                insertRelative(studentID, relRelation, relFname, relLname, alumPrimary)
+                insertRelative(
+                    studentID, relRelation, relFname, relLname, alumPrimary
+                )
 
 
-    #Insert organizationa and athletic involvement
+    # Insert organizationa and athletic involvement
     if request.POST.get('activityCount'):
         for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
             activityText = request.POST.get('activity' + str(activityIndex))
-    
+
             if(activityText):
                 insertActivity(studentID, activityText)
 
     if request.POST.get('athleticCount'):
         for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
             athleticText = request.POST.get('athletic' + str(athleticIndex))
-    
+
             if athleticText and (len(athleticText) > 0):
                 insertActivity(studentID, athleticText)
 
-    #Insert home and work address information
-    insertAddress('WORK', studentID, request.POST.get('business_address'), request.POST.get('business_address2'), '',
-                  request.POST.get('business_city'), request.POST.get('business_state'), request.POST.get('business_zip'), '', request.POST.get('business_phone'))
+    # Insert home and work address information
+    insertAddress(
+        'WORK', studentID, request.POST.get('business_address'),
+        request.POST.get('business_address2'), '',
+        request.POST.get('business_city'), request.POST.get('business_state'),
+        request.POST.get('business_zip'), '',
+        request.POST.get('business_phone')
+    )
 
-    insertAddress('HOME', studentID, request.POST.get('home_address1'), request.POST.get('home_address2'), request.POST.get('home_address3'),
-                  request.POST.get('home_city'), request.POST.get('home_state'), request.POST.get('home_zip'), '', request.POST.get('home_phone'))
+    insertAddress(
+        'HOME', studentID, request.POST.get('home_address1'),
+        request.POST.get('home_address2'), request.POST.get('home_address3'),
+        request.POST.get('home_city'), request.POST.get('home_state'),
+        request.POST.get('home_zip'), '', request.POST.get('home_phone')
+    )
 
 
-    #Clear privacy values
+    # Clear privacy values
     clearPrivacy(studentID)
 
-    #Insert updated privacy settings
+    # Insert updated privacy settings
     personal = request.POST.get('privacyPersonal','Y')
     insertPrivacy(studentID, 'Personal', personal)
 
@@ -112,45 +133,60 @@ def update(request):
     address = request.POST.get('privacyAddress','Y')
     insertPrivacy(studentID, 'Address', address)
 
-    #Generate an email specifying the differences between the existing information and the newly submitted data
+    # Generate an email specifying the differences between
+    # the existing information and the newly submitted data
     emailDifferences(studentID)
 
-    #Reuse the edit page
-    return HttpResponseRedirect(reverse('manager_user_edit_success', kwargs={'student_id':studentID}))
+    # Reuse the edit page
+    return HttpResponseRedirect(
+        reverse('manager_user_edit_success', kwargs={'student_id':studentID})
+    )
+
 
 @login_required
 def search(request, messageSent = False, permissionDenied = False):
-    fieldlist = [] #Collection of fieldnames used in search
-    terms = [] #Collection of terms used in search
-    matches = [] #Recordset of the alumni who match the search criteria
+    # Collection of fieldnames used in search
+    fieldlist = []
+    # Collection of terms used in search
+    terms = []
+    # Recordset of the alumni who match the search criteria
+    matches = []
     message = ''
     sql = ''
     if request.method == 'POST':
         orSQL = ''
         andSQL = ''
-        #Sport/activities are searched via "OR", all other fields are "AND" so assemble the list of fields to run through the logic to create the appropriate filters
+        # Sport/activities are searched via "OR", all other fields are "AND"
+        # so assemble the list of fields to run through the logic
+        # to create the appropriate filters
         for rowNum in range (0, int(request.POST.get('maxCriteria')) + 1):
             fieldname = request.POST.get('within' + str(rowNum))
             searchterm = request.POST.get('term' + str(rowNum))
 
-            if fieldname is not None and searchterm is not None and searchterm != '':
+            if fieldname is not None and searchterm is not None \
+            and searchterm != '':
                 fieldlist += (fieldname,)
                 terms += (searchterm,)
 
                 if fieldname == 'activity':
                     if len(orSQL) > 0:
                         orSQL += ' OR'
-                    orSQL += ' LOWER(invl_table.txt) LIKE "%%%s%%"' % (searchterm.lower())
+                    orSQL += ' LOWER(invl_table.txt) LIKE "%%{}%%"'.format(
+                        searchterm.lower()
+                    )
                 elif fieldname == 'alum.cl_yr' or fieldname == 'ids.id':
                     if len(andSQL) > 0:
                         andSQL += ' AND'
-                    andSQL += ' %s = %s' % (fieldname, searchterm)
+                    andSQL += ' {} = {}'.format(fieldname, searchterm)
                 else:
                     if len(andSQL) > 0:
                         andSQL += ' AND'
-                    andSQL += ' LOWER(TRIM(%s::varchar(250))) LIKE "%%%s%%"' % (fieldname, searchterm.lower())
+                    andSQL += ' LOWER(TRIM({}::varchar(250))) LIKE "%%{}%%"'.format(
+                        fieldname, searchterm.lower()
+                    )
 
-        #Based on the criteria specified by the user, add the necessary tables to the search query
+        # Based on the criteria specified by the user,
+        # add the necessary tables to the search query
         selectFromSQL = ('SELECT alum.cl_yr AS class_year, ids.firstname, maiden.lastname AS maiden_name, ids.lastname, ids.id,'
                      ' NVL(TRIM(aaEmail.line1) || TRIM(aaEmail.line2) || TRIM(aaEmail.line3), "") AS email, LOWER(ids.lastname) AS sort1, LOWER(ids.firstname) AS sort2'
                      ' FROM alum_rec alum INNER JOIN id_rec ids ON alum.id = ids.id '
@@ -158,14 +194,16 @@ def search(request, messageSent = False, permissionDenied = False):
                      ' LEFT JOIN addree_rec maiden ON maiden.prim_id = prevmap.prim_id AND maiden.active_date = prevmap.active_date AND maiden.style = "M"'
                      ' LEFT JOIN aa_rec aaEmail ON alum.id = aaEmail.id AND aaEmail.aa = "EML2" AND TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)'
                      ' LEFT JOIN hold_rec holds ON alum.id = holds.id AND holds.hld = "DDIR" AND CURRENT BETWEEN holds.beg_date AND NVL(holds.end_date, CURRENT)')
-        #If search criteria includes activity or sport add the involvement tables
+        # If search criteria includes activity or sport
+        # add the involvement tables
         if 'activity' in fieldlist:
             selectFromSQL += (
                      ' LEFT JOIN involve_rec ON ids.id = involve_rec.id'
                      ' LEFT JOIN invl_table ON involve_rec.invl = invl_table.invl')
 
-        #If search criteria includes the student's major
-        #QUESTION - Should we check all three major fields for each major specified or is sequence important?
+        # If search criteria includes the student's major
+        # QUESTION - Should we check all three major fields
+        # for each major specified or is sequence important?
         if 'major1.txt' in fieldlist or 'major2.txt' in fieldlist:
             selectFromSQL += (' LEFT JOIN prog_enr_rec progs ON ids.id = progs.id AND progs.acst = "GRAD"')
             if 'major1.txt' in fieldlist:
@@ -173,8 +211,12 @@ def search(request, messageSent = False, permissionDenied = False):
             if 'major2.txt' in fieldlist:
                 selectFromSQL += (' LEFT JOIN major_table major2 ON progs.major2 = major2.major')
 
-        #Privacy Settings - only add the restrictions for the fields actually included in the search criteria
-        personal = ['ids.firstname', 'ids.lastname', 'maiden.lastname', 'ids.id', 'alum.cl_yr']
+        # Privacy Settings - only add the restrictions for the fields
+        # actually included in the search criteria
+        personal = [
+            'ids.firstname', 'ids.lastname', 'maiden.lastname',
+            'ids.id', 'alum.cl_yr'
+        ]
         if bool(set(personal) & set(fieldlist)) == True:
             selectFromSQL += ' LEFT JOIN stg_aludir_privacy per_priv ON ids.id = per_priv.id AND per_priv.fieldname = "Personal"'
             if len(andSQL) > 0:
@@ -202,7 +244,8 @@ def search(request, messageSent = False, permissionDenied = False):
                 andSQL += ' AND'
             andSQL += ' NVL(add_priv.display, "N") = "N"'
 
-        #If search criteria were submitted, flesh out the sql query. Include "and's", "or's" and sorting
+        # If search criteria were submitted, flesh out the sql query.
+        # Include "and's", "or's" and sorting
         if len(andSQL + orSQL) > 0:
             if len(orSQL) > 0:
                 orSQL = '(%s)' % (orSQL)
@@ -221,50 +264,62 @@ def search(request, messageSent = False, permissionDenied = False):
     if permissionDenied == True:
         message = "You do not have permission to edit this record."
 
-    return render_to_response(
-        "manager/search.html",
-        {'message':message, 'searching':dict(zip(fieldlist, terms)), 'matches':matches, 'debug':sql},
-        context_instance=RequestContext(request)
+    return render(
+        'manager/search.html', {
+            'message':message, 'searching':dict(zip(fieldlist, terms)),
+            'matches':matches, 'debug':sql
+        }
     )
+
 
 @login_required
 def edit(request, student_id, success = False):
     if int(student_id) == int(request.user.id) or request.user.is_superuser:
-        #Retrieve relevant information about the alumni
+        # Retrieve relevant information about the alumni
         alumni = getStudent(student_id)
         activities = getStudentActivities(student_id, False)
         athletics = getStudentActivities(student_id, True)
         relatives = getRelatives(student_id)
         privacy = getPrivacy(student_id)
 
-        #Assemble collections for the user to make choices
+        # Assemble collections for the user to make choices
         majors = getMajors()
-        prefixes = dict([('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),('MS','Ms'),('REV','Rev')])
+        prefixes = dict([
+            ('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),
+            ('MS','Ms'),('REV','Rev')
+        ])
         suffixes = ('','II','III','IV','JR','MD','PHD','SR')
         year_range = range(1900, date.today().year + 1)
         relationships = getRelationships()
         states = getStates()
         countries = getCountries()
 
-        return render_to_response(
-            "manager/edit.html",
-            {'submitted':success,'studentID':student_id, 'person':alumni, 'activities':activities, 'athletics':athletics,
-             'relatives':relatives, 'privacy':privacy, 'majors':majors, 'prefixes':prefixes, 'suffixes':suffixes,
-             'years':year_range, 'relationships':relationships, 'states':states, 'countries':countries},
-            context_instance=RequestContext(request)
+        return render(
+            request,
+            'manager/edit.html', {
+                'submitted':success,'studentID':student_id, 'person':alumni,
+                'activities':activities, 'athletics':athletics,
+                'relatives':relatives, 'privacy':privacy, 'majors':majors,
+                'prefixes':prefixes, 'suffixes':suffixes,
+                'years':year_range, 'relationships':relationships,
+                'states':states, 'countries':countries
+            }
         )
     else:
         return HttpResponseRedirect(reverse('manager_search_denied'))
+
 
 @login_required
 def message(request, student_id, recipientHasEmail = True):
     recipient = getMessageInfo(student_id)
     recipientHasEmail = len(recipient.email) > 0
-    return render_to_response(
-        "manager/create_message.html",
-        {'validRecipient':recipientHasEmail, 'recipient':recipient},
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'manager/create_message.html', {
+            'validRecipient':recipientHasEmail, 'recipient':recipient
+        }
     )
+
 
 @login_required
 def send_message(request):
@@ -276,7 +331,8 @@ def send_message(request):
 
     sender = getMessageInfo(request.user.id)
 
-    #If the inforamation about the sender is unavailable, create empty/default values
+    # If the inforamation about the sender is unavailable,
+    # create empty/default values
     if sender == None or len(sender) == 0:
         sender = {
             'id':0,
@@ -289,20 +345,27 @@ def send_message(request):
     if attachEmail == 'Y':
         autoAddOn = 'Y'
 
-    #Initialize necessary components to generate email
-    data = {'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender}
+    # Initialize necessary components to generate email
+    data = {
+        'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender
+    }
 
-    subject_line = "Message from %s %s via the Carthage Alumni Directory" % (sender.firstname, sender.lastname)
+    subject = "Message from {} {} via the Carthage Alumni Directory".format(
+        sender.firstname, sender.lastname
+    )
     send_mail(
-        request, [recipient.email,], subject_line, sender.email,
+        request, [recipient.email,], subject, sender.email,
         'manager/send_message.html', data, settings.MANAGERS
     )
 
-    #Reuse the search page
-    return HttpResponseRedirect(reverse('manager_search_sent', kwargs={'messageSent':True}))
+    # Reuse the search page
+    return HttpResponseRedirect(
+        reverse('manager_search_sent', kwargs={'messageSent':True})
+    )
+
 
 def getStudent(student_id):
-    #Compile all the one-to-one information about the alumn(a|us)
+    # Compile all the one-to-one information about the alumn(a|us)
     sql = ('SELECT DISTINCT'
            '    ids.id AS carthage_id, TRIM(ids.firstname) AS fname, TRIM(ids.lastname) AS lname, TRIM(ids.suffix) AS suffix, TRIM(INITCAP(ids.title)) AS prefix, TRIM(NVL(email.line1,"")) email,'
            '    CASE'
@@ -379,8 +442,10 @@ def getStudent(student_id):
     else:
         return None
 
+
 def getStudentActivities(student_id, isSports = False):
-    #Conditional statements to provide the correct logic and terminology depending whether activities or athletics are being returned
+    # Conditional statements to provide the correct logic and
+    # terminology depending whether activities or athletics are being returned
     fieldname = 'activity' if not isSports else 'sport'
     comparison = 'NOT' if not isSports else ''
 
@@ -398,30 +463,32 @@ def getStudentActivities(student_id, isSports = False):
     else:
         return objs
 
+
 def getRelatives(student_id):
-    #Retrieve collection of relatives (regardless of whether the alumn(a|us) is the primary or secondary relationship)
+    # Retrieve collection of relatives (regardless of whether the alumn(a|us)
+    # is the primary or secondary relationship)
     relatives_sql = (' SELECT'
                      '    TRIM('
                      '      CASE'
-                     '            WHEN    rel.prim_id    =    %s    THEN    sec.firstname'
+                     '            WHEN    rel.prim_id    =    {}    THEN    sec.firstname'
                      '                                              ELSE    prim.firstname'
                      '      END'
                      '    )    AS    firstName,'
                      '    TRIM('
                      '        CASE'
-                     '            WHEN    rel.prim_id    =    %s    THEN    sec.lastname'
+                     '            WHEN    rel.prim_id    =    {}    THEN    sec.lastname'
                      '                                              ELSE    prim.lastname'
                      '        END'
                      '    )    AS    lastName,'
                      '    TRIM('
                      '        CASE'
-                     '            WHEN    rel.prim_id    =    %s    THEN    reltbl.sec_txt'
+                     '            WHEN    rel.prim_id    =    {}    THEN    reltbl.sec_txt'
                      '                                              ELSE    reltbl.prim_txt'
                      '        END'
                      '    )    AS    relText,'
                      '    TRIM(reltbl.rel) ||'
                      '    CASE'
-                     '        WHEN    rel.prim_id   =   %s  THEN    "2"'
+                     '        WHEN    rel.prim_id   =   {}  THEN    "2"'
                      '                                      ELSE    "1"'
                      '    END AS relCode'
                      ' FROM    relation_rec    rel    INNER JOIN    id_rec      prim    ON    rel.prim_id   =    prim.id'
@@ -433,16 +500,20 @@ def getRelatives(student_id):
                      '      rel.rel IN  ("AUNN","COCO","GPGC","HW","HWNI","PC","SBSB")'
                      '      AND'
                      ' ('
-                     '      prim_id =   %s'
+                     '      prim_id =   {}'
                      '      OR'
-                     '      sec_id  =   %s'
-                     ' )' % (student_id, student_id, student_id, student_id, student_id, student_id)
+                     '      sec_id  =   {}'
+                     ' )'.format(
+            student_id, student_id, student_id, student_id,
+            student_id, student_id
+        )
     )
     objs = do_sql(relatives_sql)
     if objs:
         return objs.fetchall()
     else:
         return objs
+
 
 def getPrivacy(student_id):
     privacy_sql = ("SELECT TRIM(fieldname) AS fieldname, TRIM(display) AS display FROM stg_aludir_privacy WHERE id = %s ORDER BY fieldname") % (student_id)
@@ -454,62 +525,142 @@ def getPrivacy(student_id):
         setting += (row.display)
     return dict(zip(field, setting))
 
+
 def getRelationships():
-    #Hardcoded collection of relationships because the entire collection of values in rel_table are not valid for the alumni directory
-    relationships = dict([('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),('AUNN2','Niece/Nephew')])
+    # Hardcoded collection of relationships because the entire collection
+    # of values in rel_table are not valid for the alumni directory
+    relationships = dict([
+        ('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),
+        ('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),
+        ('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),
+        ('AUNN2','Niece/Nephew')
+    ])
     return relationships
 
+
 def getMajors():
-    major_sql = 'SELECT DISTINCT TRIM(major) AS major_code, TRIM(txt) AS major_name FROM major_table ORDER BY TRIM(txt)'
+    major_sql = '''
+        SELECT
+            DISTINCT TRIM(major) AS major_code,
+            TRIM(txt) AS major_name
+        FROM
+            major_table
+        ORDER BY TRIM(txt)
+    '''
     objs = do_sql(major_sql)
     if objs:
         return objs.fetchall()
     else:
         return objs
 
+
 def getStates():
-    states_sql = 'SELECT TRIM(st) AS st FROM st_table WHERE NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)'
+    states_sql = '''
+        SELECT
+            TRIM(st) AS st
+        FROM
+            st_table
+        WHERE
+            NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)
+    '''
     objs = do_sql(states_sql)
     if objs:
         return objs.fetchall()
     else:
         return objs
 
+
 def getCountries():
-    countries_sql = 'SELECT TRIM(ctry) AS ctry, TRIM(txt) AS txt FROM ctry_table ORDER BY web_ord, TRIM(txt)'
+    countries_sql = '''
+        SELECT
+            TRIM(ctry) AS ctry, TRIM(txt) AS txt
+        FROM
+            ctry_table
+        ORDER BY
+            web_ord, TRIM(txt)
+    '''
     objs = do_sql(countries_sql)
     if objs:
         return objs.fetchall()
     else:
         return objs
 
+
 def getMessageInfo(studentID):
-    message_sql = (
-        'SELECT ids.id, NVL(TRIM(email.line1) || TRIM(email.line2) || TRIM(email.line3), "") AS email, TRIM(ids.firstname) AS firstname, TRIM(ids.lastname) AS lastname'
-        ' FROM id_rec ids LEFT JOIN aa_rec email ON ids.id = email.id AND email.aa = "EML2" AND TODAY BETWEEN email.beg_date AND NVL(email.end_date, TODAY)'
-        ' WHERE ids.id = %s' % (studentID)
-    )
+    message_sql = '''
+        SELECT
+            ids.id,
+            NVL(
+                TRIM(email.line1) || TRIM(email.line2) || TRIM(email.line3), ""
+            ) AS email,
+            TRIM(ids.firstname) AS firstname,
+            TRIM(ids.lastname) AS lastname
+        FROM
+            id_rec ids
+        LEFT JOIN
+            aa_rec email
+        ON
+            ids.id = email.id
+        AND
+            email.aa = "EML2"
+        AND
+            TODAY BETWEEN email.beg_date
+        AND
+            NVL(email.end_date, TODAY)
+        WHERE
+            ids.id = {}
+    '''.format(studentID)
     message = do_sql(message_sql)
     return message.fetchone()
 
+
 @login_required
 def search_activity(request):
-    search_string = request.GET.get("term","Football")
-    activity_search_sql = 'SELECT TRIM(invl_table.txt) txt FROM invl_table WHERE invl_table.invl MATCHES "S[0-9][0-9][0-9]" AND LOWER(invl_table.txt) LIKE "%%%s%%" ORDER BY TRIM(invl_table.txt)' % (search_string.lower())
+    search_string = request.GET.get('term','Football')
+    activity_search_sql = '''
+        SELECT
+            TRIM(invl_table.txt) txt
+        FROM
+            invl_table
+        WHERE
+            invl_table.invl MATCHES "S[0-9][0-9][0-9]"
+        AND
+            LOWER(invl_table.txt) LIKE "%%{}%%"
+        ORDER BY
+            TRIM(invl_table.txt)
+    '''.format(search_string.lower())
     objs = do_sql(activity_search_sql)
     if objs:
         return HttpResponse(objs.fetchall())
     else:
         return HttpResponse(objs)
 
+
 def clearRelative(carthageID):
-    clear_sql = "UPDATE stg_aludir_relative SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
+    clear_sql = '''
+        UPDATE
+            stg_aludir_relative
+        SET
+            approved = "N"
+        WHERE
+            id = {}
+        AND
+            NVL(approved,"") = ""
+    '''.format(carthageID)
     do_sql(clear_sql)
 
+
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
-    relation_sql = "INSERT INTO stg_aludir_relative (id, relCode, fname, lname, alum_primary, submitted_on) VALUES (%s, '%s', '%s', '%s', '%s', TO_DATE('%s', '%%Y-%%m-%%d'))" % (carthageID, relCode, fname, lname, alumPrimary, getNow())
+    relation_sql = '''
+        INSERT INTO stg_aludir_relative (
+            id, relCode, fname, lname, alum_primary, submitted_on
+        )
+        VALUES
+            ({}, '{}', '{}', '{}', '{}', TO_DATE('{}', '%%Y-%%m-%%d'))
+    '''.format(carthageID, relCode, fname, lname, alumPrimary, getNow())
     do_sql(relation_sql)
     return relation_sql
+
 
 def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title):
     if class_year == '':

@@ -6,6 +6,7 @@ from django.conf.urls import url
 from djauth.views import loggedout
 from djaludir.auth import views
 
+
 urlpatterns = [
     url(
         r'^login/$', views.login_user, name='auth_login'

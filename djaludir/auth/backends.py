@@ -28,7 +28,7 @@ class LDAPBackend(object):
             base=settings.LDAP_BASE_PWM
         )
 
-        result = l.search(cn,field="cn",ret=settings.LDAP_RETURN_PWM)
+        result = l.search(cn,field='cn',ret=settings.LDAP_RETURN_PWM)
 
         try:
             questions = result[0][1][settings.LDAP_CHALLENGE_ATTR][0]
@@ -54,7 +54,7 @@ class LDAPBackend(object):
         '''
 
         try:
-            result_data = l.search(username,field="cn")
+            result_data = l.search(username,field='cn')
             # If the user does not exist in LDAP, Fail.
             if not result_data and request:
                 request.session['ldap_account'] = False

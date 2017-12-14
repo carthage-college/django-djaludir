@@ -5,8 +5,6 @@ from django.contrib.auth.models import User
 
 from djauth.LDAPManager import LDAPManager
 
-import logging
-logger = logging.getLogger(__name__)
 
 class LDAPBackend(object):
     supports_object_permissions = False

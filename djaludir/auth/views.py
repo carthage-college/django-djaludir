@@ -38,7 +38,6 @@ def login_user(request):
         form = LoginForm()
 
     return render(
-        request,
-        'auth/login.html',{'form': form,'errors':errors}
+        request, 'auth/login.html', {'form': form,'errors':errors}
     )
 

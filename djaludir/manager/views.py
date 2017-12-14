@@ -265,7 +265,7 @@ def search(request, messageSent = False, permissionDenied = False):
         message = "You do not have permission to edit this record."
 
     return render(
-        'manager/search.html', {
+        request, 'manager/search.html', {
             'message':message, 'searching':dict(zip(fieldlist, terms)),
             'matches':matches, 'debug':sql
         }

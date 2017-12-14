@@ -17,15 +17,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from djzbar.utils.informix import do_sql
-from djzbar.settings import INFORMIX_EARL_PROD_DRDA as INFORMIX_EARL
+from djzbar.settings import INFORMIX_EARL_PROD as EARL
 
 import argparse
 
 '''
 Find deceased alumni
 '''
-
-EARL = settings.INFORMIX_EARL
 
 # set up command-line options
 desc = """
@@ -68,7 +66,8 @@ def main():
     sqlresult = do_sql(sql, earl=EARL)
     if sqlresult:
         for s in sqlresult:
-            print s.id, s.decsd_date
+            user = User.objects.get(pk=s.id)
+            print s.id, user.username, s.birth_date, s.decsd_date
 
 
 ######################

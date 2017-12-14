@@ -43,7 +43,10 @@ margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;paddi
 {% endblock %}
 {% block group_name %}Alumni{% endblock %}
 {% block left_nav %}
-    {% include "alumni/left_nav.html" %}
+    {% include 'alumni/left_nav.html' %}
+{% endblock %}
+{% block sidebar %}
+    {% include 'side_bar.html' %}
 {% endblock %}
 {% block content_head %}
     <h1 id="page_title">
@@ -91,7 +94,4 @@ margin-left:10px; border: 1px solid #CCCCCC;border-radius: 3px 3px 3px 3px;paddi
             <a href="https://password.carthage.edu/">Password Manager</a>
         </li>
     </ul>
-{% endblock %}
-{% block sidebar %}
-    {% include "side_bar.html" %}
 {% endblock %}

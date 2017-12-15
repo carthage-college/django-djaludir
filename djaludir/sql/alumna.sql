@@ -37,7 +37,8 @@ WHERE
     ( lower(id_rec.firstname) like "%a%" OR lower(aname_rec.line1) like "%a%" )
     AND ( lower(id_rec.lastname) = "hanna" OR lower(maiden.lastname) = "hanna" )
 GROUP BY
-    id,birth_date,firstname,line1,maiden_name,lastname,city,st,postal_code,phone,email,ldap_name
+    id,birth_date,firstname,line1,maiden_name,lastname,
+    city,st,postal_code,phone,email,ldap_name
 ORDER BY id_rec.lastname, id_rec.firstname;
 
 SELECT
@@ -64,5 +65,6 @@ WHERE
     ( lower(id_rec.firstname) like "%a%" OR lower(aname_rec.line1) like "%a%" )
     AND ( lower(id_rec.lastname) = "hanna" )
 GROUP BY
-    id,birth_date,firstname,line1,lastname,city,st,postal_code,phone,email,ldap_name
+    id,birth_date,firstname,line1,lastname,
+    city,st,postal_code,phone,email,ldap_name
 ORDER BY id_rec.lastname, id_rec.firstname;

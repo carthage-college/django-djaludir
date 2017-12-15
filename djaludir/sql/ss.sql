@@ -20,6 +20,8 @@
         (id_rec.id = email_rec.id AND email_rec.aa = "EML1")
     WHERE
         SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "0281"
-    GROUP by id,birth_date,firstname,line1,lastname,ss_no,city,st,postal_code,phone,email,ldap_name
-
-    ORDER BY id_rec.lastname, id_rec.firstname, profile_rec.birth_date;
+    GROUP by
+        id,birth_date,firstname,line1,lastname,ss_no,
+        city,st,postal_code,phone,email,ldap_name
+    ORDER BY
+    id_rec.lastname, id_rec.firstname, profile_rec.birth_date;

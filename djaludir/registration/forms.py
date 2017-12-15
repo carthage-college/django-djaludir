@@ -73,7 +73,7 @@ class CreateLdapForm(forms.Form):
 
     def clean_userPassword(self):
         import re
-        pw = self.cleaned_data.get("userPassword")
+        pw = self.cleaned_data.get('userPassword')
         if len(pw) < 12:
             raise forms.ValidationError(
                 """
@@ -88,15 +88,15 @@ class CreateLdapForm(forms.Form):
                 and at least one number.
                 """
             )
-        return self.cleaned_data.get("userPassword")
+        return self.cleaned_data.get('userPassword')
 
     def clean_confPassword(self):
         cleaned_data = self.cleaned_data
-        p1 = cleaned_data.get("userPassword")
-        p2 = cleaned_data.get("confPassword")
+        p1 = cleaned_data.get('userPassword')
+        p2 = cleaned_data.get('confPassword')
         if p1 != p2:
             raise forms.ValidationError("Passwords do not match")
-        return cleaned_data["confPassword"]
+        return cleaned_data['confPassword']
 
     def clean_mail(self):
         cleaned_data = self.cleaned_data
@@ -108,12 +108,12 @@ class CreateLdapForm(forms.Form):
             password=settings.LDAP_PASS_PWM,
             base=settings.LDAP_BASE_PWM
         )
-        user = l.search(cleaned_data.get("mail"),field="cn")
+        user = l.search(cleaned_data.get('mail'),field='cn')
         if user:
             raise forms.ValidationError(
                 "That email already exists in the system. Use another."
             )
-        return cleaned_data["mail"]
+        return cleaned_data['mail']
 
 class ModifyLdapPasswordForm(forms.Form):
     """
@@ -154,7 +154,7 @@ class ModifyLdapPasswordForm(forms.Form):
 
     def clean_userPassword(self):
         import re
-        pw = self.cleaned_data.get("userPassword")
+        pw = self.cleaned_data.get('userPassword')
         if len(pw) < 12:
             raise forms.ValidationError(
                 "Password must be at least 12 characters."
@@ -165,12 +165,12 @@ class ModifyLdapPasswordForm(forms.Form):
                 u'Your password must include at least \
                   one letter and at least one number.'
             )
-        return self.cleaned_data.get("userPassword")
+        return self.cleaned_data.get('userPassword')
 
     def clean_confPassword(self):
         cleaned_data = self.cleaned_data
-        p1 = cleaned_data.get("userPassword")
-        p2 = cleaned_data.get("confPassword")
+        p1 = cleaned_data.get('userPassword')
+        p2 = cleaned_data.get('confPassword')
         if p1 != p2:
             raise forms.ValidationError("Passwords do not match")
-        return cleaned_data["confPassword"]
+        return cleaned_data['confPassword']

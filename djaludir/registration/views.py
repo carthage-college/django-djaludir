@@ -221,9 +221,9 @@ def create_ldap(request):
             if not settings.DEBUG:
                 # update informix cvid_rec.ldap_user
                 sql = '''
-                    UPDATE cvid_rec SET ldap_name='%s',
+                    UPDATE cvid_rec SET ldap_name='{}',
                     ldap_add_date = TODAY
-                    WHERE cx_id = '%s'
+                    WHERE cx_id = '{}'
                 '''.format(
                     user[0][1]['cn'][0], user[0][1]['carthageNameID'][0]
                 )

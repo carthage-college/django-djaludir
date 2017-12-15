@@ -3,21 +3,21 @@ Django settings for project.
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os.path
+import os
+
+from djzbar.settings import INFORMIX_EARL_TEST as INFORMIX_EARL
+#from djzbar.settings import INFORMIX_EARL_PROD as INFORMIX_EARL
 
 # Debug
-#DEBUG = False
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-INFORMIX_DEBUG = "debug"
+INFORMIX_DEBUG = ''
 ADMINS = (
     ('', ''),
 )
 MANAGERS = ADMINS
 
 SECRET_KEY = ''
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS =  ['localhost','127.0.0.1']
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'America/Chicago'
 SITE_ID = 1
@@ -26,52 +26,46 @@ USE_L10N = False
 USE_TZ = False
 DEFAULT_CHARSET = 'utf-8'
 FILE_CHARSET = 'utf-8'
-
-SERVER_URL = ""
+SERVER_URL = ''
+API_URL = "{}/{}".format(SERVER_URL, 'api')
+LIVEWHALE_API_URL = "https://{}".format(SERVER_URL)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(__file__)
-ROOT_URL = "/djaludir/"
-ROOT_URLCONF = 'djaludir.urls'
+ROOT_URL = '/alumni/directory/'
+ROOT_URLCONF = 'djaludir.core.urls'
 WSGI_APPLICATION = 'djaludir.wsgi.application'
-MEDIA_ROOT = ''
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+MEDIA_ROOT = '/d2/www/vhosts/carthage.edu/subdomains/bng/httpdocs'
 STATIC_ROOT = ''
-STATIC_URL = "/static/"
+STATIC_URL = '/static/djaludir/'
 STATICFILES_DIRS = ()
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
 DATABASES = {
     'default': {
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        'NAME': 'djaludir',
+        'NAME': 'django_djaludir',
         'ENGINE': 'django.db.backends.mysql',
         'USER': '',
         'PASSWORD': ''
     },
 }
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.formtools',
     'django.contrib.humanize',
     'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'djaludir',
-    'djaludir.auth',
+    'djaludir.core',
     'djaludir.registration',
     'djaludir.manager',
     'djtools',
 )
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,24 +74,24 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
-# template stuff
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(os.path.dirname(__file__), 'templates'),
-            "/data2/django_templates/djkorra/",
-            "/data2/django_templates/djcher/",
-            "/data2/django_templates/",
+            '/data2/django_templates/djkorra/',
+            '/data2/django_templates/djcher/',
+            '/data2/django_templates/',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
+            'debug':DEBUG,
             'context_processors': [
-                "djtools.context_processors.sitevars",
+                'djtools.context_processors.sitevars',
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.media',
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
                 'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -116,75 +110,77 @@ CACHES = {
         #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         #'LOCATION': '/var/tmp/django_directory_cache',
         #'TIMEOUT': 60*20,
-        #'KEY_PREFIX': "DIRECTORY_",
+        #'KEY_PREFIX': "DJALUDIR_",
         #'OPTIONS': {
-        #    'MAX_ENTRIES': 80000,
+            #'MAX_ENTRIES': 80000,
         #}
     }
 }
-CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+#CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
+#CACHE_MIDDLEWARE_SECONDS = 60*60*24*7
+#CACHE_MIDDLEWARE_SECONDS = 60*20
+#CACHE_MIDDLEWARE_KEY_PREFIX = "DJALUDIR_"
 # SMTP settings
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
+EMAIL_HOST_USER = 'confirmation@carthage.edu'
+EMAIL_HOST_PASSWORD = 'djangoforms'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_FAIL_SILENTLY = True
-DEFAULT_FROM_EMAIL = ""
-SERVER_EMAIL = ""
-SERVER_MAIL=""
+DEFAULT_FROM_EMAIL = 'confirmation@carthage.edu'
+SERVER_EMAIL = 'larry@carthage.edu'
+SERVER_MAIL = 'confirmation@carthage.edu'
 MANAGER_RECIPIENTS = []
 # LDAP Constants
-LDAP_SERVER = ""
-LDAP_SERVER_PWM = ""
-LDAP_PORT = "636"
-LDAP_PORT_PWM = ""
-LDAP_PROTOCOL = "ldaps"
-LDAP_PROTOCOL_PWM = ""
-LDAP_BASE = ""
-LDAP_BASE_PWM = ""
-LDAP_USER = ""
-LDAP_USER_PWM = ""
-LDAP_PASS = ""
-LDAP_PASS_PWM= ""
-LDAP_EMAIL_DOMAIN = ""
-LDAP_GROUPS = {"":"",}
-LDAP_OBJECT_CLASS = ""
-LDAP_OBJECT_CLASS_LIST = ["",""]
+LDAP_SERVER_PWM = ''
+LDAP_PORT_PWM = ''
+LDAP_PROTOCOL_PWM = ''
+LDAP_BASE_PWM = ''
+LDAP_USER_PWM = ''
+LDAP_PASS_PWM = ''
+LDAP_SERVER = ''
+LDAP_PORT = ''
+LDAP_PROTOCOL = ''
+LDAP_BASE = ''
+LDAP_USER = ''
+LDAP_PASS = ''
+LDAP_EMAIL_DOMAIN = ''
+LDAP_OBJECT_CLASS = ''
+LDAP_OBJECT_CLASS_LIST = []
+LDAP_GROUPS = {}
 LDAP_RETURN = []
 LDAP_RETURN_PWM = []
-LDAP_ID_ATTR=""
-LDAP_CHALLENGE_ATTR = ""
+LDAP_ID_ATTR = ''
+LDAP_CHALLENGE_ATTR = ''
+LDAP_AUTH_USER_PK = False
 LDAP_CREATE_TO_LIST = []
 # auth backends
 AUTHENTICATION_BACKENDS = (
-    'djauth.ldapBackend.LDAPBackend',
+    'djaludir.auth.backends.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 LOGIN_URL = '/alumni/directory/auth/login/'
 LOGOUT_URL = '/alumni/directory/auth/logout/'
 LOGIN_REDIRECT_URL = '/alumni/directory/'
 USE_X_FORWARDED_HOST = True
-#SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_DOMAIN=".carthage.edu"
-SESSION_COOKIE_NAME ='django_carthage_cookie'
+SESSION_COOKIE_DOMAIN = ''
+SESSION_COOKIE_NAME = ''
 SESSION_COOKIE_AGE = 86400
-
 # logging
-LOG_FILEPATH = os.path.join(os.path.dirname(__file__), "logs/")
-LOG_FILENAME = LOG_FILEPATH + "debug.log"
+LOG_FILEPATH = os.path.join(os.path.dirname(__file__), 'logs/')
+LOG_FILENAME = LOG_FILEPATH + 'debug.log'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%Y/%b/%d %H:%M:%S"
+            'format' : '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt' : '%Y/%b/%d %H:%M:%S'
         },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s',
-            'datefmt' : "%Y/%b/%d %H:%M:%S"
+            'datefmt' : '%Y/%b/%d %H:%M:%S'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -196,10 +192,6 @@ LOGGING = {
         }
     },
     'handlers': {
-        'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
-        },
         'logfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
@@ -221,11 +213,21 @@ LOGGING = {
         }
     },
     'loggers': {
-        'djaludir': {
+        'djaludir.registration': {
             'handlers':['logfile'],
             'propagate': True,
             'level':'DEBUG',
         },
+        'djaludir.manager': {
+            'handlers':['logfile'],
+            'propagate': True,
+            'level':'DEBUG',
+        },
+        'djauth': {
+            'handlers':['logfile'],
+            'propagate': True,
+            'level':'DEBUG',
+        }
         'django': {
             'handlers':['console'],
             'propagate': True,

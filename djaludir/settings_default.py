@@ -2,7 +2,6 @@
 Django settings for project.
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
 from djzbar.settings import INFORMIX_EARL_TEST as INFORMIX_EARL
@@ -34,7 +33,7 @@ ROOT_DIR = os.path.dirname(__file__)
 ROOT_URL = '/alumni/directory/'
 ROOT_URLCONF = 'djaludir.core.urls'
 WSGI_APPLICATION = 'djaludir.wsgi.application'
-MEDIA_ROOT = '/d2/www/vhosts/carthage.edu/subdomains/bng/httpdocs'
+MEDIA_ROOT = ''
 STATIC_ROOT = ''
 STATIC_URL = '/static/djaludir/'
 STATICFILES_DIRS = ()

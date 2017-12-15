@@ -21,15 +21,36 @@ import argparse
 # set up command-line options
 desc = """
 Accepts as input first, last name, and DOB
+or college ID
 """
 
 parser = argparse.ArgumentParser(description=desc)
 
-parser.add_argument('-f', '--first', help="First name", dest="first")
-parser.add_argument('-l', '--last', help="Last name", dest="last")
-parser.add_argument('-d', '--dob', help="Date of Birth", dest="dob")
-parser.add_argument('-e', '--email', help="email", dest="email")
-parser.add_argument('-i', '--id', help="college ID", dest="cid")
+parser.add_argument(
+    '-f', '--first',
+    help = "First name",
+    dest = 'first'
+)
+parser.add_argument(
+    '-l', '--last',
+    help = "Last name",
+    dest = 'last'
+)
+parser.add_argument(
+    '-d', '--dob',
+    help = 'Date of Birth',
+    dest = 'dob'
+)
+parser.add_argument(
+    '-e', '--email',
+    help = "email",
+    dest = 'email'
+)
+parser.add_argument(
+    '-i', '--id',
+    help = 'college ID',
+    dest = 'cid'
+)
 parser.add_argument(
     '--test',
     action='store_true',
@@ -96,6 +117,7 @@ if __name__ == '__main__':
     last = args.last
     dob = args.dob
     email = args.email
+
     # if we have a college id we are good to go
     if not cid:
         mandatories = ['first','last','dob']

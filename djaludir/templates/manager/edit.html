@@ -12,9 +12,7 @@
         div.privacy {float:right;}
         .form input.privacyToggle {display:none;}
         .relative {width:4em;}
-        
         /******** NEW CSS RULE ***********/
-        
     </style>
 {% endblock %}
 {% block jquery %}
@@ -50,7 +48,13 @@
 {% block content %}
     <div class="buffer">
     {% if submitted %}
-        <h2>Thank you for updating your information. Your changes have been submitted to the Office of Institutional Advancement for review.</h2>
+        <h2>
+            Thank you for updating your information.
+            Your changes have been submitted to the
+            Office of Institutional Advancement for review.
+            The changes you made are not immediate and
+            will be updated after review.
+        </h2>
     {% endif %}
     <p><a href="{% url 'manager_search' %}">Return to Search</a></p>
     <form action="{% url 'manager_user_update' %}" method="POST" class="form">
@@ -461,7 +465,15 @@
                 </li>
             </ol>
         </fieldset>
-        {% if person %}<input type="submit" name="submit" value="Submit Changes" class="button" />{% else %}You are not listed as an alumni. Please contact the Alumni Office at <a href="mailto:alumnioffice@carthage.edu">alumnioffice@carthage.edu</a>, call 800-551-1518, or stop by Lentz Hall #414.{% endif %}
+        {% if person %}
+          <input type="submit" name="submit" value="Submit Changes" class="button">
+        {% else %}
+          You are not listed as an alumni.
+          Please contact the Alumni Office at
+          <a href="mailto:alumnioffice@carthage.edu">
+            alumnioffice@carthage.edu</a>,
+            call 800-551-1518, or stop by Lentz Hall #414.
+        {% endif %}
     </form>
     </div>
 {% endblock %}

@@ -14,7 +14,18 @@ from djzbar.utils.informix import do_sql
 
 import datetime
 
-ATHLETIC_IDS = "'S019','S020','S021','S022','S228','S043','S044','S056','S057','S073','S079','S080','S083','S090','S095','S220','S100','S101','S109','S126','S131','S156','S161','S172','S173','S176','S186','S187','S196','S197','S204','S205','S207','S208','S253','S215','S216'"
+ATHLETIC_IDS = '''
+    "S019","S020","S021","S022","S228","S043","S044","S056","S057","S073",
+    "S079","S080","S083","S090","S095","S220","S100","S101","S109","S126",
+    "S131","S156","S161","S172","S173","S176","S186","S187","S196","S197",
+    "S204","S205","S207","S208","S253","S215","S216"
+'''
+
+INFORMIX_DEBUG = settings.INFORMIX_DEBUG
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def display(request, student_id):
@@ -32,8 +43,7 @@ def display(request, student_id):
         privacy = None
 
     return render(
-        request,
-        'manager/display.html',
+        request, 'manager/display.html',
         {
             'studentID':student_id, 'person':alumni, 'activities':activities,
             'athletics':athletics, 'relatives':relatives,
@@ -61,10 +71,10 @@ def update(request):
     # Loop through all the relatives' records
     clearRelative(studentID)
     if request.POST.get('relativeCount'):
-        for relativeIndex in range (1, int(request.POST.get('relativeCount')) + 1):
-            relFname = request.POST.get('relativeFname' + str(relativeIndex))
-            relLname = request.POST.get('relativeLname' + str(relativeIndex))
-            relRelation = request.POST.get('relativeText' + str(relativeIndex))
+        for i in range (1, int(request.POST.get('relativeCount')) + 1):
+            relFname = request.POST.get('relativeFname' + str(i))
+            relLname = request.POST.get('relativeLname' + str(i))
+            relRelation = request.POST.get('relativeText' + str(i))
 
             # Because of the way relationships are stored in CX,
             # we must identify if the alumn(a|us) matches the first or
@@ -86,18 +96,18 @@ def update(request):
 
     # Insert organizationa and athletic involvement
     if request.POST.get('activityCount'):
-        for activityIndex in range (1, int(request.POST.get('activityCount')) + 1):
-            activityText = request.POST.get('activity' + str(activityIndex))
+        for i in range (1, int(request.POST.get('activityCount')) + 1):
+            activityText = request.POST.get('activity' + str(i))
 
             if(activityText):
-                insertActivity(studentID, activityText)
+                insert_activity(studentID, activityText)
 
     if request.POST.get('athleticCount'):
-        for athleticIndex in range (1, int(request.POST.get('athleticCount')) + 1):
-            athleticText = request.POST.get('athletic' + str(athleticIndex))
+        for i in range (1, int(request.POST.get('athleticCount')) + 1):
+            athleticText = request.POST.get('athletic' + str(i))
 
             if athleticText and (len(athleticText) > 0):
-                insertActivity(studentID, athleticText)
+                insert_activity(studentID, athleticText)
 
     # Insert home and work address information
     insertAddress(
@@ -137,12 +147,18 @@ def update(request):
 
     # Generate an email specifying the differences between
     # the existing information and the newly submitted data
-    emailDifferences(studentID)
+    response = email_differences(studentID, request)
 
-    # Reuse the edit page
-    return HttpResponseRedirect(
-        reverse('manager_user_edit_success', kwargs={'student_id':studentID})
-    )
+    if settings.DEBUG:
+        # display the email data instead of sending the email
+        return response
+    else:
+        # Reuse the edit page
+        return HttpResponseRedirect(
+            reverse(
+                'manager_user_edit_success', kwargs={'student_id':studentID}
+            )
+        )
 
 
 @login_required
@@ -256,7 +272,9 @@ def search(request, messageSent = False, permissionDenied = False):
                 andSQL = ' AND %s' % (andSQL)
             sql = '%s WHERE %s %s AND holds.hld_no IS NULL GROUP BY class_year, firstname, maiden_name, lastname, id, email, sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr' % (selectFromSQL, orSQL, andSQL)
 
-            objs = do_sql(sql)
+            logger.debug('search sql = {}'.format(sql))
+            objs = do_sql(sql, INFORMIX_DEBUG)
+
             if objs:
                 matches = objs.fetchall()
 
@@ -372,7 +390,8 @@ def getStudent(student_id):
     if settings.DEBUG:
         deceased = ''
     sql = ALUMNA(sid = student_id, deceased = deceased)
-    student = do_sql(sql)
+    logger.debug('get_student() sql = {}'.format(sql))
+    student = do_sql(sql, INFORMIX_DEBUG)
     obj = student.fetchone()
     if obj:
         stu = dict(obj)
@@ -401,7 +420,8 @@ def getStudentActivities(student_id, isSports = False):
         ' AND    invl_table.invl %s IN  (%s)'
         ' ORDER BY   TRIM(invl_table.txt)'   %   (fieldname, student_id, comparison, ATHLETIC_IDS)
     )
-    objs = do_sql(activities_sql)
+    logger.debug('activities_sql = {}'.format(activities_sql))
+    objs = do_sql(activities_sql, INFORMIX_DEBUG)
     if objs:
         return objs.fetchall()
     else:
@@ -452,7 +472,8 @@ def getRelatives(student_id):
             student_id, student_id
         )
     )
-    objs = do_sql(relatives_sql)
+    logger.debug('relatives_sql = {}'.format(relatives_sql))
+    objs = do_sql(relatives_sql, INFORMIX_DEBUG)
     if objs:
         return objs.fetchall()
     else:
@@ -461,7 +482,8 @@ def getRelatives(student_id):
 
 def getPrivacy(student_id):
     privacy_sql = ("SELECT TRIM(fieldname) AS fieldname, TRIM(display) AS display FROM stg_aludir_privacy WHERE id = %s ORDER BY fieldname") % (student_id)
-    privacy = do_sql(privacy_sql)
+    logger.debug('privacy_sql = {}'.format(privacy_sql))
+    privacy = do_sql(privacy_sql, INFORMIX_DEBUG)
     field = []
     setting = []
     for row in privacy:
@@ -491,7 +513,8 @@ def getMajors():
             major_table
         ORDER BY TRIM(txt)
     '''
-    objs = do_sql(major_sql)
+    logger.debug('major_sql = {}'.format(major_sql))
+    objs = do_sql(major_sql, INFORMIX_DEBUG)
     if objs:
         return objs.fetchall()
     else:
@@ -507,7 +530,8 @@ def getStates():
         WHERE
             NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)
     '''
-    objs = do_sql(states_sql)
+    logger.debug('states_sql = {}'.format(states_sql))
+    objs = do_sql(states_sql, INFORMIX_DEBUG)
     if objs:
         return objs.fetchall()
     else:
@@ -523,7 +547,8 @@ def getCountries():
         ORDER BY
             web_ord, TRIM(txt)
     '''
-    objs = do_sql(countries_sql)
+    logger.debug('countries_sql = {}'.format(countries_sql))
+    objs = do_sql(countries_sql, INFORMIX_DEBUG)
     if objs:
         return objs.fetchall()
     else:
@@ -554,7 +579,8 @@ def getMessageInfo(studentID):
         WHERE
             ids.id = {}
     '''.format(studentID)
-    message = do_sql(message_sql)
+    logger.debug('message_sql = {}'.format(message_sql))
+    message = do_sql(message_sql, INFORMIX_DEBUG)
     return message.fetchone()
 
 
@@ -573,7 +599,8 @@ def search_activity(request):
         ORDER BY
             TRIM(invl_table.txt)
     '''.format(search_string.lower())
-    objs = do_sql(activity_search_sql)
+    logger.debug('activity_search_sql = {}'.format(activity_search_sql))
+    objs = do_sql(activity_search_sql, INFORMIX_DEBUG)
     if objs:
         return HttpResponse(objs.fetchall())
     else:
@@ -581,7 +608,7 @@ def search_activity(request):
 
 
 def clearRelative(carthageID):
-    clear_sql = '''
+    sql = '''
         UPDATE
             stg_aludir_relative
         SET
@@ -591,68 +618,163 @@ def clearRelative(carthageID):
         AND
             NVL(approved,"") = ""
     '''.format(carthageID)
-    do_sql(clear_sql)
+    logger.debug('clear_relative() sql = {}'.format(sql))
+    do_sql(sql, INFORMIX_DEBUG)
 
 
 def insertRelative(carthageID, relCode, fname, lname, alumPrimary):
-    relation_sql = '''
+    sql = '''
         INSERT INTO stg_aludir_relative (
             id, relCode, fname, lname, alum_primary, submitted_on
         )
         VALUES
-            ({}, '{}', '{}', '{}', '{}', TO_DATE('{}', '%%Y-%%m-%%d'))
-    '''.format(carthageID, relCode, fname, lname, alumPrimary, getNow())
-    do_sql(relation_sql)
-    return relation_sql
+            ({}, '{}', '{}', '{}', '{}', TO_DATE('{}', '%Y-%m-%d'))
+    '''.format(
+        carthageID, relCode, fname, lname, alumPrimary, get_now()
+    )
+    logger.debug('insert_relative() sql = {}'.format(sql))
+    do_sql(sql, INFORMIX_DEBUG)
+    return sql
 
 
-def insertAlumni(carthageID, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title):
+def insertAlumni(
+    carthageID, fname, lname, suffix, prefix, email, maidenname, degree,
+    class_year, business_name, major1, major2, major3, masters_grad_year,
+    job_title
+):
     if class_year == '':
         class_year = 0
     if masters_grad_year == '':
         masters_grad_year = 0
-    clear_sql = "UPDATE stg_aludir_alumni SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
-    do_sql(clear_sql)
-    alumni_sql = ('INSERT INTO stg_aludir_alumni (id, fname, lname, suffix, prefix, email, maidenname, degree, class_year, business_name, major1, major2, major3, masters_grad_year, '
-                  'job_title, submitted_on) '
-                  'VALUES (%s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", %s,  "%s", "%s", "%s", "%s", %s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
-                  % (carthageID, fname, lname, suffix, prefix, email, maidenname.replace("(","").replace(")",""), degree, class_year, business_name, major1, major2, major3, masters_grad_year, job_title, getNow())
+    clear_sql = '''
+        UPDATE
+            stg_aludir_alumni
+        SET
+            approved = "N"
+        WHERE
+            id = {}
+        AND
+            NVL(approved,"") = ""
+    '''.format(carthageID)
+    logger.debug('clear alumni sql = {}'.format(clear_sql))
+    do_sql(clear_sql, INFORMIX_DEBUG)
+    alumni_sql = '''
+        INSERT INTO stg_aludir_alumni (
+            id, fname, lname, suffix, prefix, email, maidenname, degree,
+            class_year, business_name, major1, major2, major3,
+            masters_grad_year, job_title, submitted_on
+        )
+        VALUES (
+            {}, "{}", "{}", "{}", "{}", "{}", "{}", "{}",
+            {}, "{}", "{}", "{}", "{}",
+            {}, "{}", TO_DATE("{}", "%Y-%m-%d")
+        )
+    '''.format(
+        carthageID, fname, lname, suffix, prefix, email,
+        maidenname.replace("(","").replace(")",""), degree,
+        class_year, business_name, major1, major2, major3,
+        masters_grad_year, job_title, get_now()
     )
-    do_sql(alumni_sql)
+    logger.debug('alumni_sql = {}'.format(alumni_sql))
+    do_sql(alumni_sql, INFORMIX_DEBUG)
     return alumni_sql
 
-def insertAddress(aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone):
-    clear_sql = "UPDATE stg_aludir_address SET approved = 'N' WHERE id = %s AND aa = '%s' AND NVL(approved,'') = ''" % (carthageID, aa_type)
-    do_sql(clear_sql)
-    address_sql = ('INSERT INTO stg_aludir_address (aa, id, address_line1, address_line2, address_line3, city, state, zip, country, phone, submitted_on)'
-                   'VALUES ("%s", %s, "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))'
-                   % (aa_type, carthageID, address_line1, address_line2, address_line3, city, state, postalcode, country, phone, getNow())
+
+def insertAddress(
+    aa_type, carthageID, address_line1, address_line2,
+    address_line3, city, state, postalcode, country, phone
+):
+    clear_sql = '''
+        UPDATE
+            stg_aludir_address
+        SET
+            approved = "N"
+        WHERE
+            id = {}
+        AND
+            aa = "{}"
+        AND
+            NVL(approved,"") = ""
+    '''.format(carthageID, aa_type)
+    logger.debug('clear address sql = {}'.format(clear_sql))
+    do_sql(clear_sql, INFORMIX_DEBUG)
+    address_sql = '''
+        INSERT INTO stg_aludir_address (
+            aa, id, address_line1, address_line2, address_line3, city,
+            state, zip, country, phone, submitted_on
+        )
+        VALUES (
+            "{}", {}, "{}", "{}", "{}", "{}",
+            "{}", "{}", "{}", "{}", TO_DATE("{}", "%Y-%m-%d")
+        )
+    '''.format(
+        aa_type, carthageID, address_line1, address_line2, address_line3,
+        city, state, postalcode, country, phone, get_now()
     )
-    do_sql(address_sql)
+    logger.debug('insert_address() sql = {}'.format(address_sql))
+    do_sql(address_sql, INFORMIX_DEBUG)
     return address_sql
 
-def insertActivity(carthageID, activityText):
-    clear_sql = "UPDATE stg_aludir_activity SET approved = 'N' WHERE id = %s AND NVL(approved,'') = ''" % (carthageID)
-    do_sql(clear_sql)
-    activity_sql = 'INSERT INTO stg_aludir_activity (id, activityText, submitted_on) VALUES (%s, "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, activityText, getNow())
+
+def insert_activity(carthageID, activityText):
+    clear_sql = '''
+        UPDATE
+            stg_aludir_activity
+        SET
+            approved = "N"
+        WHERE
+            id = {}
+        AND
+            NVL(approved,"") = ""
+    '''.format(carthageID)
+    logger.debug('clear activity sql = {}'.format(clear_sql))
+    do_sql(clear_sql, INFORMIX_DEBUG)
+    activity_sql = '''
+        INSERT INTO stg_aludir_activity (
+            id, activityText, submitted_on
+        )
+        VALUES (
+            {}, "{}", TO_DATE("{}", "%Y-%m-%d")
+        )
+    '''.format(
+        carthageID, activityText, get_now()
+    )
+    logger.debug('insert_activity() sql = {}'.format(activity_sql))
     do_sql(activity_sql)
     return activity_sql
 
+
 def clearPrivacy(carthageID):
-    privacy_sql = 'DELETE FROM stg_aludir_privacy WHERE id = %s' % (carthageID)
-    do_sql(privacy_sql)
+    privacy_sql = 'DELETE FROM stg_aludir_privacy WHERE id = {}'.format(
+        carthageID
+    )
+    logger.debug('clear_privacy() sql = {}'.format(privacy_sql))
+    do_sql(privacy_sql, INFORMIX_DEBUG)
     return privacy_sql
+
 
 def insertPrivacy(carthageID, field, display):
-    privacy_sql = 'INSERT INTO stg_aludir_privacy (id, fieldname, display, lastupdated) VALUES (%s, "%s", "%s", TO_DATE("%s", "%%Y-%%m-%%d"))' % (carthageID, field, display, getNow())
-    do_sql(privacy_sql)
+    privacy_sql = '''
+        INSERT INTO stg_aludir_privacy (
+            id, fieldname, display, lastupdated
+        )
+        VALUES (
+            {}, "{}", "{}", TO_DATE("{}", "%Y-%m-%d")
+        )
+        '''.format(
+            carthageID, field, display, get_now()
+        )
+    logger.debug('insert_privacy() sql = {}'.format(privacy_sql))
+    do_sql(privacy_sql, INFORMIX_DEBUG)
     return privacy_sql
 
-def getNow():
+
+def get_now():
     return datetime.datetime.now().strftime('%Y-%m-%d')
 
-def emailDifferences(studentID):
-    #Retrieve the existing information about the alumn(a|us)
+
+def email_differences(studentID, request):
+    # Retrieve the existing information about the alumn(a|us)
     student = getStudent(studentID)
 
     if student['fname']:
@@ -671,10 +793,11 @@ def emailDifferences(studentID):
                   "LEFT JOIN major_table major2 ON alum.major2 = major2.major "
                   "LEFT JOIN major_Table major3 ON alum.major3 = major3.major "
                   "WHERE id = %s AND NVL(approved, '') = '' ORDER BY alum_no DESC") % (studentID)
-    alum = do_sql(alumni_sql)
+    logger.debug('email_differences() alumni_sql = {}'.format(alumni_sql))
+    alum = do_sql(alumni_sql, INFORMIX_DEBUG)
     alumni = alum.fetchone()
 
-    #Get information about the alum's relatives
+    # Get information about the alum's relatives
     relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, "
                      "  CASE "
                      "      WHEN    TRIM(relcode)    =    'HW'    AND    alum_primary    =    'N'    THEN    'Husband'"
@@ -692,13 +815,14 @@ def emailDifferences(studentID):
                      "FROM stg_aludir_relative "
                      "WHERE id = %s AND NVL(approved, '') = '' "
                     ) % (studentID)
-    #relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(relcode) AS relcode FROM stg_aludir_relative WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
-    relatives = do_sql(relatives_sql).fetchall()
+    logger.debug('email_differences() relatives_sql = {}'.format(relatives_sql))
+    relatives = do_sql(relatives_sql, INFORMIX_DEBUG).fetchall()
 
-    #Get address information (work and home)
+    # Get address information (work and home)
     homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' AND NVL(approved, '') = '' ORDER BY aa_no DESC") % (studentID, 'HOME')
-    homeaddress = do_sql(homeaddress_sql)
+    logger.debug('email_differences() homeaddress_sql = {}'.format(homeaddress_sql))
+    homeaddress = do_sql(homeaddress_sql, INFORMIX_DEBUG)
     if(homeaddress != None):
         home_address = homeaddress.fetchone()
     else:
@@ -706,18 +830,29 @@ def emailDifferences(studentID):
 
     workaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
                        "TRIM(zip) AS zip, TRIM(country) AS country, TRIM(phone) AS phone FROM stg_aludir_address WHERE id = %s AND aa = '%s' AND NVL(approved, '') = '' ORDER BY aa_no DESC") % (studentID, 'WORK')
-    workaddress = do_sql(workaddress_sql)
+    logger.debug('email_differences() workaddress_sql = {}'.format(workaddress_sql))
+    workaddress = do_sql(workaddress_sql, INFORMIX_DEBUG)
     if(workaddress != None):
         work_address = workaddress.fetchone()
     else:
         work_address = []
 
-    #Get organization information
-    activities_sql = ("SELECT activityText FROM stg_aludir_activity WHERE id = %s AND NVL(approved, '') = ''") % (studentID)
-    alum_activities = do_sql(activities_sql).fetchall()
+    # Get organization information
+    activities_sql = '''
+        SELECT
+            activityText
+        FROM
+            stg_aludir_activity
+        WHERE id = {} AND NVL(approved, "") = ""
+    '''.format(studentID)
+    logger.debug('email_differences() activities_sql = {}'.format(activities_sql))
+    alum_activities = do_sql(activities_sql, INFORMIX_DEBUG).fetchall()
 
-    data = {'studentID':studentID,'personal':False,'academics':False,'business':False,'home':False}
-    #Section for personal information
+    data = {
+        'studentID':studentID,'personal':False,'academics':False,
+        'business':False,'home':False
+    }
+    # Section for personal information
     if(student['prefix'].lower() != alumni.prefix.lower()):
         data["prefix"] = alumni.prefix
         data["original_prefix"] = student['prefix']
@@ -764,7 +899,8 @@ def emailDifferences(studentID):
         data["original_mastersgradyear"] = student['masters_grad_year']
         data["academics"] = True
 
-    #Section for activities (this may get split out into organizations vs athletics in the future)
+    # Section for activities
+    # (this may be split out into organizations vs athletics in the future)
     data["organizations"] = alum_activities
 
     if(student['business_name'] != alumni.business_name):
@@ -776,7 +912,7 @@ def emailDifferences(studentID):
         data["original_jobtitle"] = student['job_title']
         data["business"] = True
 
-    #Section for work address
+    # Section for work address
     if (work_address != None and len(work_address) > 0):
         if(student['business_address'] != work_address.address_line1):
             data["business_address"] = work_address.address_line1
@@ -810,7 +946,7 @@ def emailDifferences(studentID):
         data["business"] = True
         data["business_address"] = workaddress_sql
 
-    #Section for home address
+    # Section for home address
     if(student['email'] != alumni.email):
         data["email"] = alumni.email
         data["original_email"] = student['email']
@@ -849,12 +985,14 @@ def emailDifferences(studentID):
             data["original_homephone"] = student['home_phone']
             data["home"] = True
 
+    response = None
     if settings.DEBUG:
-        recipients = ["mkishline@carthage.edu",]
+        response = render(request, 'manager/email.html', {'data':data})
     else:
-        recipients = settings.MANAGER_RECIPIENTS
+        send_mail(
+            request, settings.MANAGER_RECIPIENTS, subject,
+            'confirmation@carthage.edu',
+            'manager/email.html', data, [settings.MANAGERS[0][1],]
+        )
 
-    send_mail(
-        None, recipients, subject, 'confirmation@carthage.edu',
-        'manager/email.html', data, [settings.MANAGERS[0][1],]
-    )
+    return response

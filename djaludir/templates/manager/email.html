@@ -1,45 +1,357 @@
-{% if data.personal %}<h3>Personal Information</h3>{% endif %}
-{% if data.prefix %}Prefix: changed from "{{data.original_prefix}}" to "{{data.prefix}}"<br />{% endif %}
-{% if data.fname %}First Name: changed from "{{data.original_fname}}" to "{{data.fname}}"<br />{% endif %}
-{% if data.maidenname %}Maiden Name: changed from "{{data.original_maidenname}}" to "{{data.maidenname}}"<br />{% endif %}
-{% if data.lname %}Last Name: changed from "{{data.original_lname}}" to "{{data.lname}}"<br />{% endif %}
-{% if data.suffix %}Suffix: changed from "{{data.original_suffix}}" to "{{data.suffix}}"<br />{% endif %}
-{% if data.class_year %}Class Year: changed from "{{data.original_classyear}}" to "{{data.class_year}}"<br />{% endif %}
-
-{% if data.relatives %}<h3>Family</h3>{% endif %}
-{% for rel in data.relatives %}
-Relative: {{rel.fname}} {{rel.lname}} ({{rel.relcode}})<br />
-{% endfor %}
-
-{% if data.academics %}<h3>Academics</h3>{% endif %}
-{% if data.degree %}Degree: changed from "{{data.original_degree}}" to "{{data.degree}}"<br />{% endif %}
-{% if data.major1 %}Major 1: changed from "{{data.original_major1}}" to "{{data.major1}}"<br />{% endif %}
-{% if data.major2 %}Major 2: changed from "{{data.original_major2}}" to "{{data.major2}}"<br />{% endif %}
-{% if data.major3 %}Major 3: changed from "{{data.original_major3}}" to "{{data.major3}}"<br />{% endif %}
-{% if data.masters_grad_year %}Masters Graduation Year: changed from "{{data.original_mastersgradyear}}" to "{{data.masters_grad_year}}"<br />{% endif %}
-
-    {% if data.organizations %}<h4>Student Organizations/Athletics</h4>{% endif %}
-{% for org in data.organizations %}
-    {{org.activityText}}<br />
-{% endfor %}
-
-{% if data.business %}<h3>Professional Information</h3>{% endif %}
-{% if data.business_name %}Business Name: changed from "{{data.original_businessname}}" to "{{data.business_name}}"<br />{% endif %}
-{% if data.job_title %}Job Title: changed from "{{data.original_jobtitle}}" to "{{data.job_title}}"<br />{% endif %}
-{% if data.business_address %}Business Address: changed from "{{data.original_businessaddress}}" to "{{data.business_address}}"<br />{% endif %}
-{% if data.business_city %}Business City: changed from "{{data.original_businesscity}}" to "{{data.business_city}}"<br />{% endif %}
-{% if data.business_state %}Business State: changed from "{{data.original_businessstate}}" to "{{data.business_state}}"<br />{% endif %}
-{% if data.business_zip %}Business Zip: changed from "{{data.original_businesszip}}" to "{{data.business_zip}}"<br />{% endif %}
-{% if data.business_country %}Business Country: changed from "{{data.original_businesscountry}}" to "{{data.business_country}}"<br />{% endif %}
-{% if data.business_phone %}Business Phone: changed from "{{data.original_businessphone}}" to "{{data.business_phone}}"<br />{% endif %}
-
-{% if data.home %}<h3>Address</h3>{% endif %}
-{% if data.email %}Email: changed from "{{data.original_email}}" to "{{data.email}}"<br />{% endif %}
-{% if data.home_phone %}Home Phone: changed from "{{data.original_homephone}}" to "{{data.home_phone}}"<br />{% endif %}
-{% if data.home_address %}Home Address: changed from "{{data.original_homeaddress}}" to "{{data.home_address}}"<br />{% endif %}
-{% if data.home_address2 %}Home Address Line 2: changed from "{{data.original_homeaddress2}}" to "{{data.home_address2}}"<br />{% endif %}
-{% if data.home_address3 %}Home Address Line 3: changed from "{{data.original_homeaddress3}}" to "{{data.home_address3}}"<br />{% endif %}
-{% if data.home_city %}Home City: changed from "{{data.original_homecity}}" to "{{data.home_city}}"<br />{% endif %}
-{% if data.home_state %}Home State: changed from "{{data.original_homestate}}" to "{{data.home_state}}"<br />{% endif %}
-{% if data.home_zip %}Home Zip: changed from "{{data.original_homezip}}" to "{{data.home_zip}}"<br />{% endif %}
-{% if data.home_country %}Home Country: changed from "{{data.original_homecountry}}" to "{{data.home_country}}"<br />{% endif %}
+{% autoescape off %}
+{{data}}
+{% if data.personal %}
+  <h3>Personal Information</h3>
+  <dl {{dl_detail}}>
+  {% if data.prefix %}
+    <dt {{dl_dt}}>
+        Prefix
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_prefix}}"
+        to
+        "<b>{{data.prefix}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.fname %}
+    <dt {{dl_dt}}>
+        First Name
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_fname}}"
+        to
+        "<b>{{data.fname}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.maidenname %}
+    <dt {{dl_dt}}>
+        Maiden Name
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_maidenname}}"
+        to
+        "<b>{{data.maidenname}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.lname %}
+    <dt {{dl_dt}}>
+        Last Name
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_lname}}"
+        to
+        "<b>{{data.lname}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.suffix %}
+    <dt {{dl_dt}}>
+        Suffix
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_suffix}}"
+        to
+        "<b>{{data.suffix}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.class_year %}
+    <dt {{dl_dt}}>
+        Class Year
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_classyear}}"
+        to
+        "<b>{{data.class_year}}</b>"
+    </dd>
+  {% endif %}
+  </dl>
+{% endif %}
+{% if data.relatives %}
+  <h3>Family</h3>
+  <dl {{dl_detail}}>
+  {% for rel in data.relatives %}
+    <dt {{dl_dt}}>
+        Relative
+    </dt>
+    <dd {{dl_dd}}>
+        <b>{{rel.fname}} {{rel.lname}} ({{rel.relcode}})</b>
+    </dd>
+  {% endfor %}
+  </dl>
+{% endif %}
+{% if data.academics %}
+  <h3>Academics</h3>
+  <dl {{dl_detail}}>
+  {% if data.degree %}
+    <dt {{dl_dt}}>
+        Degree
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_degree}}"
+        to
+        "<b>{{data.degree}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.major1 %}
+    <dt {{dl_dt}}>
+        Major 1
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_major1}}"
+        to
+        "<b>{{data.major1}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.major2 %}
+    <dt {{dl_dt}}>
+        Major 2
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_major2}}"
+        to
+        "<b>{{data.major2}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.major3 %}
+    <dt {{dl_dt}}>
+        Major 3
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_major3}}"
+        to
+        "<b>{{data.major3}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.masters_grad_year %}
+    <dt {{dl_dt}}>
+        Masters Graduation
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_mastersgradyear}}"
+        to
+        "<b>{{data.masters_grad_year}}</b>"
+    </dd>
+  {% endif %}
+  </dl>
+{% endif %}
+{% if data.organizations %}
+  <h3>Student Organizations/Athletics</h3>
+  <dl {{dl_detail}}>
+  {% for org in data.organizations %}
+    <dt {{dl_dt}}>
+        Activity {{forloop.counter}}
+    </dt>
+    <dd {{dl_dd}}>
+      <b>{{org.0}}</b>
+    </dd>
+  {% endfor %}
+  </dl>
+{% endif %}
+{% if data.business %}
+  <h3>Professional Information</h3>
+  <dl {{dl_detail}}>
+  {% if data.business_name %}
+    <dt {{dl_dt}}>
+        Business Name
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businessname}}"
+        to
+        "<b>{{data.business_name}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.job_title %}
+    <dt {{dl_dt}}>
+        Job Title
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_jobtitle}}"
+        to
+        "<b>{{data.job_title}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_address %}
+    <dt {{dl_dt}}>
+        Business Address
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businessaddress}}"
+        to
+        "<b>{{data.business_address}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_city %}
+    <dt {{dl_dt}}>
+        Business City
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businesscity}}"
+        to
+        "<b>{{data.business_city}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_state %}
+    <dt {{dl_dt}}>
+        Business State
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businessstate}}"
+        to
+        "<b>{{data.business_state}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_zip %}
+    <dt {{dl_dt}}>
+        Business Zip
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businesszip}}"
+        to
+        "<b>{{data.business_zip}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_country %}
+    <dt {{dl_dt}}>
+        Business Country
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businesscountry}}"
+        to
+        "<b>{{data.business_country}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.business_phone %}
+    <dt {{dl_dt}}>
+        Business Phone
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_businessphone}}"
+        to
+        "<b>{{data.business_phone}}</b>"
+    </dd>
+  {% endif %}
+  </dl>
+{% endif %}
+{% if data.home %}
+  <h3>Address</h3>
+  <dl {{dl_detail}}>
+  {% if data.email %}
+    <dt {{dl_dt}}>
+        Email
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_email}}"
+        to
+        "<b>{{data.email}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_phone %}
+    <dt {{dl_dt}}>
+        Home Phone
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homephone}}"
+        to
+        "<b>{{data.home_phone}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_address %}
+    <dt {{dl_dt}}>
+        Home Address
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homeaddress}}"
+        to
+        "<b>{{data.home_address}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_address2 %}
+    <dt {{dl_dt}}>
+        Home Address Line 2
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homeaddress2}}"
+        to
+        "<b>{{data.home_address2}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_address3 %}
+    <dt {{dl_dt}}>
+        Home Address Line 3
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homeaddress3}}"
+        to
+        "<b>{{data.home_address3}</b>}"
+    </dd>
+  {% endif %}
+  {% if data.home_city %}
+    <dt {{dl_dt}}>
+        Home City
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homecity}}"
+        to
+        "<b>{{data.home_city}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_state %}
+    <dt {{dl_dt}}>
+        Home State
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homestate}}"
+        to
+        "<b>{{data.home_state}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_zip %}
+    <dt {{dl_dt}}>
+        Home Zip
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homezip}}"
+        to
+        "<b>{{data.home_zip}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.home_country %}
+    <dt {{dl_dt}}>
+        Home Country
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_homecountry}}"
+        to
+        "<b>{{data.home_country}}</b>"
+    </dd>
+  {% endif %}
+  </dl>
+{% endif %}
+{% endautoescape %}

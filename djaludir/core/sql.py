@@ -2,28 +2,28 @@ RELATIVES_ORIG = '''
     SELECT
         TRIM(
             CASE
-                WHEN    rel.prim_id = {student_number}
+                WHEN    rel.prim_id = {cid}
                 THEN    sec.firstname
                 ELSE    prim.firstname
             END
         ) AS firstName,
         TRIM(
             CASE
-                WHEN    rel.prim_id = {student_number}
+                WHEN    rel.prim_id = {cid}
                 THEN    sec.lastname
                 ELSE    prim.lastname
             END
        ) AS lastName,
        TRIM(
             CASE
-                WHEN    rel.prim_id = {student_number}
+                WHEN    rel.prim_id = {cid}
                 THEN    reltbl.sec_txt
                 ELSE    reltbl.prim_txt
             END
         ) AS relText,
         TRIM(reltbl.rel) ||
             CASE
-                WHEN    rel.prim_id = {student_number}
+                WHEN    rel.prim_id = {cid}
                 THEN    "2"
                 ELSE    "1"
             END
@@ -50,7 +50,46 @@ RELATIVES_ORIG = '''
     AND
         rel.rel IN ("AUNN","COCO","GPGC","HW","HWNI","PC","SBSB")
     AND
-        (prim_id = {student_number} OR sec_id = {student_number})
+        (prim_id = {cid} OR sec_id = {cid})
+'''.format
+
+HOMEADDRESS_TEMP = '''
+SELECT FIRST 1
+    TRIM(address_line1) AS address_line1,
+    TRIM(address_line2) AS address_line2,
+    TRIM(address_line3) AS address_line3, TRIM(city) AS city,
+    TRIM(state) AS state, TRIM(zip) AS zip, TRIM(country) AS country,
+    TRIM(phone) AS phone
+FROM
+    stg_aludir_address
+WHERE
+    id = {cid} AND aa = 'HOME' AND NVL(approved, '') = ''
+ORDER BY
+    aa_no DESC
+'''.format
+
+WORKADDRESS_TEMP = '''
+SELECT FIRST 1
+    TRIM(address_line1) AS address_line1,
+    TRIM(address_line2) AS address_line2,
+    TRIM(address_line3) AS address_line3, TRIM(city) AS city,
+    TRIM(state) AS state, TRIM(zip) AS zip, TRIM(country) AS country,
+    TRIM(phone) AS phone
+FROM
+    stg_aludir_address
+WHERE
+    id = {cid} AND aa = 'WORK' AND NVL(approved, '') = ''
+ORDER BY
+    aa_no DESC
+'''.format
+
+ACTIVITIES_TEMP = '''
+SELECT
+    activityText
+FROM
+    stg_aludir_activity
+WHERE
+    id = {cid} AND NVL(approved, "") = ""
 '''.format
 
 RELATIVES_TEMP = '''
@@ -84,7 +123,35 @@ RELATIVES_TEMP = '''
     FROM
         stg_aludir_relative
     WHERE
-        id = {student_number} AND NVL(approved, "") = ""
+        id = {cid} AND NVL(approved, "") = ""
+'''.format
+
+ALUMNA_TEMP = '''
+SELECT FIRST 1
+    TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix,
+    TRIM(prefix) AS prefix, TRIM(email) AS email,
+    TRIM(maidenname) AS maidenname, TRIM(degree) AS degree, class_year,
+    TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1,
+    TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3, masters_grad_year,
+    TRIM(job_title) AS job_title
+FROM
+    stg_aludir_alumni alum
+LEFT JOIN
+    major_table major1
+ON
+    alum.major1 = major1.major
+LEFT JOIN
+    major_table major2
+ON
+    alum.major2 = major2.major
+LEFT JOIN
+    major_Table major3
+ON
+    alum.major3 = major3.major
+WHERE
+    id = {cid} AND NVL(approved, '') = ''
+ORDER BY
+    alum_no DESC
 '''.format
 
 ALUMNA = '''

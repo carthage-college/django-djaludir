@@ -120,18 +120,15 @@ CACHES = {
 #CACHE_MIDDLEWARE_SECONDS = 60*20
 #CACHE_MIDDLEWARE_KEY_PREFIX = "DJALUDIR_"
 # SMTP settings
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'confirmation@carthage.edu'
-EMAIL_HOST_PASSWORD = 'djangoforms'
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_FAIL_SILENTLY = True
-DEFAULT_FROM_EMAIL = 'confirmation@carthage.edu'
-SERVER_EMAIL = 'larry@carthage.edu'
-SERVER_MAIL = 'confirmation@carthage.edu'
-MANAGER_RECIPIENTS = []
-# Unit Tests
-TEST_STUDENT_NUMBER = 0
+DEFAULT_FROM_EMAIL = ''
+SERVER_EMAIL = ''
+SERVER_MAIL = ''
 # LDAP Constants
 LDAP_SERVER_PWM = ''
 LDAP_PORT_PWM = ''
@@ -168,6 +165,18 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_DOMAIN = ''
 SESSION_COOKIE_NAME = ''
 SESSION_COOKIE_AGE = 86400
+# App constants
+MANAGER_RECIPIENTS = []
+# Unit Tests
+TEST_STUDENT_NUMBER = 0
+# Hardcoded collection of relationships because the entire collection
+# of values in rel_table are not valid for the alumni directory
+RELATIONSHIPS = dict([
+    ('',''),('HW1','Husband'),('HW2','Wife'),('PC1','Parent'),
+    ('PC2','Child'),('SBSB','Sibling'),('COCO','Cousin'),
+    ('GPGC1','Grandparent'),('GPGC2','Grandchild'),('AUNN1','Aunt/Uncle'),
+    ('AUNN2','Niece/Nephew')
+])
 # logging
 LOG_FILEPATH = os.path.join(os.path.dirname(__file__), 'logs/')
 LOG_FILENAME = LOG_FILEPATH + 'debug.log'

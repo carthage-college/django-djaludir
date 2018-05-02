@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext, loader, Context
 
-from djaludir.core.sql import ALUMNA
+from djaludir.core.sql import ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP
 
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
@@ -30,11 +30,11 @@ logger = logging.getLogger(__name__)
 @login_required
 def display(request, student_id):
     # Get information about the alumn(a|us)
-    alumni = getStudent(student_id)
+    alumni = get_student(student_id)
     if alumni != None:
         activities = getStudentActivities(student_id, False)
         athletics = getStudentActivities(student_id, True)
-        relatives = getRelatives(student_id)
+        relatives = get_relatives(student_id)
         privacy = getPrivacy(student_id)
     else:
         activities = None
@@ -54,111 +54,118 @@ def display(request, student_id):
 
 @login_required
 def update(request):
-    # Retrieve the ID of the alumn(a|us)
-    studentID = request.POST.get('carthageID')
 
-    # Insert personal information
-    alumni_sql = insertAlumni(
-        studentID, request.POST.get('fname'), request.POST.get('lname'),
-        request.POST.get('suffix'), request.POST.get('prefix'),
-        request.POST.get('email'), request.POST.get('maidenname'),
-        request.POST.get('degree'), request.POST.get('class_year'),
-        request.POST.get('business_name'), request.POST.get('major1'),
-        request.POST.get('major2'), request.POST.get('major3'),
-        request.POST.get('masters_grad_year'), request.POST.get('job_title')
-    )
+    if request.method=='POST':
+        # Retrieve the ID of the alumn(a|us)
+        studentID = request.POST.get('carthageID')
 
-    # Loop through all the relatives' records
-    clearRelative(studentID)
-    if request.POST.get('relativeCount'):
-        for i in range (1, int(request.POST.get('relativeCount')) + 1):
-            relFname = request.POST.get('relativeFname' + str(i))
-            relLname = request.POST.get('relativeLname' + str(i))
-            relRelation = request.POST.get('relativeText' + str(i))
-
-            # Because of the way relationships are stored in CX,
-            # we must identify if the alumn(a|us) matches the first or
-            # second role in the relationship
-            alumPrimary = 'Y'
-            if(relRelation[-1:] == '1'):
-                alumPrimary = 'N'
-
-            if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-                relRelation = relRelation[0:-1]
-
-            # If the relative has some value in their name and a specified
-            # relationship, insert the record
-            if(len(relFname + relLname) > 0 and relRelation != ''):
-                insertRelative(
-                    studentID, relRelation, relFname, relLname, alumPrimary
-                )
-
-
-    # Insert organizationa and athletic involvement
-    if request.POST.get('activityCount'):
-        for i in range (1, int(request.POST.get('activityCount')) + 1):
-            activityText = request.POST.get('activity' + str(i))
-
-            if(activityText):
-                insert_activity(studentID, activityText)
-
-    if request.POST.get('athleticCount'):
-        for i in range (1, int(request.POST.get('athleticCount')) + 1):
-            athleticText = request.POST.get('athletic' + str(i))
-
-            if athleticText and (len(athleticText) > 0):
-                insert_activity(studentID, athleticText)
-
-    # Insert home and work address information
-    insertAddress(
-        'WORK', studentID, request.POST.get('business_address'),
-        request.POST.get('business_address2'), '',
-        request.POST.get('business_city'), request.POST.get('business_state'),
-        request.POST.get('business_zip'), '',
-        request.POST.get('business_phone')
-    )
-
-    insertAddress(
-        'HOME', studentID, request.POST.get('home_address1'),
-        request.POST.get('home_address2'), request.POST.get('home_address3'),
-        request.POST.get('home_city'), request.POST.get('home_state'),
-        request.POST.get('home_zip'), '', request.POST.get('home_phone')
-    )
-
-
-    # Clear privacy values
-    clearPrivacy(studentID)
-
-    # Insert updated privacy settings
-    personal = request.POST.get('privacyPersonal','Y')
-    insertPrivacy(studentID, 'Personal', personal)
-
-    family = request.POST.get('privacyFamily','Y')
-    insertPrivacy(studentID, 'Family', family)
-
-    academics = request.POST.get('privacyAcademics','Y')
-    insertPrivacy(studentID, 'Academics', academics)
-
-    professional = request.POST.get('privacyProfessional','Y')
-    insertPrivacy(studentID, 'Professional', professional)
-
-    address = request.POST.get('privacyAddress','Y')
-    insertPrivacy(studentID, 'Address', address)
-
-    # Generate an email specifying the differences between
-    # the existing information and the newly submitted data
-    response = email_differences(studentID, request)
-
-    if settings.DEBUG:
-        # display the email data instead of sending the email
-        return response
-    else:
-        # Reuse the edit page
-        return HttpResponseRedirect(
-            reverse(
-                'manager_user_edit_success', kwargs={'student_id':studentID}
-            )
+        # Insert personal information
+        alumni_sql = insertAlumni(
+            studentID, request.POST.get('fname'), request.POST.get('lname'),
+            request.POST.get('suffix'), request.POST.get('prefix'),
+            request.POST.get('email'), request.POST.get('maidenname'),
+            request.POST.get('degree'), request.POST.get('class_year'),
+            request.POST.get('business_name'), request.POST.get('major1'),
+            request.POST.get('major2'), request.POST.get('major3'),
+            request.POST.get('masters_grad_year'), request.POST.get('job_title')
         )
+
+        if request.POST.get('relativeCount'):
+            for i in range (1, int(request.POST.get('relativeCount')) + 1):
+                relFname = request.POST.get('relativeFname' + str(i))
+                relLname = request.POST.get('relativeLname' + str(i))
+                relRelation = request.POST.get('relativeText' + str(i))
+
+                # Because of the way relationships are stored in CX,
+                # we must identify if the alumn(a|us) matches the first or
+                # second role in the relationship
+                alumPrimary = 'Y'
+                if(relRelation[-1:] == '1'):
+                    alumPrimary = 'N'
+
+                if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
+                    relRelation = relRelation[0:-1]
+
+                # If the relative has some value in their name and a specified
+                # relationship, insert the record
+                if(len(relFname + relLname) > 0 and relRelation != ''):
+                    insertRelative(
+                        studentID, relRelation, relFname, relLname, alumPrimary
+                    )
+
+
+        # Insert organizationa and athletic involvement
+        if request.POST.get('activityCount'):
+            for i in range (1, int(request.POST.get('activityCount')) + 1):
+                activityText = request.POST.get('activity' + str(i))
+
+                if(activityText):
+                    insert_activity(studentID, activityText)
+
+        if request.POST.get('athleticCount'):
+            for i in range (1, int(request.POST.get('athleticCount')) + 1):
+                athleticText = request.POST.get('athletic' + str(i))
+
+                if athleticText and (len(athleticText) > 0):
+                    insert_activity(studentID, athleticText)
+
+        # Insert home and work address information
+        insertAddress(
+            'WORK', studentID, request.POST.get('business_address'),
+            request.POST.get('business_address2'), '',
+            request.POST.get('business_city'),
+            request.POST.get('business_state'),
+            request.POST.get('business_zip'), '',
+            request.POST.get('business_phone')
+        )
+
+        insertAddress(
+            'HOME', studentID, request.POST.get('home_address1'),
+            request.POST.get('home_address2'),
+            request.POST.get('home_address3'),
+            request.POST.get('home_city'), request.POST.get('home_state'),
+            request.POST.get('home_zip'), '', request.POST.get('home_phone')
+        )
+
+
+        # Clear privacy values
+        clearPrivacy(studentID)
+
+        # Insert updated privacy settings
+        personal = request.POST.get('privacyPersonal','Y')
+        insertPrivacy(studentID, 'Personal', personal)
+
+        family = request.POST.get('privacyFamily','Y')
+        insertPrivacy(studentID, 'Family', family)
+
+        academics = request.POST.get('privacyAcademics','Y')
+        insertPrivacy(studentID, 'Academics', academics)
+
+        professional = request.POST.get('privacyProfessional','Y')
+        insertPrivacy(studentID, 'Professional', professional)
+
+        address = request.POST.get('privacyAddress','Y')
+        insertPrivacy(studentID, 'Address', address)
+
+        # Generate an email specifying the differences between
+        # the existing information and the newly submitted data
+        response = email_differences(studentID, request)
+        clear_activity(studentID)
+
+        # display the email data instead of sending the email if developing
+        if not settings.DEBUG:
+            response = HttpResponseRedirect(
+                reverse(
+                    'manager_user_edit_success',
+                    kwargs={'student_id':studentID}
+                )
+            )
+    else:
+        response = HttpResponse(
+            "Requires POST", content_type='text/plain; charset=utf-8'
+        )
+
+    return response
 
 
 @login_required
@@ -296,10 +303,10 @@ def search(request, messageSent = False, permissionDenied = False):
 def edit(request, student_id, success = False):
     if int(student_id) == int(request.user.id) or request.user.is_superuser:
         # Retrieve relevant information about the alumni
-        alumni = getStudent(student_id)
+        alumni = get_student(student_id)
         activities = getStudentActivities(student_id, False)
         athletics = getStudentActivities(student_id, True)
-        relatives = getRelatives(student_id)
+        relatives = get_relatives(student_id)
         privacy = getPrivacy(student_id)
 
         # Assemble collections for the user to make choices
@@ -370,7 +377,7 @@ def send_message(request):
         'body':emailBody,'recipient':recipient,'auto':autoAddOn,'sender':sender
     }
 
-    subject = "Message from {} {} via the Carthage Alumni Directory".format(
+    subject = u"Message from {} {} via the Carthage Alumni Directory".format(
         sender.firstname, sender.lastname
     )
     send_mail(
@@ -384,9 +391,10 @@ def send_message(request):
     )
 
 
-def getStudent(student_id):
+def get_student(student_id):
     # Compile all the one-to-one information about the alumn(a|us)
     deceased = 'AND NVL(ids.decsd, "N") = "N"'
+    # RIP: alpha
     if settings.DEBUG:
         deceased = ''
     sql = ALUMNA(sid = student_id, deceased = deceased)
@@ -428,56 +436,16 @@ def getStudentActivities(student_id, isSports = False):
         return objs
 
 
-def getRelatives(student_id):
+def get_relatives(student_id):
     # Retrieve collection of relatives (regardless of whether the alumn(a|us)
     # is the primary or secondary relationship)
-    relatives_sql = (' SELECT'
-                     '    TRIM('
-                     '      CASE'
-                     '            WHEN    rel.prim_id    =    {}    THEN    sec.firstname'
-                     '                                              ELSE    prim.firstname'
-                     '      END'
-                     '    )    AS    firstName,'
-                     '    TRIM('
-                     '        CASE'
-                     '            WHEN    rel.prim_id    =    {}    THEN    sec.lastname'
-                     '                                              ELSE    prim.lastname'
-                     '        END'
-                     '    )    AS    lastName,'
-                     '    TRIM('
-                     '        CASE'
-                     '            WHEN    rel.prim_id    =    {}    THEN    reltbl.sec_txt'
-                     '                                              ELSE    reltbl.prim_txt'
-                     '        END'
-                     '    )    AS    relText,'
-                     '    TRIM(reltbl.rel) ||'
-                     '    CASE'
-                     '        WHEN    rel.prim_id   =   {}  THEN    "2"'
-                     '                                      ELSE    "1"'
-                     '    END AS relCode'
-                     ' FROM    relation_rec    rel    INNER JOIN    id_rec      prim    ON    rel.prim_id   =    prim.id'
-                     '                                INNER JOIN    id_rec      sec     ON    rel.sec_id    =    sec.id'
-                     '                                INNER JOIN    rel_table   reltbl  ON    rel.rel       =    reltbl.rel'
-                     ' WHERE'
-                     '      TODAY   BETWEEN rel.beg_date    AND NVL(rel.end_date, TODAY)'
-                     '      AND'
-                     '      rel.rel IN  ("AUNN","COCO","GPGC","HW","HWNI","PC","SBSB")'
-                     '      AND'
-                     ' ('
-                     '      prim_id =   {}'
-                     '      OR'
-                     '      sec_id  =   {}'
-                     ' )'.format(
-            student_id, student_id, student_id, student_id,
-            student_id, student_id
-        )
-    )
-    logger.debug('relatives_sql = {}'.format(relatives_sql))
+
+    relatives_sql = RELATIVES_ORIG(student_number = student_id)
+
+    logger.debug('get_relatives() relatives_sql = {}'.format(relatives_sql))
     objs = do_sql(relatives_sql, INFORMIX_DEBUG)
-    if objs:
-        return objs.fetchall()
-    else:
-        return objs
+
+    return objs.fetchall()
 
 
 def getPrivacy(student_id):
@@ -607,7 +575,7 @@ def search_activity(request):
         return HttpResponse(objs)
 
 
-def clearRelative(carthageID):
+def clear_relative(carthageID):
     sql = '''
         UPDATE
             stg_aludir_relative
@@ -658,6 +626,10 @@ def insertAlumni(
     '''.format(carthageID)
     logger.debug('clear alumni sql = {}'.format(clear_sql))
     do_sql(clear_sql, INFORMIX_DEBUG)
+
+    if maidenname:
+        maidenname = maidenname.replace("(","").replace(")","")
+
     alumni_sql = '''
         INSERT INTO stg_aludir_alumni (
             id, fname, lname, suffix, prefix, email, maidenname, degree,
@@ -670,8 +642,7 @@ def insertAlumni(
             {}, "{}", TO_DATE("{}", "%Y-%m-%d")
         )
     '''.format(
-        carthageID, fname, lname, suffix, prefix, email,
-        maidenname.replace("(","").replace(")",""), degree,
+        carthageID, fname, lname, suffix, prefix, email, maidenname, degree,
         class_year, business_name, major1, major2, major3,
         masters_grad_year, job_title, get_now()
     )
@@ -715,8 +686,8 @@ def insertAddress(
     do_sql(address_sql, INFORMIX_DEBUG)
     return address_sql
 
+def clear_activity(carthageID):
 
-def insert_activity(carthageID, activityText):
     clear_sql = '''
         UPDATE
             stg_aludir_activity
@@ -729,6 +700,9 @@ def insert_activity(carthageID, activityText):
     '''.format(carthageID)
     logger.debug('clear activity sql = {}'.format(clear_sql))
     do_sql(clear_sql, INFORMIX_DEBUG)
+
+
+def insert_activity(carthageID, activityText):
     activity_sql = '''
         INSERT INTO stg_aludir_activity (
             id, activityText, submitted_on
@@ -775,17 +749,22 @@ def get_now():
 
 def email_differences(studentID, request):
     # Retrieve the existing information about the alumn(a|us)
-    student = getStudent(studentID)
+    student = get_student(studentID)
+
+    data = {
+        'studentID':studentID,'personal':False,'academics':False,
+        'business':False,'home':False
+    }
 
     if student['fname']:
         fname = student['fname']
     else:
         fname = '[missing first name]'
-    subject = "Alumni Directory Update for {} {} ({})".format(
+    subject = u"Alumni Directory Update for {} {} ({})".format(
         fname, student['lname'], studentID
     )
 
-    #Get the most recent unapproved information about the person
+    # Obtain the most recent unapproved information about the person
     alumni_sql = ("SELECT FIRST 1 TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email, TRIM(maidenname) AS maidenname,"
                   "TRIM(degree) AS degree, class_year, TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1, TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3, masters_grad_year,"
                   "TRIM(job_title) AS job_title "
@@ -797,26 +776,25 @@ def email_differences(studentID, request):
     alum = do_sql(alumni_sql, INFORMIX_DEBUG)
     alumni = alum.fetchone()
 
+    # Section for relatives
+
     # Get information about the alum's relatives
-    relatives_sql = ("SELECT TRIM(fname) AS fname, TRIM(lname) AS lname, "
-                     "  CASE "
-                     "      WHEN    TRIM(relcode)    =    'HW'    AND    alum_primary    =    'N'    THEN    'Husband'"
-                     "      WHEN    TRIM(relcode)    =    'HW'    AND    alum_primary    =    'Y'    THEN    'Wife'"
-                     "      WHEN    TRIM(relcode)    =    'PC'    AND    alum_primary    =    'N'    THEN    'Parent'"
-                     "      WHEN    TRIM(relcode)    =    'PC'    AND    alum_primary    =    'Y'    THEN    'Child'"
-                     "      WHEN    TRIM(relcode)    =    'SBSB'                                THEN    'Sibling'"
-                     "      WHEN    TRIM(relcode)    =    'COCO'                                THEN    'Cousin'"
-                     "      WHEN    TRIM(relcode)    =    'GPGC'    AND    alum_primary    =    'N'    THEN    'Grandparent'"
-                     "      WHEN    TRIM(relcode)    =    'GPGC'    AND    alum_primary    =    'Y'    THEN    'Grandchild'"
-                     "      WHEN    TRIM(relcode)    =    'AUNN'    AND    alum_primary    =    'N'    THEN    'Aunt/Uncle'"
-                     "      WHEN    TRIM(relcode)    =    'AUNN'    AND    alum_primary    =    'Y'    THEN    'Niece/Nephew'"
-                     "                                                                      ELSE    TRIM(relcode)"
-                     "  END    AS    relcode "
-                     "FROM stg_aludir_relative "
-                     "WHERE id = %s AND NVL(approved, '') = '' "
-                    ) % (studentID)
+    relatives_orig = get_relatives(studentID)
+    relatives_sql = RELATIVES_TEMP(student_number = studentID)
     logger.debug('email_differences() relatives_sql = {}'.format(relatives_sql))
-    relatives = do_sql(relatives_sql, INFORMIX_DEBUG).fetchall()
+    relatives_new = do_sql(relatives_sql, INFORMIX_DEBUG).fetchall()
+    relatives = []
+    for r1 in relatives_orig:
+        ro = list(r1)
+        del ro[3]
+        for r2 in relatives_new:
+            rn = list(r2)
+            if ro != rn:
+                relatives.append(rn)
+
+    data['relatives'] = relatives
+    # Loop through all the relatives' records
+    clear_relative(studentID)
 
     # Get address information (work and home)
     homeaddress_sql = ("SELECT FIRST 1 TRIM(address_line1) AS address_line1, TRIM(address_line2) AS address_line2, TRIM(address_line3) AS address_line3, TRIM(city) AS city, TRIM(state) AS state,"
@@ -848,10 +826,6 @@ def email_differences(studentID, request):
     logger.debug('email_differences() activities_sql = {}'.format(activities_sql))
     alum_activities = do_sql(activities_sql, INFORMIX_DEBUG).fetchall()
 
-    data = {
-        'studentID':studentID,'personal':False,'academics':False,
-        'business':False,'home':False
-    }
     # Section for personal information
     if(student['prefix'].lower() != alumni.prefix.lower()):
         data["prefix"] = alumni.prefix
@@ -873,9 +847,6 @@ def email_differences(studentID, request):
         data["suffix"] = alumni.suffix
         data["original_suffix"] = student['suffix']
         data["personal"] = True
-
-    #Section for relatives
-    data["relatives"] = relatives
 
     #Section for academics
     if(student['degree'] != alumni.degree):
@@ -903,16 +874,17 @@ def email_differences(studentID, request):
     # (this may be split out into organizations vs athletics in the future)
     data["organizations"] = alum_activities
 
+    # Section for business name
     if(student['business_name'] != alumni.business_name):
         data["business_name"] = alumni.business_name
         data["original_businessname"] = student['business_name']
         data["business"] = True
+    # Section for job title
     if(student['job_title'] != alumni.job_title):
         data["job_title"] = alumni.job_title
         data["original_jobtitle"] = student['job_title']
         data["business"] = True
-
-    # Section for work address
+    # Section for work/business address
     if (work_address != None and len(work_address) > 0):
         if(student['business_address'] != work_address.address_line1):
             data["business_address"] = work_address.address_line1

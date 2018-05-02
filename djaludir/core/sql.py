@@ -1,3 +1,92 @@
+RELATIVES_ORIG = '''
+    SELECT
+        TRIM(
+            CASE
+                WHEN    rel.prim_id = {student_number}
+                THEN    sec.firstname
+                ELSE    prim.firstname
+            END
+        ) AS firstName,
+        TRIM(
+            CASE
+                WHEN    rel.prim_id = {student_number}
+                THEN    sec.lastname
+                ELSE    prim.lastname
+            END
+       ) AS lastName,
+       TRIM(
+            CASE
+                WHEN    rel.prim_id = {student_number}
+                THEN    reltbl.sec_txt
+                ELSE    reltbl.prim_txt
+            END
+        ) AS relText,
+        TRIM(reltbl.rel) ||
+            CASE
+                WHEN    rel.prim_id = {student_number}
+                THEN    "2"
+                ELSE    "1"
+            END
+        AS relCode
+    FROM
+        relation_rec rel
+    INNER JOIN
+        id_rec prim
+    ON
+        rel.prim_id = prim.id
+    INNER JOIN
+        id_rec sec
+    ON
+        rel.sec_id = sec.id
+    INNER JOIN
+        rel_table reltbl
+    ON
+        rel.rel = reltbl.rel
+    WHERE
+        TODAY BETWEEN
+            rel.beg_date
+        AND
+            NVL(rel.end_date, TODAY)
+    AND
+        rel.rel IN ("AUNN","COCO","GPGC","HW","HWNI","PC","SBSB")
+    AND
+        (prim_id = {student_number} OR sec_id = {student_number})
+'''.format
+
+RELATIVES_TEMP = '''
+    SELECT
+        TRIM(fname) AS fname, TRIM(lname) AS lname,
+        CASE
+        WHEN
+            TRIM(relcode) = 'HW'   AND alum_primary = 'N' THEN 'Husband'
+        WHEN
+            TRIM(relcode) = 'HW'   AND alum_primary = 'Y' THEN 'Wife'
+        WHEN
+            TRIM(relcode) = 'PC'   AND alum_primary = 'N' THEN 'Parent'
+        WHEN
+            TRIM(relcode) = 'PC'   AND alum_primary = 'Y' THEN 'Child'
+        WHEN
+            TRIM(relcode) = 'GPGC' AND alum_primary = 'N' THEN 'Grandparent'
+        WHEN
+            TRIM(relcode) = 'GPGC' AND alum_primary = 'Y' THEN 'Grandchild'
+        WHEN
+            TRIM(relcode) = 'AUNN' AND alum_primary = 'N' THEN 'Aunt/Uncle'
+        WHEN
+            TRIM(relcode) = 'AUNN' AND alum_primary = 'Y' THEN 'Niece/Nephew'
+        WHEN
+            TRIM(relcode) = 'SBSB' THEN 'Sibling'
+        WHEN
+            TRIM(relcode) = 'COCO' THEN 'Cousin'
+        ELSE
+            TRIM(relcode)
+        END AS
+            relcode
+    FROM
+        stg_aludir_relative
+    WHERE
+        id = {student_number} AND NVL(approved, "") = ""
+'''.format
+
 ALUMNA = '''
 SELECT DISTINCT
     ids.id AS carthage_id,

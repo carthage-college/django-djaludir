@@ -130,6 +130,8 @@ DEFAULT_FROM_EMAIL = 'confirmation@carthage.edu'
 SERVER_EMAIL = 'larry@carthage.edu'
 SERVER_MAIL = 'confirmation@carthage.edu'
 MANAGER_RECIPIENTS = []
+# Unit Tests
+TEST_STUDENT_NUMBER = 0
 # LDAP Constants
 LDAP_SERVER_PWM = ''
 LDAP_PORT_PWM = ''

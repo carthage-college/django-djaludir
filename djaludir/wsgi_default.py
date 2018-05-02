@@ -5,11 +5,14 @@ import signal
 import sys
 
 sys.path.append('/usr/lib/python2.7/')
+sys.path.append('/usr/lib/python2.7/dist-packages/')
+sys.path.append('/usr/local/lib/python2.7/dist-packages/')
 #sys.path.append('/data2/django_trunk/')
 #sys.path.append('/data2/django_1.5.5/')
 #sys.path.append('/data2/django_1.6/')
 #sys.path.append('/data2/django_1.8/')
 sys.path.append('/data2/django_1.11/')
+sys.path.append('/data2/django_projects/django-djaludir/')
 sys.path.append('/data2/django_projects/')
 sys.path.append('/data2/django_third/')
 # Django

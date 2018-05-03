@@ -1,3 +1,14 @@
+PRIVACY =  '''
+SELECT
+    TRIM(fieldname) AS fieldname, TRIM(display) AS display
+FROM
+    stg_aludir_privacy
+WHERE
+    id = {cid}
+ORDER BY
+    fieldname
+'''.format
+
 RELATIVES_ORIG = '''
     SELECT
         TRIM(
@@ -81,6 +92,30 @@ WHERE
     id = {cid} AND aa = 'WORK' AND NVL(approved, '') = ''
 ORDER BY
     aa_no DESC
+'''.format
+
+ACTIVITIES = '''
+SELECT
+    TRIM(invl_table.txt) AS {fieldname}
+FROM
+    invl_table
+INNER JOIN
+    involve_rec
+ON
+    invl_table.invl = involve_rec.invl
+WHERE
+    involve_rec.id  = {cid}
+AND
+    invl_table.invl MATCHES "S[0-9][0-9][0-9]"
+AND
+    invl_table.invl {comparison} IN (
+        "S019","S020","S021","S022","S228","S043","S044","S056","S057","S073",
+        "S079","S080","S083","S090","S095","S220","S100","S101","S109","S126",
+        "S131","S156","S161","S172","S173","S176","S186","S187","S196","S197",
+        "S204","S205","S207","S208","S253","S215","S216"
+    )
+ORDER BY
+   TRIM(invl_table.txt)
 '''.format
 
 ACTIVITIES_TEMP = '''
@@ -265,6 +300,6 @@ FROM
     LEFT JOIN
         conc_table conc2    ON  progs.conc2     = conc2.conc
 WHERE
-    ids.id = {sid}
+    ids.id = {cid}
 {deceased}
 '''.format

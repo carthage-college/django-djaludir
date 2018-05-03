@@ -3,7 +3,7 @@ from django.conf import settings
 from django.shortcuts import render
 
 from djaludir.core.sql import (
-    ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
+    ACTIVITIES, ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
     RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
 )
 from djzbar.utils.informix import do_sql
@@ -16,13 +16,6 @@ logger = logging.getLogger(__name__)
 INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
 NOW = datetime.datetime.now().strftime('%Y-%m-%d')
-
-ATHLETIC_IDS = '''
-    "S019","S020","S021","S022","S228","S043","S044","S056","S057","S073",
-    "S079","S080","S083","S090","S095","S220","S100","S101","S109","S126",
-    "S131","S156","S161","S172","S173","S176","S186","S187","S196","S197",
-    "S204","S205","S207","S208","S253","S215","S216"
-'''
 
 
 def get_student(cid):
@@ -51,7 +44,7 @@ def get_student(cid):
         return None
 
 
-def get_student_activities(cid, is_sports=False):
+def get_activities(cid, is_sports=False):
     """
     Conditional statements to provide the correct logic and
     terminology depending on whether or not activities or athletics
@@ -61,31 +54,13 @@ def get_student_activities(cid, is_sports=False):
     fieldname = 'activity' if not is_sports else 'sport'
     comparison = 'NOT' if not is_sports else ''
 
-    activities_sql = '''
-        SELECT
-            TRIM(invl_table.txt) AS {}
-        FROM
-            invl_table
-        INNER JOIN
-            involve_rec
-        ON
-            invl_table.invl = involve_rec.invl
-        WHERE
-            involve_rec.id  = {}
-        AND
-            invl_table.invl MATCHES "S[0-9][0-9][0-9]"
-        AND
-            invl_table.invl {} IN  ({})
-        ORDER BY
-           TRIM(invl_table.txt)
-    '''.format(fieldname, cid, comparison, ATHLETIC_IDS)
+    activities_sql = ACTIVITIES(
+        cid = cid, fieldname = fieldname, comparison = comparision
     )
     logger.debug('activities_sql = {}'.format(activities_sql))
     objs = do_sql(activities_sql, INFORMIX_DEBUG)
-    if objs:
-        return objs.fetchall()
-    else:
-        return objs
+
+    return objs.fetchall()
 
 
 def get_relatives(cid):
@@ -103,16 +78,7 @@ def get_relatives(cid):
 
 
 def get_privacy(cid):
-    privacy_sql = '''
-        SELECT
-            TRIM(fieldname) AS fieldname, TRIM(display) AS display
-        FROM
-            stg_aludir_privacy
-        WHERE
-            id = {}
-        ORDER BY
-            fieldname
-    '''.format(cid)
+    privacy_sql = PRIVACY(cid = cid)
     logger.debug('privacy_sql = {}'.format(privacy_sql))
     privacy = do_sql(privacy_sql, INFORMIX_DEBUG)
     field = []
@@ -134,10 +100,8 @@ def get_majors():
     '''
     logger.debug('major_sql = {}'.format(major_sql))
     objs = do_sql(major_sql, INFORMIX_DEBUG)
-    if objs:
-        return objs.fetchall()
-    else:
-        return objs
+
+    return objs.fetchall()
 
 
 def get_states():
@@ -151,10 +115,8 @@ def get_states():
     '''
     logger.debug('states_sql = {}'.format(states_sql))
     objs = do_sql(states_sql, INFORMIX_DEBUG)
-    if objs:
-        return objs.fetchall()
-    else:
-        return objs
+
+    return objs.fetchall()
 
 
 def get_countries():
@@ -168,10 +130,8 @@ def get_countries():
     '''
     logger.debug('countries_sql = {}'.format(countries_sql))
     objs = do_sql(countries_sql, INFORMIX_DEBUG)
-    if objs:
-        return objs.fetchall()
-    else:
-        return objs
+
+    return objs.fetchall()
 
 
 def get_message_info(cid):

@@ -11,7 +11,7 @@ from djaludir.core.sql import ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP
 from djaludir.manager.utils import (
     clear_activity, clear_privacy, email_differences,
     get_countries, get_majors, get_message_info, get_privacy,
-    get_relatives, get_states, get_student, get_student_activities,
+    get_relatives, get_states, get_student, get_activities,
     insert_activity, insert_address, insert_alumni, insert_privacy,
     insert_relative
 )
@@ -30,8 +30,8 @@ def display(request, student_id):
     # Get information about the alumn(a|us)
     alumni = get_student(student_id)
     if alumni != None:
-        activities = get_student_activities(student_id, False)
-        athletics = get_student_activities(student_id, True)
+        activities = get_activities(student_id, False)
+        athletics = get_activities(student_id, True)
         relatives = get_relatives(student_id)
         privacy = get_privacy(student_id)
     else:
@@ -398,8 +398,8 @@ def edit(request, student_id, success = False):
     if int(student_id) == int(request.user.id) or request.user.is_superuser:
         # Retrieve relevant information about the alumni
         alumni = get_student(student_id)
-        activities = get_student_activities(student_id, False)
-        athletics = get_student_activities(student_id, True)
+        activities = get_activities(student_id, False)
+        athletics = get_activities(student_id, True)
         relatives = get_relatives(student_id)
         privacy = get_privacy(student_id)
 

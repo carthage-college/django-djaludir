@@ -120,7 +120,7 @@ ORDER BY
 
 ACTIVITIES_TEMP = '''
 SELECT
-    activityText
+    TRIM(activityText)
 FROM
     stg_aludir_activity
 WHERE

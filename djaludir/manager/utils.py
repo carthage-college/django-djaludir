@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from djaludir.core.sql import (
     ACTIVITIES, ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
-    RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
+    PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
 )
 from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
@@ -27,7 +27,7 @@ def get_student(cid):
     # RIP: alpha
     if settings.DEBUG:
         deceased = ''
-    sql = ALUMNA(sid = cid, deceased = deceased)
+    sql = ALUMNA(cid = cid, deceased = deceased)
     logger.debug('get_student() sql = {}'.format(sql))
     student = do_sql(sql, INFORMIX_DEBUG)
     obj = student.fetchone()
@@ -55,7 +55,7 @@ def get_activities(cid, is_sports=False):
     comparison = 'NOT' if not is_sports else ''
 
     activities_sql = ACTIVITIES(
-        cid = cid, fieldname = fieldname, comparison = comparision
+        cid = cid, fieldname = fieldname, comparison = comparison
     )
     logger.debug('activities_sql = {}'.format(activities_sql))
     objs = do_sql(activities_sql, INFORMIX_DEBUG)
@@ -300,7 +300,7 @@ def insert_activity(cid, activityText):
             {}, "{}", TO_DATE("{}", "%Y-%m-%d")
         )
     '''.format(
-        cid, activityText, NOW
+        cid, activityText.strip(), NOW
     )
     logger.debug('insert_activity() sql = {}'.format(activity_sql))
     do_sql(activity_sql)
@@ -356,8 +356,8 @@ def email_differences(cid, request):
     # Obtain the most recent unapproved information about the person
     alumna_temp = ALUMNA_TEMP(cid = cid)
 
-    logger.debug('email_differences() alumna_temp = {}'.format(alumni_temp))
-    alum = do_sql(alumni_temp, INFORMIX_DEBUG)
+    logger.debug('email_differences() alumna_temp = {}'.format(alumna_temp))
+    alum = do_sql(alumna_temp, INFORMIX_DEBUG)
     alumni = alum.fetchone()
 
     # Section for relatives
@@ -384,27 +384,39 @@ def email_differences(cid, request):
     # Loop through all the relatives' records and set approved = "N"
     clear_relative(cid)
 
-    # Get address information (work and home)
-    homeaddress_sql = HOMEADDRESS_TEMP(cid = cid)
-    logger.debug('email_differences() homeaddress_sql = {}'.format(homeaddress_sql))
-    homeaddress = do_sql(homeaddress_sql, INFORMIX_DEBUG)
-    if(homeaddress != None):
-        home_address = homeaddress.fetchone()
-    else:
-        home_address = []
+    # activities/athletics information
+    activities = get_activities(cid, False)
+    athletics = get_activities(cid, True)
+    activities_orig = []
 
-    workaddress_sql = WORKADDRES_TEMP(cid = cid)
-    logger.debug('email_differences() workaddress_sql = {}'.format(workaddress_sql))
+    for a in activities:
+        activities_orig.append(a)
+
+    for a in athletics:
+        activities_orig.append(a)
+
+    activities_temp = do_sql(
+        ACTIVITIES_TEMP(cid = cid), INFORMIX_DEBUG
+    ).fetchall()
+    activities_diff = []
+
+    for temp in activities_temp:
+        if temp not in activities_orig:
+            activities_diff.append(temp)
+
+    clear_activity(cid)
+
+    # Get address information (work and home)
+    home_address = do_sql(
+        HOMEADDRESS_TEMP(cid = cid), INFORMIX_DEBUG
+    ).fetchone()
+
+    workaddress_sql = WORKADDRESS_TEMP(cid = cid)
     workaddress = do_sql(workaddress_sql, INFORMIX_DEBUG)
     if(workaddress != None):
         work_address = workaddress.fetchone()
     else:
         work_address = []
-
-    # Get organization information
-    activities_sql = ACTIVITIES_TEMP(cid = cid)
-    logger.debug('email_differences() activities_sql = {}'.format(activities_sql))
-    alum_activities = do_sql(activities_sql, INFORMIX_DEBUG).fetchall()
 
     # Section for personal information
     if(student['prefix'].lower() != alumni.prefix.lower()):
@@ -452,7 +464,7 @@ def email_differences(cid, request):
 
     # Section for activities
     # (this may be split out into organizations vs athletics in the future)
-    data["organizations"] = alum_activities
+    data["organizations"] = activities_diff
 
     # Section for business name
     if(student['business_name'] != alumni.business_name):

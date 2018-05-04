@@ -1,5 +1,4 @@
 {% autoescape off %}
-{{data}}
 {% if data.personal %}
   <h3>Personal Information</h3>
   <dl {{dl_detail}}>
@@ -272,7 +271,7 @@
         changed from
         "{{data.original_homephone}}"
         to
-        "<b>{{data.home_phone}</b>"
+        "<b>{{data.home_phone}}</b>"
     </dd>
   {% endif %}
   {% if data.home_address %}
@@ -305,7 +304,7 @@
         changed from
         "{{data.original_homeaddress3}}"
         to
-        "<b>{{data.home_address3}</b>}"
+        "<b>{{data.home_address3}}</b>}"
     </dd>
   {% endif %}
   {% if data.home_city %}

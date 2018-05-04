@@ -9,7 +9,7 @@ from django.template import RequestContext, loader, Context
 
 from djaludir.core.sql import ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP
 from djaludir.manager.utils import (
-    clear_activity, clear_privacy, email_differences,
+    clear_privacy, email_differences,
     get_countries, get_majors, get_message_info, get_privacy,
     get_relatives, get_states, get_student, get_activities,
     insert_activity, insert_address, insert_alumni, insert_privacy,
@@ -113,7 +113,8 @@ def update(request):
             request.POST.get('business_address2'), '',
             request.POST.get('business_city'),
             request.POST.get('business_state'),
-            request.POST.get('business_zip'), '',
+            request.POST.get('business_zip'),
+            request.POST.get('business_country'),
             request.POST.get('business_phone')
         )
 
@@ -122,7 +123,8 @@ def update(request):
             request.POST.get('home_address2'),
             request.POST.get('home_address3'),
             request.POST.get('home_city'), request.POST.get('home_state'),
-            request.POST.get('home_zip'), '', request.POST.get('home_phone')
+            request.POST.get('home_zip'), request.POST.get('home_country'),
+            request.POST.get('home_phone')
         )
 
 
@@ -148,7 +150,6 @@ def update(request):
         # Generate an email specifying the differences between
         # the existing information and the newly submitted data
         response = email_differences(studentID, request)
-        clear_activity(studentID)
 
         # display the email data instead of sending the email if developing
         if not settings.DEBUG:

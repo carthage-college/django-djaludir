@@ -2,7 +2,7 @@ from django.conf import settings
 from django.test import TestCase
 
 from djaludir.core.sql import RELATIVES_TEMP
-from djaludir.manager.views import get_relatives
+from djaludir.manager.utils import get_relatives
 
 from djtools.utils.logging import seperator
 from djzbar.utils.informix import do_sql

@@ -22,12 +22,12 @@ class ManagerActivitiesTestCase(TestCase):
         print(seperator())
 
         # organization, club, etc.
-        sport = False
+        is_sports = False
         fieldname = 'activity' if not is_sports else 'sport'
         comparison = 'NOT' if not is_sports else ''
 
         sql = ACTIVITIES(
-            cid = self.cid, fieldname = fieldname, comparison = comparision
+            cid = self.cid, fieldname = fieldname, comparison = comparison
         )
 
         print(sql)
@@ -45,12 +45,13 @@ class ManagerActivitiesTestCase(TestCase):
         print(seperator())
 
         # organization, club, etc.
-        sport = False
+        is_sports = False
         fieldname = 'activity' if not is_sports else 'sport'
         comparison = 'NOT' if not is_sports else ''
 
         sql = ACTIVITIES(
-            cid = self.cid_invalid, fieldname = fieldname, comparison = comparision
+            cid = self.cid_invalid, fieldname = fieldname,
+            comparison = comparison
         )
 
         print(sql)
@@ -68,13 +69,10 @@ class ManagerActivitiesTestCase(TestCase):
         print(seperator())
 
 
-        sql = ACTIVITIES(cid = self.cid)
+        sql = ACTIVITIES_TEMP(cid = self.cid)
 
         print(sql)
 
         activities = do_sql(sql, self.debug, self.earl).fetchall()
 
         print(activities)
-
-        self.assertEqual(len(activities), 0)
-

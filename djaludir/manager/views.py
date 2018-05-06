@@ -7,7 +7,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext, loader, Context
 
-from djaludir.core.sql import ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP
+from djaludir.core.sql import (
+    ACTIVITY_SEARCH, ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP, SEARCH
+)
 from djaludir.manager.utils import (
     clear_privacy, email_differences,
     get_countries, get_majors, get_message_info, get_privacy,
@@ -26,14 +28,14 @@ INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
 
 @login_required
-def display(request, student_id):
-    # Get information about the alumn(a|us)
-    alumni = get_student(student_id)
+def display(request, cid):
+    # fetch information about the alumna
+    alumni = get_student(cid)
     if alumni != None:
-        activities = get_activities(student_id, False)
-        athletics = get_activities(student_id, True)
-        relatives = get_relatives(student_id)
-        privacy = get_privacy(student_id)
+        activities = get_activities(cid, False)
+        athletics = get_activities(cid, True)
+        relatives = get_relatives(cid)
+        privacy = get_privacy(cid)
     else:
         activities = None
         athletics = None
@@ -43,9 +45,8 @@ def display(request, student_id):
     return render(
         request, 'manager/display.html',
         {
-            'studentID':student_id, 'person':alumni, 'activities':activities,
-            'athletics':athletics, 'relatives':relatives,
-            'privacy':privacy
+            'studentID':cid, 'person':alumni, 'activities':activities,
+            'athletics':athletics, 'relatives':relatives, 'privacy':privacy
         }
     )
 
@@ -55,109 +56,114 @@ def update(request):
 
     if request.method=='POST':
         # Retrieve the ID of the alumn(a|us)
-        studentID = request.POST.get('carthageID')
+        cid = request.POST.get('carthageID')
 
-        # Insert personal information
-        alumni_sql = insert_alumni(
-            studentID, request.POST.get('fname'), request.POST.get('lname'),
-            request.POST.get('suffix'), request.POST.get('prefix'),
-            request.POST.get('email'), request.POST.get('maidenname'),
-            request.POST.get('degree'), request.POST.get('class_year'),
-            request.POST.get('business_name'), request.POST.get('major1'),
-            request.POST.get('major2'), request.POST.get('major3'),
-            request.POST.get('masters_grad_year'), request.POST.get('job_title')
-        )
+        if int(cid) == int(request.user.id) or request.user.is_superuser:
 
-        if request.POST.get('relativeCount'):
-            for i in range (1, int(request.POST.get('relativeCount')) + 1):
-                relFname = request.POST.get('relativeFname' + str(i))
-                relLname = request.POST.get('relativeLname' + str(i))
-                relRelation = request.POST.get('relativeText' + str(i))
+            # Insert personal information
+            alumni_sql = insert_alumni(
+                cid, request.POST.get('fname'), request.POST.get('lname'),
+                request.POST.get('suffix'), request.POST.get('prefix'),
+                request.POST.get('email'), request.POST.get('maidenname'),
+                request.POST.get('degree'), request.POST.get('class_year'),
+                request.POST.get('business_name'), request.POST.get('major1'),
+                request.POST.get('major2'), request.POST.get('major3'),
+                request.POST.get('masters_grad_year'),
+                request.POST.get('job_title')
+            )
 
-                # Because of the way relationships are stored in CX,
-                # we must identify if the alumn(a|us) matches the first or
-                # second role in the relationship
-                alumPrimary = 'Y'
-                if(relRelation[-1:] == '1'):
-                    alumPrimary = 'N'
+            if request.POST.get('relativeCount'):
+                for i in range (1, int(request.POST.get('relativeCount')) + 1):
+                    relFname = request.POST.get('relativeFname' + str(i))
+                    relLname = request.POST.get('relativeLname' + str(i))
+                    relRelation = request.POST.get('relativeText' + str(i))
 
-                if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-                    relRelation = relRelation[0:-1]
+                    # Because of the way relationships are stored in CX,
+                    # we must identify if the alumn(a|us) matches the first or
+                    # second role in the relationship
+                    alumPrimary = 'Y'
+                    if(relRelation[-1:] == '1'):
+                        alumPrimary = 'N'
 
-                # If the relative has some value in their name and a specified
-                # relationship, insert the record
-                if(len(relFname + relLname) > 0 and relRelation != ''):
-                    insert_relative(
-                        studentID, relRelation, relFname, relLname, alumPrimary
+                    if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
+                        relRelation = relRelation[0:-1]
+
+                    # If the relative has some value in their name and a specified
+                    # relationship, insert the record
+                    if(len(relFname + relLname) > 0 and relRelation != ''):
+                        insert_relative(
+                            cid, relRelation, relFname, relLname, alumPrimary
+                        )
+
+            # Insert organizationa and athletic involvement
+            if request.POST.get('activityCount'):
+                for i in range (1, int(request.POST.get('activityCount')) + 1):
+                    activityText = request.POST.get('activity' + str(i))
+
+                    if(activityText):
+                        insert_activity(cid, activityText)
+
+            if request.POST.get('athleticCount'):
+                for i in range (1, int(request.POST.get('athleticCount')) + 1):
+                    athleticText = request.POST.get('athletic' + str(i))
+
+                    if athleticText and (len(athleticText) > 0):
+                        insert_activity(cid, athleticText)
+
+            # Insert home and work address information
+            insert_address(
+                'WORK', cid, request.POST.get('business_address'),
+                request.POST.get('business_address2'), '',
+                request.POST.get('business_city'),
+                request.POST.get('business_state'),
+                request.POST.get('business_zip'),
+                request.POST.get('business_country'),
+                request.POST.get('business_phone')
+            )
+
+            insert_address(
+                'HOME', cid, request.POST.get('home_address1'),
+                request.POST.get('home_address2'),
+                request.POST.get('home_address3'),
+                request.POST.get('home_city'), request.POST.get('home_state'),
+                request.POST.get('home_zip'), request.POST.get('home_country'),
+                request.POST.get('home_phone')
+            )
+
+            # Clear privacy values
+            clear_privacy(cid)
+
+            # Insert updated privacy settings
+            personal = request.POST.get('privacyPersonal','Y')
+            insert_privacy(cid, 'Personal', personal)
+
+            family = request.POST.get('privacyFamily','Y')
+            insert_privacy(cid, 'Family', family)
+
+            academics = request.POST.get('privacyAcademics','Y')
+            insert_privacy(cid, 'Academics', academics)
+
+            professional = request.POST.get('privacyProfessional','Y')
+            insert_privacy(cid, 'Professional', professional)
+
+            address = request.POST.get('privacyAddress','Y')
+            insert_privacy(cid, 'Address', address)
+
+            # Generate an email specifying the differences between
+            # the existing information and the newly submitted data
+            response = email_differences(cid, request)
+
+            # display the email data instead of sending the email if developing
+            if not settings.DEBUG:
+                response = HttpResponseRedirect(
+                    reverse(
+                        'manager_user_edit_success', kwargs={'cid':cid}
                     )
-
-
-        # Insert organizationa and athletic involvement
-        if request.POST.get('activityCount'):
-            for i in range (1, int(request.POST.get('activityCount')) + 1):
-                activityText = request.POST.get('activity' + str(i))
-
-                if(activityText):
-                    insert_activity(studentID, activityText)
-
-        if request.POST.get('athleticCount'):
-            for i in range (1, int(request.POST.get('athleticCount')) + 1):
-                athleticText = request.POST.get('athletic' + str(i))
-
-                if athleticText and (len(athleticText) > 0):
-                    insert_activity(studentID, athleticText)
-
-        # Insert home and work address information
-        insert_address(
-            'WORK', studentID, request.POST.get('business_address'),
-            request.POST.get('business_address2'), '',
-            request.POST.get('business_city'),
-            request.POST.get('business_state'),
-            request.POST.get('business_zip'),
-            request.POST.get('business_country'),
-            request.POST.get('business_phone')
-        )
-
-        insert_address(
-            'HOME', studentID, request.POST.get('home_address1'),
-            request.POST.get('home_address2'),
-            request.POST.get('home_address3'),
-            request.POST.get('home_city'), request.POST.get('home_state'),
-            request.POST.get('home_zip'), request.POST.get('home_country'),
-            request.POST.get('home_phone')
-        )
-
-
-        # Clear privacy values
-        clear_privacy(studentID)
-
-        # Insert updated privacy settings
-        personal = request.POST.get('privacyPersonal','Y')
-        insert_privacy(studentID, 'Personal', personal)
-
-        family = request.POST.get('privacyFamily','Y')
-        insert_privacy(studentID, 'Family', family)
-
-        academics = request.POST.get('privacyAcademics','Y')
-        insert_privacy(studentID, 'Academics', academics)
-
-        professional = request.POST.get('privacyProfessional','Y')
-        insert_privacy(studentID, 'Professional', professional)
-
-        address = request.POST.get('privacyAddress','Y')
-        insert_privacy(studentID, 'Address', address)
-
-        # Generate an email specifying the differences between
-        # the existing information and the newly submitted data
-        response = email_differences(studentID, request)
-
-        # display the email data instead of sending the email if developing
-        if not settings.DEBUG:
-            response = HttpResponseRedirect(
-                reverse(
-                    'manager_user_edit_success',
-                    kwargs={'student_id':studentID}
                 )
+        else:
+            response = HttpResponse(
+                "You do not have permission to manage this profile",
+                content_type='text/plain; charset=utf-8'
             )
     else:
         response = HttpResponse(
@@ -213,58 +219,7 @@ def search(request, messageSent = False, permissionDenied = False):
 
         # Based on the criteria specified by the user,
         # add the necessary tables to the search query
-        selectFromSQL = '''
-            SELECT
-                alum.cl_yr AS class_year, ids.firstname,
-                maiden.lastname AS maiden_name, ids.lastname, ids.id,
-                NVL(
-                    TRIM(aaEmail.line1) ||
-                    TRIM(aaEmail.line2) ||
-                    TRIM(aaEmail.line3), ""
-                ) AS email,
-                LOWER(ids.lastname) AS sort1,
-                LOWER(ids.firstname) AS sort2
-            FROM
-                alum_rec alum
-            INNER JOIN
-                id_rec ids ON alum.id = ids.id
-            LEFT JOIN (
-                SELECT
-                    prim_id, MAX(active_date) active_date
-                FROM
-                    addree_rec
-                WHERE
-                    style = "M"
-                GROUP BY prim_id
-                )
-                prevmap
-            ON
-                ids.id = prevmap.prim_id
-            LEFT JOIN
-                addree_rec maiden
-            ON
-                maiden.prim_id = prevmap.prim_id
-            AND
-                maiden.active_date = prevmap.active_date
-            AND
-                maiden.style = "M"
-            LEFT JOIN
-                aa_rec aaEmail
-            ON
-                alum.id = aaEmail.id
-            AND
-                aaEmail.aa = "EML2"
-            AND
-                TODAY BETWEEN aaEmail.beg_date AND NVL(aaEmail.end_date, TODAY)
-            LEFT JOIN
-                hold_rec holds
-            ON
-                alum.id = holds.id
-            AND
-                holds.hld = "DDIR"
-            AND
-                CURRENT BETWEEN holds.beg_date AND NVL(holds.end_date, CURRENT)
-        '''
+        selectFromSQL = SEARCH
         # If search criteria includes activity or sport
         # add the involvement tables
         if 'activity' in fieldlist:
@@ -395,14 +350,14 @@ def search(request, messageSent = False, permissionDenied = False):
 
 
 @login_required
-def edit(request, student_id, success = False):
-    if int(student_id) == int(request.user.id) or request.user.is_superuser:
+def edit(request, cid, success = False):
+    if int(cid) == int(request.user.id) or request.user.is_superuser:
         # Retrieve relevant information about the alumni
-        alumni = get_student(student_id)
-        activities = get_activities(student_id, False)
-        athletics = get_activities(student_id, True)
-        relatives = get_relatives(student_id)
-        privacy = get_privacy(student_id)
+        alumni = get_student(cid)
+        activities = get_activities(cid, False)
+        athletics = get_activities(cid, True)
+        relatives = get_relatives(cid)
+        privacy = get_privacy(cid)
 
         # Assemble collections for the user to make choices
         majors = get_majors()
@@ -419,7 +374,7 @@ def edit(request, student_id, success = False):
         return render(
             request,
             'manager/edit.html', {
-                'submitted':success,'studentID':student_id, 'person':alumni,
+                'submitted':success,'studentID':cid, 'person':alumni,
                 'activities':activities, 'athletics':athletics,
                 'relatives':relatives, 'privacy':privacy, 'majors':majors,
                 'prefixes':prefixes, 'suffixes':suffixes,
@@ -432,8 +387,8 @@ def edit(request, student_id, success = False):
 
 
 @login_required
-def message(request, student_id, recipientHasEmail = True):
-    recipient = get_message_info(student_id)
+def message(request, cid, recipientHasEmail = True):
+    recipient = get_message_info(cid)
     recipientHasEmail = len(recipient.email) > 0
     return render(
         request,
@@ -488,22 +443,9 @@ def send_message(request):
 
 @login_required
 def search_activity(request):
-    search_string = request.GET.get('term','Football')
-    activity_search_sql = '''
-        SELECT
-            TRIM(invl_table.txt) txt
-        FROM
-            invl_table
-        WHERE
-            invl_table.invl MATCHES "S[0-9][0-9][0-9]"
-        AND
-            LOWER(invl_table.txt) LIKE "%%{}%%"
-        ORDER BY
-            TRIM(invl_table.txt)
-    '''.format(search_string.lower())
-    logger.debug('activity_search_sql = {}'.format(activity_search_sql))
-    objs = do_sql(activity_search_sql, INFORMIX_DEBUG)
-    if objs:
-        return HttpResponse(objs.fetchall())
-    else:
-        return HttpResponse(objs)
+    search_string = request.GET.get('term','Soccer')
+    objs = do_sql(
+        ACTIVITY_SEARCH(search_string = search_string.lower()), INFORMIX_DEBUG
+    )
+
+    return HttpResponse(objs.fetchall())

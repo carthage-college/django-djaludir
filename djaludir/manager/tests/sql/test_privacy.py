@@ -11,9 +11,9 @@ class ManagerPrivacyTestCase(TestCase):
 
     def setUp(self):
         self.debug = settings.INFORMIX_DEBUG
-        self.cid = settings.TEST_COLLEGE_ID
-        self.cid_invalid = 666
         self.earl = settings.INFORMIX_EARL
+        self.cid = settings.TEST_USER_COLLEGE_ID
+        self.cid_null = 666
 
     def test_privacy_select(self):
 
@@ -36,7 +36,7 @@ class ManagerPrivacyTestCase(TestCase):
         print("test privacy select statement with invalid college ID")
         print(seperator())
 
-        sql = PRIVACY(cid = self.cid_invalid)
+        sql = PRIVACY(cid = self.cid_null)
         print(sql)
 
         privacy = do_sql(sql, self.debug, self.earl).fetchall()

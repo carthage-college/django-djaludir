@@ -11,9 +11,9 @@ class ManagerActivitiesTestCase(TestCase):
 
     def setUp(self):
         self.debug = settings.INFORMIX_DEBUG
-        self.cid = settings.TEST_COLLEGE_ID
-        self.cid_invalid = 666
         self.earl = settings.INFORMIX_EARL
+        self.cid = settings.TEST_USER_COLLEGE_ID
+        self.cid_null = 666
 
     def test_activities(self):
 
@@ -50,7 +50,7 @@ class ManagerActivitiesTestCase(TestCase):
         comparison = 'NOT' if not is_sports else ''
 
         sql = ACTIVITIES(
-            cid = self.cid_invalid, fieldname = fieldname,
+            cid = self.cid_null, fieldname = fieldname,
             comparison = comparison
         )
 

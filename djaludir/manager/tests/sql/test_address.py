@@ -11,9 +11,9 @@ class ManagerAddressTestCase(TestCase):
 
     def setUp(self):
         self.debug = settings.INFORMIX_DEBUG
-        self.cid = settings.TEST_COLLEGE_ID
-        self.cid_invalid = 666
         self.earl = settings.INFORMIX_EARL
+        self.cid = settings.TEST_USER_COLLEGE_ID
+        self.cid_null = 666
 
     def test_home_address_temp(self):
 
@@ -41,7 +41,7 @@ class ManagerAddressTestCase(TestCase):
         )
         print(seperator())
 
-        sql = HOMEADDRESS_TEMP(cid = self.cid_invalid)
+        sql = HOMEADDRESS_TEMP(cid = self.cid_null)
         print(sql)
 
         homeaddress = do_sql(sql, self.debug, self.earl).fetchall()
@@ -76,7 +76,7 @@ class ManagerAddressTestCase(TestCase):
         )
         print(seperator())
 
-        sql = WORKADDRESS_TEMP(cid = self.cid_invalid)
+        sql = WORKADDRESS_TEMP(cid = self.cid_null)
         print(sql)
 
         workaddress = do_sql(sql, self.debug, self.earl).fetchall()

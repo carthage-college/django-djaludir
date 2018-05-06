@@ -72,9 +72,10 @@ class LDAPBackend(object):
             return user
         except ldap.INVALID_CREDENTIALS:
             # Name or password were bad. Fail permanently.
-            request.session['ldap_cn'] = username
-            request.session['ldap_account'] = True
-            request.session['ldap_questions'] = self.get_questions(username)
+            if request:
+                request.session['ldap_cn'] = username
+                request.session['ldap_account'] = True
+                request.session['ldap_questions'] = self.get_questions(username)
             return None
 
     def get_user(self, user_id):

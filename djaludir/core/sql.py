@@ -1,6 +1,8 @@
+# for some reason alt_name does not work here so we use aname
 SEARCH = '''
     SELECT
-        alum.cl_yr AS class_year, ids.firstname,
+        alum.cl_yr AS class_year, TRIM(NVL(ids.firstname,"")) AS fname,
+        TRIM(NVL(aname_rec.line1,"")) AS aname,
         maiden.lastname AS maiden_name, ids.lastname, ids.id,
         NVL(
             TRIM(aaEmail.line1) ||
@@ -25,6 +27,12 @@ SEARCH = '''
         prevmap
     ON
         ids.id = prevmap.prim_id
+    LEFT JOIN
+        aa_rec as aname_rec
+    ON
+        (
+            ids.id = aname_rec.id AND aname_rec.aa = "ANDR"
+        )
     LEFT JOIN
         addree_rec maiden
     ON
@@ -260,6 +268,7 @@ ALUMNA = '''
     SELECT DISTINCT
         ids.id AS carthage_id,
         TRIM(ids.firstname) AS fname,
+        TRIM(NVL(aname_rec.line1,"")) AS alt_name,
         TRIM(ids.lastname) AS lname,
         TRIM(ids.suffix) AS suffix,
         TRIM(INITCAP(ids.title)) AS prefix,
@@ -327,6 +336,12 @@ ALUMNA = '''
             GROUP BY prim_id
         )
             prevmap             ON  ids.id              = prevmap.prim_id
+        LEFT JOIN
+            aa_rec as aname_rec
+        ON
+            (
+                ids.id = aname_rec.id AND aname_rec.aa = "ANDR"
+            )
         LEFT JOIN
             addree_rec maiden   ON  maiden.prim_id      = prevmap.prim_id
                                 AND maiden.active_date  = prevmap.active_date

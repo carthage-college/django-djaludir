@@ -11,9 +11,27 @@
     <a href='/alumni/apps/directory/listing/{{firstpage}}'>First</a>
     {% endif %}
     <table>
-            <tr><th>First Name</th><th>Last Name</th><th>Year</th><th>Action</th></tr>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Year</th>
+        <th>Action</th>
+      </tr>
     {% for person in people.object_list %}
-            <tr><td>{{person.fname}}</td><td>{{person.lname}}</td><td>{{person.class_year}}</td><td><a href="/alumni/apps/directory/display/{{person.id}}">Details</a></td></tr>
+      <tr>
+        <td>
+        {% if person.aname %}
+            {{person.aname}} ({{person.fname}})
+        {% else %}
+            {{person.fname}}
+        {% endif %}
+        </td>
+        <td>{{person.lname}}</td>
+        <td>{{person.class_year}}</td>
+        <td>
+          <a href="/alumni/apps/directory/display/{{person.id}}">Details</a>
+        </td>
+      </tr>
     {% endfor %}
     </table>
 {% endblock %}

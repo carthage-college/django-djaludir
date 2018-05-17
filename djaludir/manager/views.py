@@ -325,8 +325,10 @@ def search(request, messageSent = False, permissionDenied = False):
                 AND
                     holds.hld_no IS NULL
                 GROUP BY
-                    class_year, firstname, maiden_name, lastname, id, email,
-                    sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr
+                    class_year, fname, aname, maiden_name, lastname, id,
+                    email, sort1, sort2
+                ORDER BY
+                    lastname, fname, alum.cl_yr
             '''.format(selectFromSQL, orSQL, andSQL)
 
             logger.debug('search sql = {}'.format(sql))

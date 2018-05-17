@@ -1,0 +1,3 @@
+Informix schema files live in:
+
+/opt/carsi/schema/development

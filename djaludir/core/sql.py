@@ -238,8 +238,8 @@ RELATIVES_TEMP = '''
 
 ALUMNA_TEMP = '''
     SELECT FIRST 1
-        TRIM(fname) AS fname, TRIM(lname) AS lname, TRIM(suffix) AS suffix,
-        TRIM(prefix) AS prefix, TRIM(email) AS email,
+        TRIM(fname) AS fname, TRIM(aname) AS aname, TRIM(lname) AS lname,
+        TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email,
         TRIM(maidenname) AS maidenname, TRIM(degree) AS degree, class_year,
         TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1,
         TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3,

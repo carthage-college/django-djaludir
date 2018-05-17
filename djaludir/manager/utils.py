@@ -403,6 +403,10 @@ def email_differences(cid, request):
         data["fname"] = alumni.fname
         data["original_fname"] = fname
         data["personal"] = True
+    if(student['aname'] != alumni.aname):
+        data["aname"] = alumni.aname
+        data["original_aname"] = student['aname']
+        data["personal"] = True
     if(student['birth_lname'] != alumni.maidenname):
         data["maidenname"] = alumni.maidenname
         data["original_maidenname"] = student['birth_lname']

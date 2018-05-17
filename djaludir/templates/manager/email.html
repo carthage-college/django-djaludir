@@ -24,6 +24,17 @@
         "<b>{{data.fname}}</b>"
     </dd>
   {% endif %}
+  {% if data.aname %}
+    <dt {{dl_dt}}>
+        Preferred Name
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_aname}}"
+        to
+        "<b>{{data.aname}}</b>"
+    </dd>
+  {% endif %}
   {% if data.maidenname %}
     <dt {{dl_dt}}>
         Maiden Name

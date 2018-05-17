@@ -27,7 +27,7 @@
         <fieldset>
             <div class="form-row header">Personal Information</div>
             <div class="form-row">
-                <label>Name:</label>{{person.prefix}} {% if person.alt_name %}{{person.alt_name}} ({{person.fname}}){% else %}{{person.fname}}{% endif %} {% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %} {{person.lname}} {{person.suffix}}
+                <label>Name:</label>{{person.prefix}} {% if person.aname %}{{person.aname}} ({{person.fname}}){% else %}{{person.fname}}{% endif %} {% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %} {{person.lname}} {{person.suffix}}
             </div>
             {% if person.class_year %}<div class="form-row"><label>Class year:</label>{{person.class_year}}</div>{% endif %}
         </fieldset>

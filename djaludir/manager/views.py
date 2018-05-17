@@ -8,12 +8,12 @@ from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext, loader, Context
 
 from djaludir.core.sql import (
-    ACTIVITY_SEARCH, ALUMNA, RELATIVES_ORIG, RELATIVES_TEMP, SEARCH
+    ACTIVITY_SEARCH, RELATIVES_ORIG, RELATIVES_TEMP, SEARCH
 )
 from djaludir.manager.utils import (
     clear_privacy, email_differences,
     get_countries, get_majors, get_message_info, get_privacy,
-    get_relatives, get_states, get_student, get_activities,
+    get_relatives, get_states, get_alumna, get_activities,
     insert_activity, insert_address, insert_alumni, insert_privacy,
     insert_relative
 )
@@ -27,7 +27,7 @@ INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 @login_required
 def display(request, cid):
     # fetch information about the alumna
-    alumni = get_student(cid)
+    alumni = get_alumna(cid)
     if alumni != None:
         activities = get_activities(cid, False)
         athletics = get_activities(cid, True)
@@ -59,7 +59,8 @@ def update(request):
 
             # Insert personal information
             alumni_sql = insert_alumni(
-                cid, request.POST.get('fname'), request.POST.get('lname'),
+                cid, request.POST.get('fname'), request.POST.get('aname'),
+                request.POST.get('lname'),
                 request.POST.get('suffix'), request.POST.get('prefix'),
                 request.POST.get('email'), request.POST.get('maidenname'),
                 request.POST.get('degree'), request.POST.get('class_year'),
@@ -351,7 +352,7 @@ def search(request, messageSent = False, permissionDenied = False):
 def edit(request, cid, success = False):
     if int(cid) == int(request.user.id) or request.user.is_superuser:
         # Retrieve relevant information about the alumni
-        alumni = get_student(cid)
+        alumni = get_alumna(cid)
         activities = get_activities(cid, False)
         athletics = get_activities(cid, True)
         relatives = get_relatives(cid)

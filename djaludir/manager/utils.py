@@ -16,7 +16,7 @@ INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 NOW = datetime.datetime.now().strftime('%Y-%m-%d')
 
 
-def get_student(cid):
+def get_alumna(cid):
     """
     Compile all the one-to-one information about the alumn(a|us)
     """
@@ -182,7 +182,7 @@ def insert_relative(cid, relCode, fname, lname, alumPrimary):
 
 
 def insert_alumni(
-    cid, fname, lname, suffix, prefix, email, maidenname, degree,
+    cid, fname, aname, lname, suffix, prefix, email, maidenname, degree,
     class_year, business_name, major1, major2, major3, masters_grad_year,
     job_title
 ):
@@ -207,17 +207,17 @@ def insert_alumni(
 
     alumni_sql = '''
         INSERT INTO stg_aludir_alumni (
-            id, fname, lname, suffix, prefix, email, maidenname, degree,
+            id, fname, aname, lname, suffix, prefix, email, maidenname, degree,
             class_year, business_name, major1, major2, major3,
             masters_grad_year, job_title, submitted_on
         )
         VALUES (
-            {}, "{}", "{}", "{}", "{}", "{}", "{}", "{}",
+            {}, "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}",
             {}, "{}", "{}", "{}", "{}",
             {}, "{}", TO_DATE("{}", "%Y-%m-%d")
         )
     '''.format(
-        cid, fname, lname, suffix, prefix, email, maidenname, degree,
+        cid, fname, aname, lname, suffix, prefix, email, maidenname, degree,
         class_year, business_name, major1, major2, major3,
         masters_grad_year, job_title, NOW
     )
@@ -317,7 +317,7 @@ def email_differences(cid, request):
     Retrieve the existing information about the alumn(a|us)
     """
 
-    student = get_student(cid)
+    student = get_alumna(cid)
 
     data = {
         'cid':cid,'personal':False,'academics':False,

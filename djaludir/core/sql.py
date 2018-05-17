@@ -268,7 +268,7 @@ ALUMNA = '''
     SELECT DISTINCT
         ids.id AS carthage_id,
         TRIM(ids.firstname) AS fname,
-        TRIM(NVL(aname_rec.line1,"")) AS alt_name,
+        TRIM(NVL(aname_rec.line1,"")) AS aname,
         TRIM(ids.lastname) AS lname,
         TRIM(ids.suffix) AS suffix,
         TRIM(INITCAP(ids.title)) AS prefix,

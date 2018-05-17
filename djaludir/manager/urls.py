@@ -5,7 +5,7 @@ from djaludir.manager import views
 
 urlpatterns = [
     url(
-        r'^display/(?P<student_id>\d+)/$', views.display,
+        r'^display/(?P<cid>\d+)/$', views.display,
         name="manager_alum_display"
     ),
     url(
@@ -24,11 +24,11 @@ urlpatterns = [
         name='manager_search_sent'
     ),
     url(
-        r'^edit/(?P<student_id>\d+)/$', views.edit,
+        r'^edit/(?P<cid>\d+)/$', views.edit,
         name='manager_user_edit'
     ),
     url(
-        r'^edit/(?P<student_id>\d+)/submit/$', views.edit,
+        r'^edit/(?P<cid>\d+)/submit/$', views.edit,
         kwargs={'success':True},
         name='manager_user_edit_success'
     ),
@@ -37,7 +37,7 @@ urlpatterns = [
         name='manager_user_update'
     ),
     url(
-        r'^message/(?P<student_id>\d+)/$', views.message,
+        r'^message/(?P<cid>\d+)/$', views.message,
         name='message_user'
     ),
     url(

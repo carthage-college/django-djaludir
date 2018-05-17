@@ -12,9 +12,9 @@ class ManagerRelativesTestCase(TestCase):
 
     def setUp(self):
         self.debug = settings.INFORMIX_DEBUG
-        self.cid = settings.TEST_COLLEGE_ID
-        self.cid_invalid = 666
         self.earl = settings.INFORMIX_EARL
+        self.cid = settings.TEST_USER_COLLEGE_ID
+        self.cid_null = 666
 
     def test_relatives_temp(self):
 
@@ -55,7 +55,7 @@ class ManagerRelativesTestCase(TestCase):
         )
         print(seperator())
 
-        sql = RELATIVES_ORIG(cid = self.cid_invalid)
+        sql = RELATIVES_ORIG(cid = self.cid_null)
         print(sql)
 
         relatives_orig = do_sql(sql, self.debug, self.earl).fetchall()

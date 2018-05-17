@@ -19,9 +19,6 @@ from djaludir.manager.utils import (
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
-import logging
-logger = logging.getLogger(__name__)
-
 INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
 
@@ -374,7 +371,6 @@ def search(request, messageSent = False, permissionDenied = False):
                     sort1, sort1 ORDER BY lastname, firstname, alum.cl_yr
             '''.format(selectFromSQL, orSQL, andSQL)
 
-            logger.debug('search sql = {}'.format(sql))
             objs = do_sql(sql, INFORMIX_DEBUG)
 
             if objs:
@@ -501,7 +497,6 @@ def search_activity(request):
         ORDER BY
             TRIM(invl_table.txt)
     '''.format(search_string.lower())
-    logger.debug('activity_search_sql = {}'.format(activity_search_sql))
     objs = do_sql(activity_search_sql, INFORMIX_DEBUG)
     if objs:
         return HttpResponse(objs.fetchall())

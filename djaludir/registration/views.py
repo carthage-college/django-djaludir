@@ -19,9 +19,6 @@ from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
 from djauth.LDAPManager import LDAPManager
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 def error_mess(val):
     error = '''
@@ -291,7 +288,6 @@ def modify_ldap_password(request):
                 SUBSTRING(id_rec.ss_no FROM 8 FOR 4) = "{}"
             '''.format(data['ssn'])
             sql = CONFIRM_USER + where
-            logger.debug('sql = {}'.format(sql))
             results = do_sql(sql, key=settings.INFORMIX_DEBUG)
             try:
                 objects = results.fetchall()

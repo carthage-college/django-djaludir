@@ -10,8 +10,6 @@ from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
 
 import datetime
-import logging
-logger = logging.getLogger(__name__)
 
 INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
@@ -28,7 +26,6 @@ def get_student(cid):
     if settings.DEBUG:
         deceased = ''
     sql = ALUMNA(cid = cid, deceased = deceased)
-    logger.debug('get_student() sql = {}'.format(sql))
     student = do_sql(sql, INFORMIX_DEBUG)
     obj = student.fetchone()
     if obj:
@@ -57,7 +54,6 @@ def get_activities(cid, is_sports=False):
     activities_sql = ACTIVITIES(
         cid = cid, fieldname = fieldname, comparison = comparison
     )
-    logger.debug('activities_sql = {}'.format(activities_sql))
     objs = do_sql(activities_sql, INFORMIX_DEBUG)
 
     return objs.fetchall()
@@ -71,7 +67,6 @@ def get_relatives(cid):
 
     relatives_sql = RELATIVES_ORIG(cid = cid)
 
-    logger.debug('get_relatives() relatives_sql = {}'.format(relatives_sql))
     objs = do_sql(relatives_sql, INFORMIX_DEBUG)
 
     return objs.fetchall()
@@ -79,7 +74,6 @@ def get_relatives(cid):
 
 def get_privacy(cid):
     privacy_sql = PRIVACY(cid = cid)
-    logger.debug('privacy_sql = {}'.format(privacy_sql))
     privacy = do_sql(privacy_sql, INFORMIX_DEBUG)
     field = []
     setting = []
@@ -98,7 +92,6 @@ def get_majors():
             major_table
         ORDER BY TRIM(txt)
     '''
-    logger.debug('major_sql = {}'.format(major_sql))
     objs = do_sql(major_sql, INFORMIX_DEBUG)
 
     return objs.fetchall()
@@ -113,7 +106,6 @@ def get_states():
         WHERE
             NVL(high_zone, 0) >= 100 ORDER BY TRIM(txt)
     '''
-    logger.debug('states_sql = {}'.format(states_sql))
     objs = do_sql(states_sql, INFORMIX_DEBUG)
 
     return objs.fetchall()
@@ -128,7 +120,6 @@ def get_countries():
         ORDER BY
             web_ord, TRIM(txt)
     '''
-    logger.debug('countries_sql = {}'.format(countries_sql))
     objs = do_sql(countries_sql, INFORMIX_DEBUG)
 
     return objs.fetchall()
@@ -158,7 +149,6 @@ def get_message_info(cid):
         WHERE
             ids.id = {}
     '''.format(cid)
-    logger.debug('message_sql = {}'.format(message_sql))
     message = do_sql(message_sql, INFORMIX_DEBUG)
 
     return message.fetchone()
@@ -174,7 +164,6 @@ def clear_relative(cid):
         AND
             NVL(approved,"") = ""
     '''.format(cid)
-    logger.debug('clear_relative() sql = {}'.format(sql))
     do_sql(sql, INFORMIX_DEBUG)
 
 
@@ -188,7 +177,6 @@ def insert_relative(cid, relCode, fname, lname, alumPrimary):
     '''.format(
         cid, relCode, fname, lname, alumPrimary, NOW
     )
-    logger.debug('insert_relative() sql = {}'.format(sql))
     do_sql(sql, INFORMIX_DEBUG)
     return sql
 
@@ -212,7 +200,6 @@ def insert_alumni(
         AND
             NVL(approved,"") = ""
     '''.format(cid)
-    logger.debug('clear alumni sql = {}'.format(clear_sql))
     do_sql(clear_sql, INFORMIX_DEBUG)
 
     if maidenname:
@@ -234,7 +221,6 @@ def insert_alumni(
         class_year, business_name, major1, major2, major3,
         masters_grad_year, job_title, NOW
     )
-    logger.debug('alumni_sql = {}'.format(alumni_sql))
     do_sql(alumni_sql, INFORMIX_DEBUG)
     return alumni_sql
 
@@ -255,7 +241,6 @@ def insert_address(
         AND
             NVL(approved,"") = ""
     '''.format(cid, aa_type)
-    logger.debug('clear address sql = {}'.format(clear_sql))
     do_sql(clear_sql, INFORMIX_DEBUG)
     address_sql = '''
         INSERT INTO stg_aludir_address (
@@ -270,7 +255,6 @@ def insert_address(
         aa_type, cid, address_line1, address_line2, address_line3,
         city, state, postalcode, country, phone, NOW
     )
-    logger.debug('insert_address() sql = {}'.format(address_sql))
     do_sql(address_sql, INFORMIX_DEBUG)
     return address_sql
 
@@ -287,7 +271,6 @@ def clear_activity(cid):
         AND
             NVL(approved,"") = ""
     '''.format(cid)
-    logger.debug('clear activity sql = {}'.format(clear_sql))
     do_sql(clear_sql, INFORMIX_DEBUG)
 
 
@@ -302,7 +285,6 @@ def insert_activity(cid, activityText):
     '''.format(
         cid, activityText.strip(), NOW
     )
-    logger.debug('insert_activity() sql = {}'.format(activity_sql))
     do_sql(activity_sql)
     return activity_sql
 
@@ -311,7 +293,6 @@ def clear_privacy(cid):
     privacy_sql = 'DELETE FROM stg_aludir_privacy WHERE id = {}'.format(
         cid
     )
-    logger.debug('clear_privacy() sql = {}'.format(privacy_sql))
     do_sql(privacy_sql, INFORMIX_DEBUG)
     return privacy_sql
 
@@ -327,7 +308,6 @@ def insert_privacy(cid, field, display):
         '''.format(
             cid, field, display, NOW
         )
-    logger.debug('insert_privacy() sql = {}'.format(privacy_sql))
     do_sql(privacy_sql, INFORMIX_DEBUG)
     return privacy_sql
 
@@ -356,7 +336,6 @@ def email_differences(cid, request):
     # Obtain the most recent unapproved information about the person
     alumna_temp = ALUMNA_TEMP(cid = cid)
 
-    logger.debug('email_differences() alumna_temp = {}'.format(alumna_temp))
     alum = do_sql(alumna_temp, INFORMIX_DEBUG)
     alumni = alum.fetchone()
 
@@ -365,9 +344,6 @@ def email_differences(cid, request):
     # Get information about the alum's relatives
     relatives_orig = get_relatives(cid)
     relatives_sql = RELATIVES_TEMP(cid = cid)
-    logger.debug(
-        'email_differences() relatives_sql = {}'.format(relatives_sql)
-    )
     relatives_new = do_sql(relatives_sql, INFORMIX_DEBUG).fetchall()
     relatives = []
     # compare current relatives with data from POST to determine if there

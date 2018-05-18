@@ -21,6 +21,9 @@ from djaludir.manager.utils import (
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
+import logging
+logger = logging.getLogger(__name__)
+
 INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
 
@@ -187,6 +190,7 @@ def search(request, messageSent = False, permissionDenied = False):
         # Sport/activities are searched via "OR", all other fields are "AND"
         # so assemble the list of fields to run through the logic
         # to create the appropriate filters
+        logger.debug("post = {}".format(request.body))
         for rowNum in range (0, int(request.POST.get('maxCriteria')) + 1):
             fieldname = request.POST.get('within' + str(rowNum))
             searchterm = request.POST.get('term' + str(rowNum))
@@ -328,6 +332,8 @@ def search(request, messageSent = False, permissionDenied = False):
                 ORDER BY
                     lastname, fname, alum.cl_yr
             '''.format(selectFromSQL, orSQL, andSQL)
+
+            logger.debug("sql = {}".format(sql))
 
             objs = do_sql(sql, INFORMIX_DEBUG)
 

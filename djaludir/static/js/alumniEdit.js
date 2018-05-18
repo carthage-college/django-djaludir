@@ -13,10 +13,10 @@ $(document).ready(function(){
 
     //Attach functionality to "Add Relative" button
     $('input[name="addRelative"]').click(function(){
-        
+
         //Increment relative counter
         var addedRelatives = $('.relativeBlock').length + 1;
-        
+
         //Create HTML for relative form
         $('<fieldset />').append($('<ol />').addClass('relativeBlock')
             .append($('<li>').addClass('ctrlHolder')
@@ -32,7 +32,7 @@ $(document).ready(function(){
                 .append($('<select />').attr({'type':'text','name':'relativeText' + addedRelatives}))
             )
         ).insertBefore($(this));
-        
+
         //Populate select box with family relationships
         loadSelectKeyVal('select[name="relativeText' + addedRelatives + '"]', relationships);
 
@@ -42,7 +42,7 @@ $(document).ready(function(){
 
     //Attach functionality to "Add Activity" button
     $('input[name="addActivity"]').click(function(){
-        
+
         //Increment activity counter
         var addedActivities = $('#activityList li').length + 1;
 
@@ -57,10 +57,10 @@ $(document).ready(function(){
 
     //Attach functionality to "Add Athletic Team" button
     $('input[name="addTeam"]').click(function(){
-        
+
         //Increment athletic counter
         var addedTeams = $('#athleticList li').length + 1;
-        
+
         //Create HTML for athletic form
         $('<li>')
             .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team'}))
@@ -74,10 +74,10 @@ $(document).ready(function(){
     $('a.privacyToggle').each(function(){
         //Get the name of the checkbox
         var cbName = $(this).parent().find('input.privacyToggle').attr('name');
-        
+
         //Attach togglePrivacy() to the click event of the checkbox
         $(this).click({chkBoxName: cbName}, togglePrivacy);
-        
+
         //Initialize privacy setting
         setPrivacy(cbName.replace(/privacy/i,''), false);
     });
@@ -110,7 +110,7 @@ function togglePrivacy(chkBoxName){
         chkBoxName = chkBoxName.data.chkBoxName;
     }
     setPrivacy(chkBoxName.replace(/privacy/i,''), $chkBox.is(':checked'));
-    
+
     //When someone clicks a link, reset the privacy radio button to the "Custom" setting
     $('input[name="privacy"][value="4"]').prop('checked', true);
 }

@@ -1,43 +1,58 @@
 {% extends "core/home.html" %}
 {% block title %}Search &mdash; {{block.super}}{% endblock %}
 {% block extra_style %}
-    {{block.super}}
-    <link rel="stylesheet" href="{{static_url}}css/tablesorter_theme/blue/style.css" />
-    <style type="text/css">
-        .center {text-align:center;font-size:14px;font-weight:bold;}
-        #searchResults {padding:3px 5px;}
-        th.headerSortUp {
-            background: url('{{static_url}}css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
-        }
-        #profile .form-row {margin-bottom:3px;}
-    </style>
+  {{block.super}}
+  <link rel="stylesheet" href="{{static_url}}css/tablesorter_theme/blue/style.css">
+  <style type="text/css">
+    .center {text-align:center;font-size:14px;font-weight:bold;}
+    #searchResults {padding:3px 5px;}
+    th.headerSortUp {
+        background: url('{{static_url}}css/tablesorter_theme/blue/asc.gif') no-repeat #3399FF;
+    }
+    #profile .form-row {margin-bottom:3px;}
+  </style>
 {% endblock %}
 {% block extra_javascript %}
-    <script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
-    <script type="text/javascript" src="{{static_url}}js/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="{{static_url}}/js/alumniSearch.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            {% if searching %}
-                {% for field, term in searching.items %}
-                    createBlock('{{field}}','{{term}}');
-                {% endfor %}
-            {% else %}
-                createBlock();
-            {% endif %}
-        });
-    </script>
+<script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
+<script type="text/javascript" src="{{static_url}}js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="{{static_url}}/js/alumniSearch.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    {% if searching %}
+      {% for field, term in searching.items %}
+        createBlock('{{field}}','{{term}}');
+      {% endfor %}
+    {% else %}
+      createBlock();
+    {% endif %}
+    $(document).on('change','select[name^="within"]',function(e){
+      $dis = $(this);
+      $sib = $dis.siblings('input[type="text"]');
+      if ($dis.val() == 'ids.st') {
+        selectField = buildStateField($sib.attr('name'), '');
+        $sib.replaceWith(selectField);
+      } else {
+        if (typeof $sib.attr('type') === "undefined") {
+          $sib = $dis.siblings('select');
+          inputField = '<input name="' + $sib.attr('name') + '" class="medium looper" type="text">';
+          $sib.replaceWith(inputField);
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
 {% block content %}
     <div class="forms-container">
     {% if message %}<div class="message">{{message}}</div>{% endif %}
     <h1>Search</h1>
-    <form action="{% url 'manager_search' %}" name="searchForm" method="post" class="form" id="profile">
-        <input type="hidden" name="maxCriteria" value="0" />
+    <form action="{% url 'manager_search' %}" name="searchForm"
+      method="post" class="form" id="profile">
+        <input type="hidden" name="maxCriteria" value="0">
         {% csrf_token %}
         <fieldset id="formfieldset">
             <div id="submitrow" class="form-row">
-                <input type="submit" name="submit" value="Search" class="button" />
+                <input type="submit" name="submit" value="Search" class="button">
             </div>
         </fieldset>
     </form>

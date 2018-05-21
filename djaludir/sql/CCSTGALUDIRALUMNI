@@ -6,7 +6,7 @@
 }
 
 table stg_aludir_alumni
-    desc        "Flattened version of the data model describing an alumnus/alumna" 
+    desc        "Flattened version of the data model describing an alumnus/alumna"
     location    "DBS_DEVELOPMENT"
     lockmode    row
     prefix      ""        { Used by makedef }

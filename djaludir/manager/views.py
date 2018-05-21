@@ -89,8 +89,8 @@ def update(request):
                     if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
                         relRelation = relRelation[0:-1]
 
-                    # If the relative has some value in their name and a specified
-                    # relationship, insert the record
+                    # If the relative has some value in their name and
+                    # a specified relationship, insert the record
                     if(len(relFname + relLname) > 0 and relRelation != ''):
                         insert_relative(
                             cid, relRelation, relFname, relLname, alumPrimary

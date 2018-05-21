@@ -1,430 +1,493 @@
 {% extends "core/home.html" %}
 {% block title %}Edit Alumni Information &mdash; {{block.super}}{% endblock %}
 {% block extra_style %}
-    {{block.super}}
-    <style type="text/css">
-        fieldset {border:.1em solid #000000;margin-bottom:8px;}
-        label {width:auto;padding-right:5px;font-weight:bold;}
-        .business_address {padding-right:8.5em;}
-        .form-row {clear:both;}
-        div.header {font-weight:bold;font-size:13pt;float:left;}
-        .home_address {padding-right:7.4em;}
-        div.privacy {float:right;}
-        .form input.privacyToggle {display:none;}
-        .relative {width:4em;}
-    </style>
+{{block.super}}
+<style type="text/css">
+  fieldset {border:.1em solid #000000;margin-bottom:8px;}
+  label {width:auto;padding-right:5px;font-weight:bold;}
+  .business_address {padding-right:8.5em;}
+  .form-row {clear:both;}
+  div.header {font-weight:bold;font-size:13pt;float:left;}
+  .home_address {padding-right:7.4em;}
+  div.privacy {float:right;}
+  .form input.privacyToggle {display:none;}
+  .relative {width:4em;}
+</style>
 {% endblock %}
 {% block jquery %}
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 {% endblock %}
 {% block javascript %}{% endblock %}
 {% block extra_javascript %}
-    <script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
-    <script type="text/javascript" src="{{static_url}}js/alumniEdit.js"></script>
-    <script type="text/javascript">
-        var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
+<script type="text/javascript" src="{{static_url}}js/commonLib.js"></script>
+<script type="text/javascript" src="{{static_url}}js/alumniEdit.js"></script>
+<script type="text/javascript">
+  var relationships = "{% for relCode, relText in relationships.items %}{{relCode}}^{{relText}}{% if not forloop.last %},{% endif %}{% endfor %}";
 
-        $(document).ready(function(){
-            /*
-            $('input[name="activitySearch"]').autocomplete({
-                source: '../../activity/',
-                minLength: 2,
-                select: function(event, ui){
-                    console.log('Obj: ' + ui + '\nItem: ' + ui.item + '\nValue: ' + ui.value);
-                }
-            });
-            */
-            var privateFields = '{% for field, display in privacy.items %}{% ifequal display 'Y' %}{{field}},{% endifequal %}{% endfor %}';
-            initPrivacy(privateFields);
+  $(document).ready(function(){
+    /*
+    $('input[name="activitySearch"]').autocomplete({
+      source: '../../activity/',
+      minLength: 2,
+      select: function(event, ui){
+          console.log('Obj: ' + ui + '\nItem: ' + ui.item + '\nValue: ' + ui.value);
+      }
+    });
+    */
+    var privateFields = '{% for field, display in privacy.items %}{% ifequal display 'Y' %}{{field}},{% endifequal %}{% endfor %}';
+    initPrivacy(privateFields);
 
-            {% for field, display in privacy.items %}
-                setPrivacy('{{field}}', '{{display}}' == 'Y');
-            {% endfor %}
-        });
-    </script>
+    {% for field, display in privacy.items %}
+      setPrivacy('{{field}}', '{{display}}' == 'Y');
+    {% endfor %}
+  });
+</script>
 {% endblock %}
 {% block content %}
-    <div class="buffer">
-    {% if submitted %}
-        <h2>
-            Thank you for updating your information.
-            Your changes have been submitted to the
-            Office of Institutional Advancement for review.
-            The changes you made are not immediate and
-            will be updated after review.
-        </h2>
-    {% endif %}
-    <p>
-        <a href="{% url 'manager_search' %}">Return to Search</a>
-    </p>
-    <form action="{% url 'manager_user_update' %}" method="POST" class="form">
-        {% csrf_token %}
-        <fieldset class="blockLabels">
-            <legend>Privacy Settings</legend>
-            <input type="hidden" name="carthageID" value="{{studentID}}">
-            <input type="hidden" name="relativeCount">
-            <input type="hidden" name="activityCount">
-            <input type="hidden" name="athleticCount">
-            <ol>
-                <li>
-                    <input type="radio" name="privacy" value="0">
-                    Please do not show any of my information in the
-                    alumni directory.
-                </li>
-                <li>
-                    <input type="radio" name="privacy" value="1">
-                    Do not allow others to see information other than
-                    my name and class year.
-                </li>
-                <li>
-                    <input type="radio" name="privacy" value="2">
-                    Allow people to see my personal and academic details
-                    but do not share my address information. (Others
-                    will be able to send you a message but your email
-                    will remain private.)
-                </li>
-                <li>
-                    <input type="radio" name="privacy" value="3">
-                    Make all my information available.
-                </li>
-                <li>
-                    <input type="radio" name="privacy" value="4">
-                    Custom (specify your own privacy settings,
-                    a checked box makes information public)
-                </li>
-            </ol>
-        </fieldset>
-        <fieldset class="blockLabels">
-            <legend>Personal Information</legend>
-            <div class="privacy">
-                <a href="javascript://" class="privacyToggle"></a>
-                <input type="checkbox" name="privacyPersonal"
-                    class="privacyToggle" value="N">
+<div class="buffer">
+  {% if submitted %}
+    <h2>
+      Thank you for updating your information.
+      Your changes have been submitted to the
+      Office of Institutional Advancement for review.
+      The changes you made are not immediate and
+      will be updated after review.
+    </h2>
+  {% endif %}
+  <p>
+    <a href="{% url 'manager_search' %}">Return to Search</a>
+  </p>
+  <form action="{% url 'manager_user_update' %}" method="POST" class="form">
+    {% csrf_token %}
+    <fieldset class="blockLabels">
+      <legend>Privacy Settings</legend>
+      <input type="hidden" name="carthageID" value="{{studentID}}">
+      <input type="hidden" name="relativeCount">
+      <input type="hidden" name="activityCount">
+      <input type="hidden" name="athleticCount">
+      <ol>
+        <li>
+          <input type="radio" name="privacy" value="0">
+          Please do not show any of my information in the
+          alumni directory.
+        </li>
+        <li>
+          <input type="radio" name="privacy" value="1">
+          Do not allow others to see information other than
+          my name and class year.
+        </li>
+        <li>
+          <input type="radio" name="privacy" value="2">
+          Allow people to see my personal and academic details
+          but do not share my address information. (Others
+          will be able to send you a message but your email
+          will remain private.)
+        </li>
+        <li>
+          <input type="radio" name="privacy" value="3">
+          Make all my information available.
+        </li>
+        <li>
+          <input type="radio" name="privacy" value="4">
+          Custom (specify your own privacy settings,
+          a checked box makes information public)
+        </li>
+      </ol>
+    </fieldset>
+    <fieldset class="blockLabels">
+      <legend>Personal Information</legend>
+      <div class="privacy">
+        <a href="javascript://" class="privacyToggle"></a>
+        <input type="checkbox" name="privacyPersonal"
+            class="privacyToggle" value="N">
+      </div>
+      <ol>
+        <li class="ctrlHolder">
+          <h3><label>Title</label></h3>
+          <div>
+            <select name="prefix">
+              {% for prefix_code, prefix in prefixes.items %}
+                <option value="{{prefix_code}}"
+                {% ifequal prefix person.prefix %}
+                selected="selected"
+                {% endifequal %}
+                >{{prefix}}</option>
+              {% endfor %}
+            </select>
+          <div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>First Name</label></h3>
+          <div>
+            <input type="text" name="fname" value="{{person.fname}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Preferred Name</label></h3>
+          <div>
+            <input type="text" name="aname" value="{{person.aname}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Maiden Name</label></h3>
+          <div>
+            <input type="text" name="maidenname" value="{% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Last Name</label></h3>
+          <div>
+            <input type="text" name="lname" value="{{person.lname}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Suffix</label></h3>
+          <div>
+            <select name="suffix">
+              {% for suffix in suffixes %}
+                <option value="{{suffix}}" {% ifequal suffix person.suffix %}selected="selected"{% endifequal %}>
+                  {{suffix}}
+                </option>
+              {% endfor %}
+            </select> 
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Class year</label></h3>
+          <div>
+            <select name="class_year">
+              <option value=""></option>
+              {% for year in years reversed %}
+                <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>
+                  {{year}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+      </ol>
+    </fieldset>
+    <fieldset id="familyBlock" class="blockLabels">
+      <legend>Family</legend>
+      <div class="privacy">
+        <a href="javascript://" class="privacyToggle"></a>
+        <input type="checkbox" name="privacyFamily"
+            class="privacyToggle" value="N">
+      </div>
+      <div class="form-row"></div>
+      {% for relative in relatives %}
+        <ol class="relativeBlock">
+          <li class="ctrlHolder">
+            <h3><label>Relative First Name</label></h3>
+            <div>
+              <input type="text"
+                name="relativeFname{{forloop.counter}}"
+                value="{{relative.firstname}}">
             </div>
-            <ol>
-                <li class="ctrlHolder">
-                    <h3><label>Title</label></h3>
-                    <select name="prefix">
-                        {% for prefix_code, prefix in prefixes.items %}
-                            <option value="{{prefix_code}}"
-                            {% ifequal prefix person.prefix %}
-                            selected="selected"
-                            {% endifequal %}
-                            >{{prefix}}</option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>First Name</label></h3>
-                    <input type="text" name="fname" value="{{person.fname}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Preferred Name</label></h3>
-                    <input type="text" name="aname" value="{{person.aname}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Maiden Name</label></h3>
-                    <input type="text" name="maidenname" value="{% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Last Name</label></h3>
-                    <input type="text" name="lname" value="{{person.lname}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Suffix</label></h3>
-                    <select name="suffix">
-                        {% for suffix in suffixes %}
-                            <option value="{{suffix}}" {% ifequal suffix person.suffix %}selected="selected"{% endifequal %}>
-                                {{suffix}}
-                            </option>
-                        {% endfor %}
-                    </select> 
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Class year</label></h3>
-                    <select name="class_year">
-                        <option value=""></option>
-                        {% for year in years reversed %}
-                            <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>
-                                {{year}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-            </ol>
-        </fieldset>
-        <fieldset id="familyBlock" class="blockLabels">
-            <legend>Family</legend>
-            <div class="privacy">
-                <a href="javascript://" class="privacyToggle"></a>
-                <input type="checkbox" name="privacyFamily"
-                    class="privacyToggle" value="N">
+          </li>
+          <li class="ctrlHolder">
+            <h3><label>Relative Last Name</label></h3>
+            <div>
+              <input type="text"
+                name="relativeLname{{forloop.counter}}"
+                value="{{relative.lastname}}">
             </div>
-            <div class="form-row"></div>
-            {% for relative in relatives %}
-                <fieldset>
-                    <ol class="relativeBlock">
-                        <li class="ctrlHolder">
-                            <h3><label>Relative First Name</label></h3>
-                            <input type="text"
-                                name="relativeFname{{forloop.counter}}"
-                                value="{{relative.firstname}}">
-                        </li>
-                        <li class="ctrlHolder">
-                            <h3><label>Relative Last Name</label></h3>
-                            <input type="text"
-                                name="relativeLname{{forloop.counter}}"
-                                value="{{relative.lastname}}">
-                        </li>
-                        <li class="ctrlHolder">
-                            <h3><label>Relationship</label></h3>
-                            <select name="relativeText{{forloop.counter}}">
-                                {% for relationshipCode, relationshipText in relationships.items %}
-                                    <option value="{{relationshipCode}}" {% ifequal relative.relcode relationshipCode %}selected="selected"{% endifequal %}>
-                                        {{relationshipText}}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </li>
-                    </ol>
-                </fieldset>
+          </li>
+          <li class="ctrlHolder">
+            <h3><label>Relationship</label></h3>
+            <div>
+              <select name="relativeText{{forloop.counter}}">
+                {% for relationshipCode, relationshipText in relationships.items %}
+                  <option value="{{relationshipCode}}" {% ifequal relative.relcode relationshipCode %}selected="selected"{% endifequal %}>
+                    {{relationshipText}}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </li>
+        </ol>
+      {% endfor %}
+      <input type="button" name="addRelative"
+          value="Add Relative" class="button">
+    </fieldset>
+    <fieldset id="academicBlock" class="blockLabels">
+      <legend>Academics</legend>
+      <div class="privacy">
+        <a href="javascript://" class="privacyToggle"></a>
+        <input type="checkbox" name="privacyAcademics"
+            class="privacyToggle" value="N">
+      </div>
+      <ol>
+        <li class="ctrlHolder">
+          <h3><label>Degree</label></h3>
+          <div>
+            <input type="text" name="degree" value="{{person.degree}}"
+              placeholder="ex: BA, MBA, etc">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Major 1</label></h3>
+          <div>
+            <select name="major1">
+              <option value=""></option>
+              {% for major_code, major in majors %}
+                <option value="{{major_code}}" {% ifequal major person.major1 %}selected="selected"{% endifequal %}>
+                  {{major}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Major 2</label></h3>
+          <div>
+            <select name="major2">
+              <option value=""></option>
+              {% for major_code, major in majors %}
+                <option value="{{major_code}}" {% ifequal major person.major2 %}selected="selected"{% endifequal %}>
+                  {{major}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Major 3</label></h3>
+          <div>
+            <select name="major3">
+              <option value=""></option>
+              {% for major_code, major in majors %}
+                <option value="{{major_code}}" {% ifequal major person.major3 %}selected="selected"{% endifequal %}>
+                  {{major}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Masters Graduation Year</label></h3>
+          <div>
+            <select name="masters_grad_year">
+              <option value=""></option>
+              {% for year in years reversed %}
+                <option value="{{year}}" {% ifequal year person.masters_grad_year %}selected="selected"{% endifequal %}>
+                  {{year}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3>
+            <label>Student Organization{{activities|pluralize}}</label>
+          </h3>
+          <ul id="activityList">
+            {% for org in activities %}
+              <li>
+                <input type="text"
+                    name="activity{{forloop.counter}}"
+                    value="{{org.activity}}">
+              </li>
             {% endfor %}
-            <input type="button" name="addRelative" value="Add Relative" class="button">
-        </fieldset>
-        <fieldset id="academicBlock" class="blockLabels">
-            <legend>Academics</legend>
-            <div class="privacy">
-                <a href="javascript://" class="privacyToggle"></a>
-                <input type="checkbox" name="privacyAcademics"
-                    class="privacyToggle" value="N">
-            </div>
-            <ol>
-                <li class="ctrlHolder">
-                    <h3><label>Degree</label></h3>
-                    <input type="text" name="degree"
-                      value="{{person.degree}}" placeholder="ex: BA, MBA, etc">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Major 1</label></h3>
-                    <select name="major1">
-                        <option value=""></option>
-                        {% for major_code, major in majors %}
-                            <option value="{{major_code}}" {% ifequal major person.major1 %}selected="selected"{% endifequal %}>
-                                {{major}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Major 2</label></h3>
-                    <select name="major2">
-                        <option value=""></option>
-                        {% for major_code, major in majors %}
-                            <option value="{{major_code}}" {% ifequal major person.major2 %}selected="selected"{% endifequal %}>
-                                {{major}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Major 3</label></h3>
-                    <select name="major3">
-                        <option value=""></option>
-                        {% for major_code, major in majors %}
-                            <option value="{{major_code}}" {% ifequal major person.major3 %}selected="selected"{% endifequal %}>
-                                {{major}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Masters Graduation Year</label></h3>
-                    <select name="masters_grad_year">
-                        <option value=""></option>
-                        {% for year in years reversed %}
-                            <option value="{{year}}" {% ifequal year person.masters_grad_year %}selected="selected"{% endifequal %}>
-                                {{year}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3>
-                        <label>
-                            Student Organization{{activities|pluralize}}
-                        </label>
-                    </h3>
-                    <ul id="activityList">
-                        {% for org in activities %}
-                            <li>
-                                <input type="text"
-                                    name="activity{{forloop.counter}}"
-                                    value="{{org.activity}}">
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <input type="button" name="addActivity"
-                        value="Add Activity" class="button">
-                </li>
-                <li class="ctrlHolder">
-                    <h3>
-                        <label>Athletic Team{{athletics|pluralize}}</label>
-                    </h3>
-                    <ul id="athleticList">
-                        {% for team in athletics %}
-                            <li>
-                                <input type="text"
-                                    name="athletic{{forloop.counter}}"
-                                    value="{{team.sport}}">
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <input type="button" name="addTeam"
-                        value="Add Athletic Team" class="button">
-                </li>
-            </ol>
-        </fieldset>
-        <fieldset class="blockLabels">
-            <legend>Professional Information</legend>
-            <div class="privacy">
-                <a href="javascript://" class="privacyToggle"></a>
-                <input type="checkbox"
-                    name="privacyProfessional" class="privacyToggle" value="N">
-            </div>
-            <ol>
-                <li class="ctrlHolder">
-                    <h3><label>Business name</label></h3>
-                    <input type="text" name="business_name"
-                        value="{{person.business_name}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Job Title</label></h3>
-                    <input type="text" name="job_title"
-                        value="{{person.job_title}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business address</label></h3>
-                    <input type="text" name="business_address"
-                        value="{{person.business_address}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business address line 2</label></h3>
-                    <input type="text" name="business_address2"
-                        value="{{person.business_address2}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business City</label></h3>
-                    <input type="text" name="business_city"
-                        value="{{person.business_city}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business State</label></h3>
-                    <select name="business_state">
-                        <option value=""></option>
-                        {% for state in states %}
-                            <option value="{{state.st}}" {% ifequal state.st person.business_state %}selected="selected"{% endifequal %}>
-                                {{state.st}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business Postal Code</label></h3>
-                    <input type="text" name="business_zip"
-                        value="{{person.business_zip}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business Country</label></h3>
-                    <select name="business_country">
-                        {% for ctry, txt in countries %}
-                            <option value="{{ctry}}" {% ifequal ctry person.business_country %}selected="selected"{% endifequal %}>
-                                {{txt}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Business phone</label></h3>
-                    <input type="text" name="business_phone"
-                        value="{{person.business_phone}}">
-                </li>
-            </ol>
-        </fieldset>
-        <fieldset class="blockLabels">
-            <legend>Address</legend>
-            <div class="privacy">
-                <a href="javascript://" class="privacyToggle"></a>
-                <input type="checkbox" name="privacyAddress"
-                    class="privacyToggle" value="N">
-            </div>
-            <ol>
-                <li class="ctrlHolder">
-                    <h3><label>Email</label></h3>
-                    <input type="text" name="email" value="{{person.email}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Home phone</label></h3>
-                    <input type="text" name="home_phone"
-                        value="{{person.home_phone}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Home address</label></h3>
-                    <input type="text" name="home_address1"
-                        value="{{person.home_address1}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Address line 2</label></h3>
-                    <input type="text" name="home_address2"
-                        value="{{person.home_address2}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Address line 3</label></h3>
-                    <input type="text" name="home_address3"
-                        value="{{person.home_address3}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>City</label></h3>
-                    <input type="text" name="home_city"
-                        value="{{person.home_city}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>State</label></h3>
-                    <select name="home_state">
-                        <option value=""></option>
-                        {% for state in states %}
-                            <option value="{{state.st}}" {% ifequal state.st person.home_state %}selected="selected"{% endifequal %}>
-                                {{state.st}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Zip</label></h3>
-                    <input type="text" name="home_zip"
-                        value="{{person.home_zip}}">
-                </li>
-                <li class="ctrlHolder">
-                    <h3><label>Country</label></h3>
-                    <select name="home_country">
-                        {% for ctry, txt in countries %}
-                            <option value="{{ctry}}" {% ifequal ctry person.home_country %}selected="selected"{% endifequal %}>
-                                {{txt}}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </li>
-            </ol>
-        </fieldset>
-        {% if person %}
-          <input type="submit" name="submit" value="Submit Changes" class="button">
-        {% else %}
-          You are not listed as an alumni.
-          Please contact the Alumni Office at
-          <a href="mailto:alumnioffice@carthage.edu">
-            alumnioffice@carthage.edu</a>,
-            call 800-551-1518, or stop by Lentz Hall #414.
-        {% endif %}
-    </form>
-    </div>
+          </ul>
+          <input type="button" name="addActivity"
+              value="Add Activity" class="button">
+        </li>
+        <li class="ctrlHolder">
+          <h3>
+              <label>Athletic Team{{athletics|pluralize}}</label>
+          </h3>
+          <ul id="athleticList">
+            {% for team in athletics %}
+              <li>
+                <input type="text"
+                    name="athletic{{forloop.counter}}"
+                    value="{{team.sport}}">
+              </li>
+            {% endfor %}
+          </ul>
+          <input type="button" name="addTeam"
+              value="Add Athletic Team" class="button">
+        </li>
+      </ol>
+    </fieldset>
+    <fieldset class="blockLabels">
+      <legend>Professional Information</legend>
+      <div class="privacy">
+          <a href="javascript://" class="privacyToggle"></a>
+          <input type="checkbox"
+              name="privacyProfessional" class="privacyToggle" value="N">
+      </div>
+      <ol>
+        <li class="ctrlHolder">
+          <h3><label>Business name</label></h3>
+          <div>
+            <input type="text" name="business_name"
+              value="{{person.business_name}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Job Title</label></h3>
+          <div>
+            <input type="text" name="job_title"
+              value="{{person.job_title}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business address</label></h3>
+          <div>
+            <input type="text" name="business_address"
+              value="{{person.business_address}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business address line 2</label></h3>
+          <div>
+            <input type="text" name="business_address2"
+              value="{{person.business_address2}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business City</label></h3>
+          <div>
+            <input type="text" name="business_city"
+              value="{{person.business_city}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business State</label></h3>
+          <div>
+            <select name="business_state">
+              <option value=""></option>
+              {% for state in states %}
+                  <option value="{{state.st}}" {% ifequal state.st person.business_state %}selected="selected"{% endifequal %}>
+                      {{state.st}}
+                  </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business Postal Code</label></h3>
+          <div>
+            <input type="text" name="business_zip"
+              value="{{person.business_zip}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business Country</label></h3>
+          <div>
+            <select name="business_country">
+              {% for ctry, txt in countries %}
+                <option value="{{ctry}}" {% ifequal ctry person.business_country %}selected="selected"{% endifequal %}>
+                  {{txt}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Business phone</label></h3>
+          <div>
+            <input type="text" name="business_phone"
+              value="{{person.business_phone}}">
+          </div>
+        </li>
+      </ol>
+    </fieldset>
+    <fieldset class="blockLabels">
+      <legend>Address</legend>
+      <div class="privacy">
+          <a href="javascript://" class="privacyToggle"></a>
+          <input type="checkbox" name="privacyAddress"
+              class="privacyToggle" value="N">
+      </div>
+      <ol>
+        <li class="ctrlHolder">
+          <h3><label>Email</label></h3>
+          <div>
+            <input type="text" name="email" value="{{person.email}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Home phone</label></h3>
+          <div>
+            <input type="text" name="home_phone"
+              value="{{person.home_phone}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Home address</label></h3>
+          <div>
+            <input type="text" name="home_address1"
+              value="{{person.home_address1}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Address line 2</label></h3>
+          <div>
+            <input type="text" name="home_address2"
+              value="{{person.home_address2}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Address line 3</label></h3>
+          <div>
+            <input type="text" name="home_address3"
+              value="{{person.home_address3}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>City</label></h3>
+          <div>
+            <input type="text" name="home_city"
+              value="{{person.home_city}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>State</label></h3>
+          <div>
+            <select name="home_state">
+              <option value=""></option>
+              {% for state in states %}
+                <option value="{{state.st}}" {% ifequal state.st person.home_state %}selected="selected"{% endifequal %}>
+                  {{state.st}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Zip</label></h3>
+          <div>
+            <input type="text" name="home_zip"
+              value="{{person.home_zip}}">
+          </div>
+        </li>
+        <li class="ctrlHolder">
+          <h3><label>Country</label></h3>
+          <div>
+            <select name="home_country">
+              {% for ctry, txt in countries %}
+                <option value="{{ctry}}" {% ifequal ctry person.home_country %}selected="selected"{% endifequal %}>
+                  {{txt}}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </li>
+      </ol>
+    </fieldset>
+    {% if person %}
+      <input type="submit" name="submit" value="Submit Changes" class="button">
+    {% else %}
+      You are not listed as an alumni.
+      Please contact the Alumni Office at
+      <a href="mailto:alumnioffice@carthage.edu">
+        alumnioffice@carthage.edu</a>,
+        call 800-551-1518, or stop by Lentz Hall #414.
+    {% endif %}
+  </form>
+</div>
 {% endblock %}

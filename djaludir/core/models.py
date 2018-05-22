@@ -77,7 +77,7 @@ class Alumni(Base):
     id = Column(Integer, nullable=False)
     fname = Column(String)
     aname = Column(String)
-    lname_line3 = Column(String)
+    lname = Column(String)
     suffix = Column(String)
     prefix = Column(String)
     email = Column(String)

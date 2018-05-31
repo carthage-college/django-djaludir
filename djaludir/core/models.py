@@ -1,61 +1,78 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime
-from sqlalchemy import ForeignKey, Integer, String
-from sqlalchemy.ext.hybrid import hybrid_method
-
-Base = declarative_base()
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import User
 
 
-class AlumniActivity(Base):
+class Base(models.Model):
     """
-    Alumni activities like student organizations, clubs, or sport
+    Abstract base class for all data models
     """
 
-    __tablename__ = 'stg_aludir_activity'
-
-    # core
-    activity_no = Column(BigInteger, primary_key=True)
-    id = Column(Integer, nullable=False)
-    activitycode = Column(String)
-    activitytext = Column(String)
     # meta
-    submitted_on = Column(Date)
-    approved = Column(String)
-    approved_date = Column(Date)
+    user = models.ForeignKey(
+        User, verbose_name="Created by", editable=settings.DEBUG,
+        related_name='%(app_label)s_%(class)s_created_by',
+    )
+    created_at = models.DateTimeField(
+        "Date Created", auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        "Date Updated", auto_now=True
+    )
+    approved_at = models.DateTimeField(
+        "Date Approved", auto_now=True
+    )
+    updated_by = models.ForeignKey(
+        User, verbose_name="Updated by", editable=settings.DEBUG,
+        related_name='%(app_label)s_%(class)s_updated_by',
+    )
+    approved = models.BooleanField(default=False)
 
-    def __repr__(self):
+    class Meta:
+        abstract = True
+        ordering  = ['-created_at']
+        get_latest_by = 'created_at'
+
+    def __unicode__(self):
         return "[{}] {}".format(self.activitycode, self.activitytext)
 
     def get_slug(self):
         return 'activity'
 
 
-class AlumniAddress(Base):
+class Activity(Base):
     """
-    Alumni addresses for home and work
+    Activities like student organizations, clubs, or sport
     """
 
-    __tablename__ = 'stg_aludir_address'
+    activity_code = models.CharField(max_length=4, null=True, blank=True)
+    activity_text = models.CharField(max_length=32, null=True, blank=True)
 
-    # core
-    aa_no = Column(BigInteger, primary_key=True)
-    aa = Column(String)
-    id = Column(Integer, nullable=False)
-    address_line1 = Column(String)
-    address_line2 = Column(String)
-    address_line3 = Column(String)
-    city = Column(String)
-    state = Column(String)
-    zip = Column(String)
-    country = Column(String)
-    phone = Column(String)
-    # meta
-    submitted_on = Column(Date)
-    approved = Column(String)
-    approved_date = Column(Date)
+    def __unicode__(self):
+        return "[{}] {}".format(self.activitycode, self.activitytext)
 
-    def __repr__(self):
+    def get_slug(self):
+        return 'activity'
+
+
+class Address(Base):
+    """
+    Addresses for home and work
+    """
+
+    aa = models.CharField(max_length=4, null=True, blank=True)
+    address_line1 = models.CharField(max_length=64, null=True, blank=True)
+    address_line2 = models.CharField(max_length=64, null=True, blank=True)
+    address_line3 = models.CharField(max_length=64, null=True, blank=True)
+
+    city = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=2, null=True, blank=True)
+    postal_code = models.CharField(max_length=10, null=True, blank=True)
+    country = models.CharField(max_length=3, null=True, blank=True)
+    phone = models.CharField(max_length=12, null=True, blank=True)
+
+    def __unicode__(self):
         return "{} {} {} {} {} {} {}".format(
             self.address_line1, self.address_line2, self.address_line3,
             self.city, self.state, self.zip, self.country
@@ -67,61 +84,60 @@ class AlumniAddress(Base):
 
 class Alumni(Base):
     """
-    Alumni vital stats
+    Alumni vitals
     """
 
-    __tablename__ = 'stg_aludir_alumni'
+    alt_name = models.CharField(max_length=32, null=True, blank=True)
+    suffix = models.CharField(max_length=10, null=True, blank=True)
+    prefix = models.CharField(max_length=10, null=True, blank=True)
+    email = models.CharField(max_length=128, null=True, blank=True)
+    maiden_name = models.CharField(max_length=32, null=True, blank=True)
+    degree = models.CharField(max_length=4, null=True, blank=True)
+    class_year = models.CharField(max_length=4, null=True, blank=True)
+    business_name = models.CharField(max_length=64, null=True, blank=True)
+    major1 = models.CharField(max_length=4, null=True, blank=True)
+    major2 = models.CharField(max_length=4, null=True, blank=True)
+    major3 = models.CharField(max_length=4, null=True, blank=True)
+    masters_grad_year = models.CharField(max_length=4, null=True, blank=True)
+    job_title = models.CharField(max_length=64, null=True, blank=True)
 
-    # core
-    alum_no = Column(BigInteger, primary_key=True)
-    id = Column(Integer, nullable=False)
-    fname = Column(String)
-    aname = Column(String)
-    lname = Column(String)
-    suffix = Column(String)
-    prefix = Column(String)
-    email = Column(String)
-    maidenname = Column(String)
-    degree = Column(String)
-    class_year = Column(Integer)
-    business_name = Column(String)
-    major1 = Column(String)
-    major2 = Column(String)
-    major3 = Column(String)
-    masters_grad_year = Column(Integer)
-    job_title = Column(String)
-    # meta
-    submitted_on = Column(Date)
-    approved = Column(String)
-    approved_date = Column(Date)
-
-    def __repr__(self):
+    def __unicode__(self):
         return "{}, {}".format(
-            self.lname, self.fname
+            self.user.last_name, self.user_first_name
         )
 
     def get_slug(self):
         return 'alumni'
 
 
-class AlumniPrivacy(Base):
+class Privacy(Base):
     """
-    Alumni privacy settings for the various data models
+    Privacy settings for the various data models
     """
 
-    __tablename__ = 'stg_aludir_privacy'
+    fieldname = models.CharField(max_length=32, null=True, blank=True)
+    display = models.BooleanField(default=False)
 
-    # core
-    priv_no = Column(BigInteger, primary_key=True)
-    id = Column(Integer, nullable=False)
-    fieldname = Column(String)
-    display = Column(String)
-    # meta
-    lastupdated = Column(Date)
-
-    def __repr__(self):
+    def __unicode__(self):
         return "[{}] {}".format(self.fieldname, self.display)
 
     def get_slug(self):
         return 'privacy'
+
+
+class Relative(Base):
+    """
+    Activities like student organizations, clubs, or sport
+    """
+
+    relation_code = models.CharField(max_length=8, null=True, blank=True)
+    first_name = models.CharField(max_length=32, null=True, blank=True)
+    last_name = models.CharField(max_length=32, null=True, blank=True)
+    primary = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return "[{}] {}".format(self.activitycode, self.activitytext)
+
+    def get_slug(self):
+        return 'relative'
 

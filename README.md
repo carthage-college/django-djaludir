@@ -9,3 +9,9 @@ Alumni Directory
 
 http://www.openldap.org/lists/openldap-software/200411/msg00258.html
 
+## django migrations for new tables
+
+python manage.py migrate --run-syncd
+python manage.py makemigrations core
+python manage.py migrate core
+

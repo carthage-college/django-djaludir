@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from djaludir.core.sql import (
     ACTIVITIES, ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
-    PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
+    MAJORS, PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
 )
 from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
@@ -84,15 +84,7 @@ def get_privacy(cid):
 
 
 def get_majors():
-    major_sql = '''
-        SELECT
-            DISTINCT TRIM(major) AS major_code,
-            TRIM(txt) AS major_name
-        FROM
-            major_table
-        ORDER BY TRIM(txt)
-    '''
-    objs = do_sql(major_sql, INFORMIX_DEBUG)
+    objs = do_sql(MAJORS, INFORMIX_DEBUG)
 
     return objs.fetchall()
 

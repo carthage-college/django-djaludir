@@ -72,6 +72,15 @@ ACTIVITY_SEARCH = '''
         TRIM(invl_table.txt)
 '''.format
 
+MAJORS = '''
+    SELECT
+        DISTINCT TRIM(major) AS major_code,
+        TRIM(txt) AS major_name
+    FROM
+        major_table
+    ORDER BY TRIM(txt)
+'''
+
 PRIVACY =  '''
     SELECT
         TRIM(fieldname) AS fieldname, TRIM(display) AS display

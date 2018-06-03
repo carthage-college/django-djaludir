@@ -15,3 +15,4 @@ python manage.py migrate --run-syncd
 python manage.py makemigrations core
 python manage.py migrate core
 
+will we have to move the migrations/ directory out of the way in production?

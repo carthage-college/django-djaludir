@@ -34,12 +34,6 @@ class Base(models.Model):
         ordering  = ['-created_at']
         get_latest_by = 'created_at'
 
-    def __unicode__(self):
-        return "[{}] {}".format(self.activitycode, self.activitytext)
-
-    def get_slug(self):
-        return 'activity'
-
 
 class Activity(Base):
     """
@@ -90,7 +84,7 @@ class Alumni(Base):
     alt_name = models.CharField(max_length=32, null=True, blank=True)
     suffix = models.CharField(max_length=10, null=True, blank=True)
     prefix = models.CharField(max_length=10, null=True, blank=True)
-    email = models.CharField(max_length=128, null=True, blank=True)
+    email = models.CharField(max_length=254, null=True, blank=True)
     maiden_name = models.CharField(max_length=32, null=True, blank=True)
     degree = models.CharField(max_length=4, null=True, blank=True)
     class_year = models.CharField(max_length=4, null=True, blank=True)
@@ -102,8 +96,8 @@ class Alumni(Base):
     job_title = models.CharField(max_length=64, null=True, blank=True)
 
     def __unicode__(self):
-        return "{}, {}".format(
-            self.user.last_name, self.user_first_name
+        return u"{}, {}".format(
+            self.user.last_name, self.user.first_name
         )
 
     def get_slug(self):

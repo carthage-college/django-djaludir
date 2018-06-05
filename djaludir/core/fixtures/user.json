@@ -1,6 +1,7 @@
 [
     {
-        "model": "auth.user", "pk": 744073, "fields": {
+        "model": "auth.user", "pk": 744073, "fields":
+        {
             "password": "pbkdf2_sha256$36000$SuV4U68qgh9Q$+r1Vye4+kXkJApzsPIkbC6MsDibuebSzTr+EYDd6mb0=",
             "last_login": "2018-04-20T16:20:00",
             "is_superuser": false,

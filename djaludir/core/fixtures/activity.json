@@ -1,0 +1,19 @@
+[
+    {
+        "model": "core.activity", "pk": 1, "fields":
+        {
+            "code": "",
+            "text": "Oliver Wendall Holmes Society"
+        },
+        "model": "core.activity", "pk": 2, "fields":
+        {
+            "code": "",
+            "text": "Quidditch"
+        },
+        "model": "core.activity", "pk": 3, "fields":
+        {
+            "code": "",
+            "text": "Model United Nations"
+        }
+    }
+]

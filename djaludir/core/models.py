@@ -40,11 +40,11 @@ class Activity(Base):
     Activities like student organizations, clubs, or sport
     """
 
-    activity_code = models.CharField(max_length=4, null=True, blank=True)
-    activity_text = models.CharField(max_length=32, null=True, blank=True)
+    code = models.CharField(max_length=4, null=True, blank=True)
+    text = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
-        return "[{}] {}".format(self.activitycode, self.activitytext)
+        return "[{}] {}".format(self.code, self.text)
 
     def get_slug(self):
         return 'activity'
@@ -130,8 +130,9 @@ class Relative(Base):
     primary = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "[{}] {}".format(self.activitycode, self.activitytext)
+        return "[{}] {}, {}".format(
+            self.relation_code, self.last_name, self.first_name
+        )
 
     def get_slug(self):
         return 'relative'
-

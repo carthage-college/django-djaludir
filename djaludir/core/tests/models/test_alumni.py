@@ -12,7 +12,6 @@ class CoreAlumniTestCase(TestCase):
 
     def setUp(self):
         self.cid = settings.TEST_USER_COLLEGE_ID
-        self.cid_null = 666
 
     def test_alumni(self):
 

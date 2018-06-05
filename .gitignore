@@ -3,4 +3,5 @@
 *.pyc
 settings.py
 wsgi.py
+migrations
 djaludir/static/admin

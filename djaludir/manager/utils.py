@@ -118,11 +118,11 @@ def set_relatives(request):
         relRelation = request.POST.get('relativeText' + str(i))
 
         # Because of the way relationships are stored in CX,
-        # we must identify if the alumn(a|us) matches the first or
+        # we must identify if the alumna matches the first or
         # second role in the relationship
-        alumPrimary = True
+        alumPrimary = False
         if(relRelation[-1:] == '1'):
-            alumPrimary = False
+            alumPrimary = True
 
         if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
             relRelation = relRelation[0:-1]
@@ -130,13 +130,16 @@ def set_relatives(request):
         # If the relative has some value in their name and
         # a specified relationship, insert the record
         if (len(relFname + relLname) > 0 and relRelation != ''):
-            r, created = Relative.objects.get_or_create(
-                user = user, updated_by = user,
+            relative, created = Relative.objects.get_or_create(
+                user = user,
                 relation_code = relRelation,
-                first_name = relFname, last_name = relLname,
-                primary = alumPrimary
+                first_name = relFname,
+                last_name = relLname
             )
-            relatives.append(r)
+            relative.updated_by = user
+            relative.primary = alumPrimary
+            relative.save()
+            relatives.append(relative)
 
     return relatives
 

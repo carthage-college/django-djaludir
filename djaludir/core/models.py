@@ -3,6 +3,11 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 
+EXCLUDE_FIELDS = [
+    'id','user','updated_by', 'created_at','updated_at',
+    'approved_at','approved'
+]
+
 
 class Base(models.Model):
     """
@@ -26,6 +31,7 @@ class Base(models.Model):
     updated_by = models.ForeignKey(
         User, verbose_name="Updated by", editable=settings.DEBUG,
         related_name='%(app_label)s_%(class)s_updated_by',
+        null=True, blank=True
     )
     approved = models.BooleanField(default=False)
 

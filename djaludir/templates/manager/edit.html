@@ -120,25 +120,25 @@
         <li class="ctrlHolder">
           <h3><label>First Name</label></h3>
           <div>
-            <input type="text" name="fname" value="{{person.fname}}">
+            <input type="text" name="first_name" value="{{person.fname}}">
           </div>
         </li>
         <li class="ctrlHolder">
           <h3><label>Preferred Name</label></h3>
           <div>
-            <input type="text" name="aname" value="{{person.aname}}">
+            <input type="text" name="alt_name" value="{{person.aname}}">
           </div>
         </li>
         <li class="ctrlHolder">
           <h3><label>Maiden Name</label></h3>
           <div>
-            <input type="text" name="maidenname" value="{% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %}">
+            <input type="text" name="maiden_name" value="{% if person.birth_lname %}{% ifnotequal person.birth_lname person.lname %}({{person.birth_lname}}){% endifnotequal %}{% endif %}">
           </div>
         </li>
         <li class="ctrlHolder">
           <h3><label>Last Name</label></h3>
           <div>
-            <input type="text" name="lname" value="{{person.lname}}">
+            <input type="text" name="last_name" value="{{person.lname}}">
           </div>
         </li>
         <li class="ctrlHolder">

@@ -3,6 +3,8 @@
         "model": "core.alumni", "pk": 1, "fields":
         {
             "user_id": "744073",
+            "first_name": "Kòu Lā",
+            "last_name": "Tonraq",
             "alt_name": "Korra",
             "suffix": "Esq",
             "prefix": "MS",

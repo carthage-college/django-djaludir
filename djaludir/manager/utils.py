@@ -6,7 +6,9 @@ from djaludir.core.sql import (
     ACTIVITIES, ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
     MAJORS, PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
 )
-from djaludir.core.models import Activity, Address, Alumni, Relative
+from djaludir.core.models import (
+    Activity, Address, Alumni, Relative, EXCLUDE_FIELDS
+)
 
 from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
@@ -46,26 +48,17 @@ def get_alumna(cid):
 def set_alumna(request):
 
     user = request.user
-    a, created = Alumni.objects.get_or_create(
-        user = user, updated_by = user,
-        first_name = request.POST.get('fname'),
-        alt_name = request.POST.get('aname'),
-        last_name = request.POST.get('lname'),
-        suffix = request.POST.get('suffix'),
-        prefix = request.POST.get('prefix'),
-        email = request.POST.get('email'),
-        maiden_name = request.POST.get('maidenname'),
-        degree = request.POST.get('degree'),
-        class_year = request.POST.get('class_year'),
-        business_name = request.POST.get('business_name'),
-        major1 = request.POST.get('major1'),
-        major2 = request.POST.get('major2'),
-        major3 = request.POST.get('major3'),
-        masters_grad_year = request.POST.get('masters_grad_year'),
-        job_title = request.POST.get('job_title')
-    )
+    alumna, created = Alumni.objects.get_or_create(user = user)
 
-    return a
+    for f in alumna._meta.get_fields():
+        field = f.name
+        if field not in EXCLUDE_FIELDS:
+            setattr(alumna, field, request.POST.get(field))
+
+    alumna.updated_by=(user)
+    alumna.save()
+
+    return alumna
 
 
 def get_activities(cid, is_sports=False):

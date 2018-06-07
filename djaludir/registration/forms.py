@@ -62,7 +62,7 @@ class CreateLdapForm(forms.Form):
         label="Password", required=True, max_length=64,
         widget=forms.PasswordInput(),
         help_text="""
-            Minimum 12 characters and at least one lowercase letter
+            Minimum 12 characters and at least one uppercase letter
             and one number.
         """
     )
@@ -81,10 +81,10 @@ class CreateLdapForm(forms.Form):
                 """
             )
 
-        if not re.search('[a-z]+',pw) or not re.search('[0-9]+', pw):
+        if not re.search('[A-Z]+',pw) or not re.search('[0-9]+', pw):
             raise forms.ValidationError(
                 """
-                Your password must include at least one lowercase letter
+                Your password must include at least one uppercase letter
                 and at least one number.
                 """
             )
@@ -143,7 +143,7 @@ class ModifyLdapPasswordForm(forms.Form):
         max_length=64, label="Password",
         widget=forms.PasswordInput(),
         help_text="""
-            Minimum 12 characters and at least one letter and one number.
+            Minimum 12 characters and at least one uppercase letter and one number.
         """
     )
     confPassword = forms.CharField(
@@ -160,10 +160,10 @@ class ModifyLdapPasswordForm(forms.Form):
                 "Password must be at least 12 characters."
             )
 
-        if not re.search('[a-zA-Z]+', pw) or not re.search('[0-9]+', pw):
+        if not re.search('[A-Z]+', pw) or not re.search('[0-9]+', pw):
             raise forms.ValidationError(
                 u'Your password must include at least \
-                  one letter and at least one number.'
+                  one uppercase letter and at least one number.'
             )
         return self.cleaned_data.get('userPassword')
 

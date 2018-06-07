@@ -30,7 +30,10 @@ class ManagerActivitiesTestCase(TestCase):
             cid = self.cid, fieldname = fieldname, comparison = comparison
         )
 
-        print(sql)
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ACTIVITIES SQL")
 
         activities = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -54,7 +57,10 @@ class ManagerActivitiesTestCase(TestCase):
             comparison = comparison
         )
 
-        print(sql)
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print Activities SQL")
 
         activities = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -71,7 +77,10 @@ class ManagerActivitiesTestCase(TestCase):
 
         sql = ACTIVITIES_TEMP(cid = self.cid)
 
-        print(sql)
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ACTIVITIES_TEMP SQL")
 
         activities = do_sql(sql, self.debug, self.earl).fetchall()
 

@@ -23,7 +23,11 @@ class ManagerRelativesTestCase(TestCase):
         print(seperator())
 
         sql = RELATIVES_TEMP(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print RELATIVES_TEMP SQL")
 
         relatives_temp = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -36,7 +40,11 @@ class ManagerRelativesTestCase(TestCase):
         print(seperator())
 
         sql = RELATIVES_ORIG(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print RELATIVES_ORIG SQL")
 
         relatives_orig = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -56,7 +64,11 @@ class ManagerRelativesTestCase(TestCase):
         print(seperator())
 
         sql = RELATIVES_ORIG(cid = self.cid_null)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print RELATIVES_ORIG SQL")
 
         relatives_orig = do_sql(sql, self.debug, self.earl).fetchall()
 

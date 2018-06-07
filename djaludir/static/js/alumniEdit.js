@@ -6,18 +6,18 @@ var LEVEL_0_HIDE = 'Personal,Family,Academics,Professional,Address',
     LEVEL_3_SHOW = 'Personal,Family,Academics,Professional,Address';
 
 $(document).ready(function(){
-    //Set the current counters for relatives, activities, and athletics
+    // Set the current counters for relatives, activities, and athletics
     $('input[name="relativeCount"]').val($('.relativeBlock').length);
     $('input[name="activityCount"]').val($('#activityList li').length);
     $('input[name="athleticCount"]').val($('#athleticList li').length);
 
-    //Attach functionality to "Add Relative" button
+    // Attach functionality to "Add Relative" button
     $('input[name="addRelative"]').click(function(){
 
-        //Increment relative counter
+        // Increment relative counter
         var addedRelatives = $('.relativeBlock').length + 1;
 
-        //Create HTML for relative form
+        // Create HTML for relative form
         $('<fieldset />').append($('<ol />').addClass('relativeBlock')
             .append($('<li>').addClass('ctrlHolder')
                 .append($('<h3 />').append($('<label />').text('Relative First Name')))
@@ -33,56 +33,56 @@ $(document).ready(function(){
             )
         ).insertBefore($(this));
 
-        //Populate select box with family relationships
+        // Populate select box with family relationships
         loadSelectKeyVal('select[name="relativeText' + addedRelatives + '"]', relationships);
 
-        //Update hidden relative count field
+        // Update hidden relative count field
         $('input[name="relativeCount"]').val(addedRelatives);
     });
 
-    //Attach functionality to "Add Activity" button
+    // Attach functionality to "Add Activity" button
     $('input[name="addActivity"]').click(function(){
 
-        //Increment activity counter
+        // Increment activity counter
         var addedActivities = $('#activityList li').length + 1;
 
-        //Create HTML for activity form
+        // Create HTML for activity form
         $('<li />')
             .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'placeholder':'Activity Name'}))
             .insertAfter($('#activityList li:last'));
 
-        //Update hidden activity count field
+        // Update hidden activity count field
         $('input[name="activityCount"]').val(addedActivities);
     });
 
-    //Attach functionality to "Add Athletic Team" button
+    // Attach functionality to "Add Athletic Team" button
     $('input[name="addTeam"]').click(function(){
 
-        //Increment athletic counter
+        // Increment athletic counter
         var addedTeams = $('#athleticList li').length + 1;
 
-        //Create HTML for athletic form
+        // Create HTML for athletic form
         $('<li>')
             .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team'}))
             .insertAfter($('#athleticList li:last'));
 
-        //Update hidden athletic count field
+        // Update hidden athletic count field
         $('input[name="athleticCount"]').val(addedTeams);
     });
 
-    //Attach functionality to each Privacy link (currently in the heading of each fieldset)
+    // Attach functionality to each Privacy link (currently in the heading of each fieldset)
     $('a.privacyToggle').each(function(){
-        //Get the name of the checkbox
+        // Get the name of the checkbox
         var cbName = $(this).parent().find('input.privacyToggle').attr('name');
 
-        //Attach togglePrivacy() to the click event of the checkbox
+        // Attach togglePrivacy() to the click event of the checkbox
         $(this).click({chkBoxName: cbName}, togglePrivacy);
 
-        //Initialize privacy setting
+        // Initialize privacy setting
         setPrivacy(cbName.replace(/privacy/i,''), false);
     });
 
-    //Attach functionality to privacy radio buttons
+    // Attach functionality to privacy radio buttons
     $('input[name="privacy"]').click(function(){
         switch($(this).val()){
             case '0':
@@ -111,7 +111,7 @@ function togglePrivacy(chkBoxName){
     }
     setPrivacy(chkBoxName.replace(/privacy/i,''), $chkBox.is(':checked'));
 
-    //When someone clicks a link, reset the privacy radio button to the "Custom" setting
+    // When someone clicks a link, reset the privacy radio button to the "Custom" setting
     $('input[name="privacy"][value="4"]').prop('checked', true);
 }
 
@@ -120,7 +120,7 @@ function togglePrivacy(chkBoxName){
  * isPrivate (boolean) - dictates the new privacy setting
 *********************************************************/
 function setPrivacy(chkBoxName, isPrivate){
-    //Loop through each checkbox name in the chkBoxName variable
+    // Loop through each checkbox name in the chkBoxName variable
     $.each(chkBoxName.split(','), function(index, value){
         $chkBox = $('input[name="privacy' + value + '"]');
         $chkBox.parent().find('a.privacyToggle').text('Information is: ' + (isPrivate ? 'Private' : 'Visible to Alumni'));
@@ -133,7 +133,7 @@ function setPrivacy(chkBoxName, isPrivate){
  * select the appropriate radio button setting
 ********************************************************/
 function initPrivacy(privateFields){
-    //Let "Custom" be the default setting
+    // Let "Custom" be the default setting
     var index = '4';
     /*
      * Remove the trailing comma, split the string into an array, sort the elements

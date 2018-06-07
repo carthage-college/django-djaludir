@@ -15,7 +15,7 @@ from djaludir.manager.utils import (
     get_countries, get_majors, get_message_info, get_privacy,
     get_relatives, get_states, get_alumna, get_activities,
     insert_activity, insert_address, insert_alumni, insert_privacy,
-    insert_relative
+    insert_relative, set_activities, set_address, set_alumna, set_relatives
 )
 
 from djtools.utils.mail import send_mail
@@ -58,83 +58,32 @@ def update(request):
         # Retrieve the ID of the alumn(a|us)
         cid = request.POST.get('carthageID')
 
-        if int(cid) == int(request.user.id) or request.user.is_superuser:
+        user = request.user
 
-            # Insert personal information
-            alumni_sql = insert_alumni(
-                cid, request.POST.get('fname'), request.POST.get('aname'),
-                request.POST.get('lname'),
-                request.POST.get('suffix'), request.POST.get('prefix'),
-                request.POST.get('email'), request.POST.get('maidenname'),
-                request.POST.get('degree'), request.POST.get('class_year'),
-                request.POST.get('business_name'), request.POST.get('major1'),
-                request.POST.get('major2'), request.POST.get('major3'),
-                request.POST.get('masters_grad_year'),
-                request.POST.get('job_title')
-            )
+        if int(cid) == int(user.id) or user.is_superuser:
 
+            # personal information
+            set_alumna(request)
+
+            # relatives
             if request.POST.get('relativeCount'):
-                for i in range (1, int(request.POST.get('relativeCount')) + 1):
-                    relFname = request.POST.get('relativeFname' + str(i))
-                    relLname = request.POST.get('relativeLname' + str(i))
-                    relRelation = request.POST.get('relativeText' + str(i))
+                set_relatives(request)
 
-                    # Because of the way relationships are stored in CX,
-                    # we must identify if the alumn(a|us) matches the first or
-                    # second role in the relationship
-                    alumPrimary = 'Y'
-                    if(relRelation[-1:] == '1'):
-                        alumPrimary = 'N'
-
-                    if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-                        relRelation = relRelation[0:-1]
-
-                    # If the relative has some value in their name and
-                    # a specified relationship, insert the record
-                    if(len(relFname + relLname) > 0 and relRelation != ''):
-                        insert_relative(
-                            cid, relRelation, relFname, relLname, alumPrimary
-                        )
-
-            # Insert organizationa and athletic involvement
+            # organizations and athletic involvement
             if request.POST.get('activityCount'):
-                for i in range (1, int(request.POST.get('activityCount')) + 1):
-                    activityText = request.POST.get('activity' + str(i))
-
-                    if(activityText):
-                        insert_activity(cid, activityText)
+                set_activities(request, 'activity')
 
             if request.POST.get('athleticCount'):
-                for i in range (1, int(request.POST.get('athleticCount')) + 1):
-                    athleticText = request.POST.get('athletic' + str(i))
+                set_activities(request, 'athletic')
 
-                    if athleticText and (len(athleticText) > 0):
-                        insert_activity(cid, athleticText)
-
-            # Insert home and work address information
-            insert_address(
-                'WORK', cid, request.POST.get('business_address'),
-                request.POST.get('business_address2'), '',
-                request.POST.get('business_city'),
-                request.POST.get('business_state'),
-                request.POST.get('business_zip'),
-                request.POST.get('business_country'),
-                request.POST.get('business_phone')
-            )
-
-            insert_address(
-                'HOME', cid, request.POST.get('home_address1'),
-                request.POST.get('home_address2'),
-                request.POST.get('home_address3'),
-                request.POST.get('home_city'), request.POST.get('home_state'),
-                request.POST.get('home_zip'), request.POST.get('home_country'),
-                request.POST.get('home_phone')
-            )
+            # home and work address information
+            set_address(request, 'WORK')
+            set_address(request, 'HOME')
 
             # Clear privacy values
             clear_privacy(cid)
 
-            # Insert updated privacy settings
+            # Manager privacy settings
             personal = request.POST.get('privacyPersonal','Y')
             insert_privacy(cid, 'Personal', personal)
 
@@ -154,7 +103,9 @@ def update(request):
             # the existing information and the newly submitted data
             response = email_differences(cid, request)
 
-            # display the email data instead of sending the email if developing
+            # the email_differences() returns a response that displays the
+            # data rather than sending the email if DEBUG is True, otherwise
+            # we redirect the user to the manager edit view
             if not settings.DEBUG:
                 response = HttpResponseRedirect(
                     reverse(
@@ -190,7 +141,6 @@ def search(request, messageSent = False, permissionDenied = False):
         # Sport/activities are searched via "OR", all other fields are "AND"
         # so assemble the list of fields to run through the logic
         # to create the appropriate filters
-        logger.debug("post = {}".format(request.body))
         for rowNum in range (0, int(request.POST.get('maxCriteria')) + 1):
             fieldname = request.POST.get('within' + str(rowNum))
             searchterm = request.POST.get('term' + str(rowNum))
@@ -332,8 +282,6 @@ def search(request, messageSent = False, permissionDenied = False):
                 ORDER BY
                     lastname, fname, alum.cl_yr
             '''.format(selectFromSQL, orSQL, andSQL)
-
-            logger.debug("sql = {}".format(sql))
 
             objs = do_sql(sql, INFORMIX_DEBUG)
 

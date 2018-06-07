@@ -21,7 +21,7 @@ class Base(models.Model):
         "Date Updated", auto_now=True
     )
     approved_at = models.DateTimeField(
-        "Date Approved", auto_now=True
+        "Date Approved", null=True, blank=True
     )
     updated_by = models.ForeignKey(
         User, verbose_name="Updated by", editable=settings.DEBUG,
@@ -44,7 +44,7 @@ class Activity(Base):
     text = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
-        return "[{}] {}".format(self.code, self.text)
+        return u"{}".format(self.text)
 
     def get_slug(self):
         return 'activity'
@@ -67,9 +67,9 @@ class Address(Base):
     phone = models.CharField(max_length=12, null=True, blank=True)
 
     def __unicode__(self):
-        return "{} {} {} {} {} {} {}".format(
+        return u"{} {} {} {} {} {} {}".format(
             self.address_line1, self.address_line2, self.address_line3,
-            self.city, self.state, self.zip, self.country
+            self.city, self.state, self.postal_code, self.country
         )
 
     def get_slug(self):
@@ -81,6 +81,8 @@ class Alumni(Base):
     Alumni vitals
     """
 
+    first_name = models.CharField(max_length=32, null=True, blank=True)
+    last_name = models.CharField(max_length=32, null=True, blank=True)
     alt_name = models.CharField(max_length=32, null=True, blank=True)
     suffix = models.CharField(max_length=10, null=True, blank=True)
     prefix = models.CharField(max_length=10, null=True, blank=True)
@@ -111,6 +113,9 @@ class Privacy(Base):
 
     fieldname = models.CharField(max_length=32, null=True, blank=True)
     display = models.BooleanField(default=False)
+    # abstract base class fields that are not necessary for this model
+    approved = None
+    approved_at = None
 
     def __unicode__(self):
         return "[{}] {}".format(self.fieldname, self.display)
@@ -130,7 +135,7 @@ class Relative(Base):
     primary = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "[{}] {}, {}".format(
+        return u"[{}] {}, {}".format(
             self.relation_code, self.last_name, self.first_name
         )
 

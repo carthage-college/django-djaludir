@@ -33,7 +33,7 @@ urlpatterns = [
         name='manager_user_edit_success'
     ),
     url(
-        r'^update', views.update,
+        r'^update/', views.update,
         name='manager_user_update'
     ),
     url(

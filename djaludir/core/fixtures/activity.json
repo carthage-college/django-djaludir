@@ -2,18 +2,41 @@
     {
         "model": "core.activity", "pk": 1, "fields":
         {
+            "user_id": "744073",
             "code": "",
-            "text": "Oliver Wendall Holmes Society"
-        },
+            "text": "Oliver Wendall Holmes Society",
+            "created_at": "2018-05-01 04:20:00",
+            "updated_at": "2018-05-01 04:20:00",
+            "approved_at": "2018-05-01 04:20:00",
+            "updated_by_id": "744073",
+            "approved": true
+        }
+    },
+    {
         "model": "core.activity", "pk": 2, "fields":
         {
+            "user_id": "744073",
             "code": "",
-            "text": "Quidditch"
-        },
-        "model": "core.activity", "pk": 3, "fields":
+            "text": "Quidditch",
+            "created_at": "2018-05-01 04:20:00",
+            "updated_at": "2018-05-01 04:20:00",
+            "approved_at": "2018-05-01 04:20:00",
+            "updated_by_id": "744073",
+            "approved": true
+        }
+    },
+    {
+       "model": "core.activity", "pk": 3, "fields":
         {
+            "user_id": "744073",
             "code": "",
-            "text": "Model United Nations"
+            "text": "Model United Nations",
+            "created_at": "2018-05-01 04:20:00",
+            "updated_at": "2018-05-01 04:20:00",
+            "approved_at": "2018-05-01 04:20:00",
+            "updated_by_id": "744073",
+            "approved": true
         }
     }
 ]
+

@@ -22,7 +22,11 @@ class ManagerAlumnaTestCase(TestCase):
         print(seperator())
 
         sql = ALUMNA(cid = self.cid, deceased = '')
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ALUMNA SQL")
 
         alumna = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -37,7 +41,11 @@ class ManagerAlumnaTestCase(TestCase):
         print(seperator())
 
         sql = ALUMNA(cid = self.cid_null, deceased = '')
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ALUMNA SQL")
 
         alumna = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -52,7 +60,11 @@ class ManagerAlumnaTestCase(TestCase):
         print(seperator())
 
         sql = ALUMNA_TEMP(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ALUMNA_TEMP SQL")
 
         alumna = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -67,7 +79,11 @@ class ManagerAlumnaTestCase(TestCase):
         print(seperator())
 
         sql = ALUMNA_TEMP(cid = self.cid_null)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print ALUMNA_TEMP SQL")
 
         alumna = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -102,11 +118,14 @@ class ManagerAlumnaTestCase(TestCase):
         '''
 
         sql = '{} {}'.format(SEARCH, append)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print SEARCH SQL")
 
         objects = do_sql(sql, self.debug, self.earl).fetchall()
 
         print(objects)
 
         self.assertGreaterEqual(len(objects), 1)
-

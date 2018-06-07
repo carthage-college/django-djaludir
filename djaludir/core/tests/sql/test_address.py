@@ -22,7 +22,11 @@ class ManagerAddressTestCase(TestCase):
         print(seperator())
 
         sql = HOMEADDRESS_TEMP(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print HOMEADDRESS_TEMP SQL")
 
         homeaddress = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -42,7 +46,11 @@ class ManagerAddressTestCase(TestCase):
         print(seperator())
 
         sql = HOMEADDRESS_TEMP(cid = self.cid_null)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print HOMEADDRESS_TEMP SQL")
 
         homeaddress = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -57,7 +65,11 @@ class ManagerAddressTestCase(TestCase):
         print(seperator())
 
         sql = WORKADDRESS_TEMP(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print WORKADDRESS_TEMP SQL")
 
         workaddress = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -77,11 +89,14 @@ class ManagerAddressTestCase(TestCase):
         print(seperator())
 
         sql = WORKADDRESS_TEMP(cid = self.cid_null)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print WORKADDRESS_TEMP SQL")
 
         workaddress = do_sql(sql, self.debug, self.earl).fetchall()
 
         print(workaddress)
 
         self.assertEqual(len(workaddress), 0)
-

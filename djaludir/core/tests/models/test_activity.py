@@ -8,7 +8,7 @@ from djtools.utils.logging import seperator
 
 class CoreActivityTestCase(TestCase):
 
-    #fixtures = ['user.json', 'activity.json']
+    fixtures = ['user.json', 'activity.json']
 
     def setUp(self):
         self.cid = settings.TEST_USER_COLLEGE_ID
@@ -16,10 +16,13 @@ class CoreActivityTestCase(TestCase):
     def test_activity(self):
 
         print("\n")
-        print("test activity ORM data model, which will fail if not found")
+        print("test activity ORM data model")
         print(seperator())
 
         # obtain our health insturance object
         activities = Activity.objects.filter(user__id=self.cid)
 
-        print(activities)
+        for activity in activities:
+            print(activity)
+
+        self.assertGreaterEqual(len(activities), 1)

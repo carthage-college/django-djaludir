@@ -22,7 +22,11 @@ class ManagerPrivacyTestCase(TestCase):
         print(seperator())
 
         sql = PRIVACY(cid = self.cid)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print PRIVACY SQL")
 
         privacy = do_sql(sql, self.debug, self.earl).fetchall()
 
@@ -37,7 +41,11 @@ class ManagerPrivacyTestCase(TestCase):
         print(seperator())
 
         sql = PRIVACY(cid = self.cid_null)
-        print(sql)
+
+        if settings.DEBUG:
+            print(sql)
+        else:
+            print("use the --debug-mode flag to print PRIVACY SQL")
 
         privacy = do_sql(sql, self.debug, self.earl).fetchall()
 

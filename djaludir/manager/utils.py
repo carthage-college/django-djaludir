@@ -7,7 +7,7 @@ from djaludir.core.sql import (
     MAJORS, PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
 )
 from djaludir.core.models import (
-    Activity, Address, Alumni, Relative, EXCLUDE_FIELDS
+    Activity, Address, Alumna, Relative, EXCLUDE_FIELDS
 )
 
 from djzbar.utils.informix import do_sql
@@ -48,7 +48,7 @@ def get_alumna(cid):
 def set_alumna(request):
 
     user = request.user
-    alumna, created = Alumni.objects.get_or_create(user = user)
+    alumna, created = Alumna.objects.get_or_create(user = user)
 
     for f in alumna._meta.get_fields():
         field = f.name

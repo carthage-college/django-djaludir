@@ -82,9 +82,9 @@ class Address(Base):
         return 'address'
 
 
-class Alumni(Base):
+class Alumna(Base):
     """
-    Alumni vitals
+    Alumna vitals
     """
 
     first_name = models.CharField(max_length=32, null=True, blank=True)
@@ -109,7 +109,7 @@ class Alumni(Base):
         )
 
     def get_slug(self):
-        return 'alumni'
+        return 'alumna'
 
 
 class Privacy(Base):

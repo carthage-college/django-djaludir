@@ -1,6 +1,6 @@
 [
     {
-        "model": "core.alumni", "pk": 1, "fields":
+        "model": "core.alumna", "pk": 1, "fields":
         {
             "user_id": "744073",
             "first_name": "Kòu Lā",

@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from djaludir.core.models import Alumni, EXCLUDE_FIELDS
+from djaludir.core.models import Alumna, EXCLUDE_FIELDS
 
 from djtools.utils.logging import seperator
 
@@ -23,7 +23,7 @@ class CoreAlumnaTestCase(TestCase):
         print(seperator())
 
         # obtain our health insturance object
-        alumna = Alumni.objects.get(user__id=self.cid)
+        alumna = Alumna.objects.get(user__id=self.cid)
 
         print(alumna)
 
@@ -38,7 +38,7 @@ class CoreAlumnaTestCase(TestCase):
 
         user = User.objects.get(pk=self.cid)
 
-        alumna, created = Alumni.objects.get_or_create(user = user)
+        alumna, created = Alumna.objects.get_or_create(user = user)
 
         json_data = open(
             '{}/core/fixtures/alumni.json'.format(settings.ROOT_DIR)

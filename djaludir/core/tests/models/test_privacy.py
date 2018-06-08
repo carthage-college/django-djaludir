@@ -19,7 +19,6 @@ class CorePrivacyTestCase(TestCase):
         print("test privacy ORM data model")
         print(seperator())
 
-        # obtain our health insturance object
         privacies = Privacy.objects.filter(user__id=self.cid)
         print("len = {}".format(len(privacies)))
         for privacy in privacies:

@@ -1,0 +1,33 @@
+[
+    {
+        "model": "core.relative", "pk": 1, "fields":
+        {
+            "user_id": "744073",
+            "relation_code": "PC",
+            "first_name": "Senna",
+            "last_name": "Tribu Agua",
+            "primary": true,
+            "created_at": "2018-05-01 04:20:00",
+            "updated_at": "2018-05-01 04:20:00",
+            "approved_at": "2018-05-01 04:20:00",
+            "updated_by_id": "744073",
+            "approved": true
+        }
+    },
+    {
+        "model": "core.relative", "pk": 2, "fields":
+        {
+            "user_id": "744073",
+            "relation_code": "PC",
+            "first_name": "Tonraq",
+            "last_name": "Tribu Agua",
+            "primary": false,
+            "created_at": "2018-05-01 04:20:00",
+            "updated_at": "2018-05-01 04:20:00",
+            "approved_at": "2018-05-01 04:20:00",
+            "updated_by_id": "744073",
+            "approved": true
+        }
+    }
+]
+

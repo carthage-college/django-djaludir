@@ -11,7 +11,7 @@ import json
 
 class CoreAlumnaTestCase(TestCase):
 
-    fixtures = ['alumni.json','user.json']
+    fixtures = ['alumna.json','user.json']
 
     def setUp(self):
         self.cid = settings.TEST_USER_COLLEGE_ID
@@ -22,7 +22,6 @@ class CoreAlumnaTestCase(TestCase):
         print("test alumna ORM data model, which will fail if not found")
         print(seperator())
 
-        # obtain our health insturance object
         alumna = Alumna.objects.get(user__id=self.cid)
 
         print(alumna)
@@ -41,7 +40,7 @@ class CoreAlumnaTestCase(TestCase):
         alumna, created = Alumna.objects.get_or_create(user = user)
 
         json_data = open(
-            '{}/core/fixtures/alumni.json'.format(settings.ROOT_DIR)
+            '{}/core/fixtures/alumna.json'.format(settings.ROOT_DIR)
         ).read()
         data = json.loads(json_data)
         for f in alumna._meta.get_fields():

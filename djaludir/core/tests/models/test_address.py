@@ -19,7 +19,6 @@ class CoreAddressTestCase(TestCase):
         print("test address ORM data model")
         print(seperator())
 
-        # obtain our health insturance object
         addresses = Address.objects.filter(user__id=self.cid)
 
         for address in addresses:

@@ -19,7 +19,6 @@ class CoreActivityTestCase(TestCase):
         print("test activity ORM data model")
         print(seperator())
 
-        # obtain our health insturance object
         activities = Activity.objects.filter(user__id=self.cid)
 
         for activity in activities:

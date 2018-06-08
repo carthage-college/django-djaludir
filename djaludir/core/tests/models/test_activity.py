@@ -29,13 +29,13 @@ class CoreActivityTestCase(TestCase):
 
         self.assertGreaterEqual(len(activities), 1)
 
-    def test_set_relative(self):
+    def test_set_activity(self):
         """
-        corresponds also to set_relative() in manager.utils
+        corresponds also to set_activity() in manager.utils
         """
 
         print("\n")
-        print("test relative ORM data model for get_or_create() method")
+        print("test activity ORM data model for get_or_create() method")
         print(seperator())
 
         user = User.objects.get(pk=self.cid)

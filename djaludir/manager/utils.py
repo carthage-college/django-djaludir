@@ -61,7 +61,7 @@ def set_alumna(request):
     return alumna
 
 
-def get_activities(cid, is_sports=False):
+def get_activity(cid, is_sports=False):
     """
     Conditional statements to provide the correct logic and
     terminology depending on whether or not activities or athletics
@@ -79,7 +79,7 @@ def get_activities(cid, is_sports=False):
     return objs.fetchall()
 
 
-def set_activities(request, activity):
+def set_activity(request, activity):
 
     user = request.user
     activities = []
@@ -97,7 +97,7 @@ def set_activities(request, activity):
     return activities
 
 
-def get_relatives(cid):
+def get_relative(cid):
     """
     Retrieve collection of relatives (regardless of whether the alumn(a|us)
     is the primary or secondary relationship)
@@ -110,7 +110,7 @@ def get_relatives(cid):
     return objs.fetchall()
 
 
-def set_relatives(request):
+def set_relative(request):
 
     user = request.user
     relatives = []
@@ -298,19 +298,19 @@ def set_address(request, place):
     if place == 'WORK':
         prefix = 'business'
 
-    a, created = Address.objects.get_or_create(
-        user = user, updated_by = user, aa = place,
-        address_line1 = request.POST.get('{}_address'.format(prefix)),
-        address_line2 = request.POST.get('{}_address2'.format(prefix)),
-        address_line3 = request.POST.get('{}_address3'.format(prefix)),
-        city = request.POST.get('{}_city'.format(prefix)),
-        state = request.POST.get('{}_state'.format(prefix)),
-        postal_code = request.POST.get('{}_zip'.format(prefix)),
-        country = request.POST.get('{}_country'.format(prefix)),
-        phone = request.POST.get('{}_phone'.format(prefix))
+    address, created = Address.objects.get_or_create(
+        user = user, aa = place
     )
 
-    return a
+    for f in address._meta.get_fields():
+        field = f.name
+        if field not in EXCLUDE_FIELDS:
+            setattr(
+                address, field, request.POST.get('{}_{}'.format(prefix, field))
+            )
+
+    address.updated_by = user
+    address.save()
 
 
 def insert_address(

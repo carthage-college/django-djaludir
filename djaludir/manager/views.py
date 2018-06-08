@@ -13,9 +13,8 @@ from djaludir.core.sql import (
 from djaludir.manager.utils import (
     clear_privacy, email_differences,
     get_countries, get_majors, get_message_info, get_privacy,
-    get_relatives, get_states, get_alumna, get_activities,
-    insert_activity, insert_address, insert_alumni, insert_privacy,
-    insert_relative, set_activities, set_address, set_alumna, set_relatives
+    get_relative, get_states, get_alumna, get_activity, insert_privacy,
+    set_activity, set_address, set_alumna, set_relative
 )
 
 from djtools.utils.mail import send_mail
@@ -32,8 +31,8 @@ def display(request, cid):
     # fetch information about the alumna
     alumni = get_alumna(cid)
     if alumni != None:
-        activities = get_activities(cid, False)
-        athletics = get_activities(cid, True)
+        activities = get_activity(cid, False)
+        athletics = get_activity(cid, True)
         relatives = get_relatives(cid)
         privacy = get_privacy(cid)
     else:
@@ -67,14 +66,14 @@ def update(request):
 
             # relatives
             if request.POST.get('relativeCount'):
-                set_relatives(request)
+                set_relative(request)
 
             # organizations and athletic involvement
             if request.POST.get('activityCount'):
-                set_activities(request, 'activity')
+                set_activity(request, 'activity')
 
             if request.POST.get('athleticCount'):
-                set_activities(request, 'athletic')
+                set_activity(request, 'athletic')
 
             # home and work address information
             set_address(request, 'WORK')

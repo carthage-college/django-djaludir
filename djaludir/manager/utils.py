@@ -87,10 +87,12 @@ def set_activities(request, activity):
     for i in range (1, int(request.POST.get(count)) + 1):
         activityText = request.POST.get('{}{}'.format(activity, str(i)))
         if activityText:
-            a, created = Activity.objects.get_or_create(
-                user = user, updated_by = user, text = activityText
+            activity, created = Activity.objects.get_or_create(
+                user = user, text = activityText
             )
-            activities.append(a)
+            activity.updated_by = user
+            activity.save()
+            activities.append(activity)
 
     return activities
 

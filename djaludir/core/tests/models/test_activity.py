@@ -1,9 +1,12 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from djaludir.core.models import Activity
 
 from djtools.utils.logging import seperator
+
+import json
 
 
 class CoreActivityTestCase(TestCase):
@@ -25,3 +28,26 @@ class CoreActivityTestCase(TestCase):
             print(activity)
 
         self.assertGreaterEqual(len(activities), 1)
+
+    def test_set_relative(self):
+        """
+        corresponds also to set_relative() in manager.utils
+        """
+
+        print("\n")
+        print("test relative ORM data model for get_or_create() method")
+        print(seperator())
+
+        user = User.objects.get(pk=self.cid)
+
+        json_data = open(
+            '{}/core/fixtures/activity.json'.format(settings.ROOT_DIR)
+        ).read()
+        data = json.loads(json_data)
+        for i in range (0, len(data)):
+            activity, created = Activity.objects.get_or_create(
+                user = user, text = data[i]['fields']['text'],
+                code = data[i]['fields']['code']
+            )
+            activity.updated_by = user
+            activity.save()

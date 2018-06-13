@@ -14,12 +14,9 @@
     <style type="text/css">
         fieldset {border:.1em solid #000000;margin-bottom:8px;padding:5px;}
         label {width:auto;padding-right:5px;font-weight:bold;}
-        .business_address {width:9em;}
-        .home_address {width:7.2em;}
         .relative {width:4em;}
         .form-row {clear:both;}
         div.header {font-weight:bold;font-size:13pt;float:left;}
-        .home_address {width:7.2em;}
     </style>
 {% endblock %}
 {% block content %}
@@ -83,25 +80,23 @@
         <fieldset>
             <div class="form-row header">Professional Information</div>
             <p class="clear">
-            {% if person.business_name %}
-              {{person.business_name}}<br>
+            {% if person.business_address_line1 %}
+              {{person.business_address_line1}}<br>
             {% endif %}
-            {% if person.business_address %}
-              {{person.business_address}}<br>
+            {% if person.business_address_line2 %}
+              {{person.business_address_line2}}<br>
             {% endif %}
-            {% if person.business_address2 %}
-              {{person.business_address2}}<br>
+            {% if person.business_address_line3 %}
+              {{person.business_address_line3}}<br>
             {% endif %}
-            {% if person.business_address %}
-                {% if person.business_city %}
-                  {{person.business_city}},
-                {% endif %}
-                {% if person.business_state %}
-                  {{person.business_state}}
-                {% endif %}
-                {% if person.business_zip %}
-                  {{person.business_zip}}
-                {% endif %}
+            {% if person.business_city %}
+              {{person.business_city}},
+            {% endif %}
+            {% if person.business_state %}
+              {{person.business_state}}
+            {% endif %}
+            {% if person.business_zip %}
+              {{person.business_zip}}
             {% endif %}
             {% if person.business_phone %}
             <br>{{person.business_phone}}
@@ -113,13 +108,13 @@
       <fieldset>
         <div class="form-row header">Contact Information</div>
         <div class="form-row">
-            {% if person.home_address1 or person.home_address2 or person.home_address3 %}
-                {{person.home_address1}}<br>
-                {% if person.home_address2 %}
-                  {{person.home_address2}}<br>
+            {% if person.home_address_line1 or person.home_address_line2 or person.home_address_line3 %}
+                {{person.home_address_line1}}<br>
+                {% if person.home_address_line2 %}
+                  {{person.home_address_line2}}<br>
                 {% endif %}
-                {% if person.home_address3 %}
-                  {{person.home_address3}}<br>
+                {% if person.home_address_line3 %}
+                  {{person.home_address_line3}}<br>
                 {% endif %}
             {% endif %}
             {{person.home_city}}, {{person.home_state}} {{person.home_zip}}

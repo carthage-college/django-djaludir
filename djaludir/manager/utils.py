@@ -48,7 +48,7 @@ def get_alumna(cid):
 def set_alumna(request):
 
     user = request.user
-    alumna, created = Alumna.objects.get_or_create(user = user)
+    alumna, created = Alumna.objects.get_or_create(user=user, pk=user.id)
 
     for f in alumna._meta.get_fields():
         field = f.name
@@ -79,13 +79,13 @@ def get_activity(cid, is_sports=False):
     return objs.fetchall()
 
 
-def set_activity(request, activity):
+def set_activity(request, tipo):
 
     user = request.user
     activities = []
-    count = '{}Count'.format(activity)
+    count = '{}Count'.format(tipo)
     for i in range (1, int(request.POST.get(count)) + 1):
-        activityText = request.POST.get('{}{}'.format(activity, str(i)))
+        activityText = request.POST.get('{}{}'.format(tipo, str(i)))
         if activityText:
             activity, created = Activity.objects.get_or_create(
                 user = user, text = activityText
@@ -103,9 +103,7 @@ def get_relative(cid):
     is the primary or secondary relationship)
     """
 
-    relatives_sql = RELATIVES_ORIG(cid = cid)
-
-    objs = do_sql(relatives_sql, INFORMIX_DEBUG)
+    objs = do_sql(RELATIVES_ORIG(cid = cid), INFORMIX_DEBUG)
 
     return objs.fetchall()
 
@@ -269,7 +267,7 @@ def insert_alumni(
     do_sql(clear_sql, INFORMIX_DEBUG)
 
     if maidenname:
-        maidenname = maidenname.replace("(","").replace(")","")
+        maidenname = maidenname.replace('(','').replace(')','')
 
     alumni_sql = '''
         INSERT INTO stg_aludir_alumni (
@@ -411,7 +409,7 @@ def insert_privacy(cid, field, display):
 
 def email_differences(cid, request):
     """
-    Retrieve the existing information about the alumn(a|us)
+    Retrieve the existing information about the alumna
     """
 
     student = get_alumna(cid)
@@ -421,45 +419,50 @@ def email_differences(cid, request):
         'business':False,'home':False
     }
 
-    if student['fname']:
-        fname = student['fname']
+    if student['first_name']:
+        first_name = student['first_name']
     else:
-        fname = '[missing first name]'
+        first_name = '[missing first name]'
 
     subject = u"Alumni Directory Update for {} {} ({})".format(
-        fname, student['lname'], cid
+        first_name, student['last_name'], cid
     )
 
-    # Obtain the most recent unapproved information about the person
-    alumna_temp = ALUMNA_TEMP(cid = cid)
+    #
+    # begin data aquisition
+    #
 
-    alum = do_sql(alumna_temp, INFORMIX_DEBUG)
-    alumni = alum.fetchone()
+    # needed to translate 4 letter code to major name
+    majors = get_majors()
+
+    # Obtain the most recent unapproved information about the person
+    alumna = Alumna.objects.get(pk=cid)
 
     # Section for relatives
 
     # Get information about the alum's relatives
-    relatives_orig = get_relatives(cid)
-    relatives_sql = RELATIVES_TEMP(cid = cid)
-    relatives_new = do_sql(relatives_sql, INFORMIX_DEBUG).fetchall()
+    relative_org = get_relative(cid)
+    relative_new = Relative.objects.filter(user__id=cid)
+
     relatives = []
     # compare current relatives with data from POST to determine if there
     # were any changes or not
-    for r1 in relatives_orig:
-        ro = list(r1)
-        del ro[3]
-        for r2 in relatives_new:
-            rn = list(r2)
+    for r1 in relative_org:
+        # still not certain why we append '1' to primary relationships in the
+        # RELATIVES_ORIG sql so we strip it from here for now
+        ro = [r1.lastname, r1.firstname, r1.relcode[:-1]]
+        for r2 in relative_new:
+            rn = [r2.last_name, r2.first_name, r2.relation_code]
             if ro != rn:
                 relatives.append(rn)
 
     data['relatives'] = relatives
-    # Loop through all the relatives' records and set approved = "N"
-    clear_relative(cid)
 
     # activities/athletics information
-    activities = get_activities(cid, False)
-    athletics = get_activities(cid, True)
+
+    activities = get_activity(cid, False)
+    athletics = get_activity(cid, True)
+
     activities_orig = []
 
     for a in activities:
@@ -468,163 +471,111 @@ def email_differences(cid, request):
     for a in athletics:
         activities_orig.append(a)
 
-    activities_temp = do_sql(
-        ACTIVITIES_TEMP(cid = cid), INFORMIX_DEBUG
-    ).fetchall()
-    activities_diff = []
+    activities = Activity.objects.filter(user__id=cid)
 
+    activities_temp = []
+
+    for a in activities:
+        activities_temp.append((a.text,))
+
+    activities_diff = []
     for temp in activities_temp:
         if temp not in activities_orig:
             activities_diff.append(temp)
 
-    clear_activity(cid)
-
     # Get address information (work and home)
-    home_address = do_sql(
-        HOMEADDRESS_TEMP(cid = cid), INFORMIX_DEBUG
-    ).fetchone()
+    addresses = Address.objects.filter(user__id=cid)
 
-    workaddress_sql = WORKADDRESS_TEMP(cid = cid)
-    workaddress = do_sql(workaddress_sql, INFORMIX_DEBUG)
-    if(workaddress != None):
-        work_address = workaddress.fetchone()
-    else:
-        work_address = []
+    #
+    # begin comparisions
+    #
 
     # Section for personal information
-    if(student['prefix'].lower() != alumni.prefix.lower()):
-        data["prefix"] = alumni.prefix
-        data["original_prefix"] = student['prefix']
-        data["personal"] = True
-    if(fname != alumni.fname):
-        data["fname"] = alumni.fname
-        data["original_fname"] = fname
-        data["personal"] = True
-    if(student['aname'] != alumni.aname):
-        data["aname"] = alumni.aname
-        data["original_aname"] = student['aname']
-        data["personal"] = True
-    if(student['birth_lname'] != alumni.maidenname):
-        data["maidenname"] = alumni.maidenname
-        data["original_maidenname"] = student['birth_lname']
-        data["personal"] = True
-    if(student['lname'] != alumni.lname):
-        data["lname"] = alumni.lname
-        data["original_lname"] = student['lname']
-        data["personal"] = True
-    if(student['suffix'].lower() != alumni.suffix.lower()):
-        data["suffix"] = alumni.suffix
-        data["original_suffix"] = student['suffix']
-        data["personal"] = True
+    if(student['prefix'].lower() != alumna.prefix.lower()):
+        data['prefix'] = alumna.prefix
+        data['original_prefix'] = student['prefix']
+        data['personal'] = True
+    if(first_name != alumna.first_name):
+        data['first_name'] = alumna.first_name
+        data['original_first_name'] = first_name
+        data['personal'] = True
+    if(student['alt_name'] != alumna.alt_name):
+        data['alt_name'] = alumna.alt_name
+        data['original_alt_name'] = student['alt_name']
+        data['personal'] = True
+    if(student['birth_last_name'] != alumna.maiden_name):
+        data['maiden_name'] = alumna.maiden_name
+        data['original_maiden_name'] = student['birth_last_name']
+        data['personal'] = True
+    if(student['last_name'] != alumna.last_name):
+        data['last_name'] = alumna.last_name
+        data['original_last_name'] = student['last_name']
+        data['personal'] = True
+    if(student['suffix'].lower() != alumna.suffix.lower()):
+        data['suffix'] = alumna.suffix
+        data['original_suffix'] = student['suffix']
+        data['personal'] = True
+    if(student['email'] != alumna.email):
+        data['email'] = alumna.email
+        data['original_email'] = student['email']
+        data['personal'] = True
 
-    #Section for academics
-    if(student['degree'] != alumni.degree):
-        data["degree"] = alumni.degree
-        data["original_degree"] = student['degree']
-        data["academics"] = True
-    if(student['major1'] != alumni.major1):
-        data["major1"] = alumni.major1
-        data["original_major1"] = student['major1']
-        data["academics"] = True
-    if(student['major2'] != alumni.major2):
-        data["major2"] = alumni.major2
-        data["original_major2"] = student['major2']
-        data["academics"] = True
-    if(student['major3'] != alumni.major3):
-        data["major3"] = alumni.major3
-        data["original_major3"] = student['major3']
-        data["academics"] = True
-    if(student['masters_grad_year'] != alumni.masters_grad_year):
-        data["masters_grad_year"] = alumni.masters_grad_year
-        data["original_mastersgradyear"] = student['masters_grad_year']
-        data["academics"] = True
+    # Section for academics
+    major1 = major2 = major3 = ''
+    if(student['degree'] != alumna.degree):
+        data['degree'] = alumna.degree
+        data['original_degree'] = student['degree']
+        data['academics'] = True
+    for m in majors:
+        if m[0] == alumna.major1:
+            major1 = m[1]
+            break
+    if(student['major1'] != major1):
+        data['major1'] = major1
+        data['original_major1'] = student['major1']
+        data['academics'] = True
+    for m in majors:
+        if m[0] == alumna.major2:
+            major2 = m[1]
+            break
+    if(student['major2'] != major2):
+        data['major2'] = major2
+        data['original_major2'] = student['major2']
+        data['academics'] = True
+    for m in majors:
+        if m[0] == alumna.major3:
+            major3 = m[1]
+            break
+    if(student['major3'] != major3):
+        data['major3'] = major3
+        data['original_major3'] = student['major3']
+        data['academics'] = True
+    if(student['masters_grad_year'] != alumna.masters_grad_year):
+        data['masters_grad_year'] = alumna.masters_grad_year
+        data['original_masters_grad_year'] = student['masters_grad_year']
+        data['academics'] = True
 
     # Section for activities
-    # (this may be split out into organizations vs athletics in the future)
-    data["organizations"] = activities_diff
+    data['organizations'] = activities_diff
 
-    # Section for business name
-    if(student['business_name'] != alumni.business_name):
-        data["business_name"] = alumni.business_name
-        data["original_businessname"] = student['business_name']
-        data["business"] = True
-    # Section for job title
-    if(student['job_title'] != alumni.job_title):
-        data["job_title"] = alumni.job_title
-        data["original_jobtitle"] = student['job_title']
-        data["business"] = True
-    # Section for work/business address
-    if (work_address != None and len(work_address) > 0):
-        if(student['business_address'] != work_address.address_line1):
-            data["business_address"] = work_address.address_line1
-            data["original_businessaddress"] = student['business_address']
-            data["business"] = True
-        if(student['business_address2'] != work_address.address_line2):
-            data["business_address"] = work_address.address_line2
-            data["original_businessaddress2"] = student['business_address2']
-            data["business"] = True
-        if(student['business_city'] != work_address.city):
-            data["business_city"] = work_address.city
-            data["original_businesscity"] = student['business_city']
-            data["business"] = True
-        if(student['business_state'] != work_address.state):
-            data["business_state"] = work_address.state
-            data["original_businessstate"] = student['business_state']
-            data["business"] = True
-        if(student['business_zip'] != work_address.zip):
-            data["business_zip"] = work_address.zip
-            data["original_businesszip"] = student['business_zip']
-            data["business"] = True
-        if(student['business_country'] != work_address.country):
-            data["business_country"] = work_address.country
-            data["original_businesscountry"] = student['business_country']
-            data["business"] = True
-        if(student['business_phone'] != work_address.phone):
-            data["business_phone"] = work_address.phone
-            data["original_businessphone"] = student['business_phone']
-            data["business"] = True
-    else:
-        data["business"] = True
-        data["business_address"] = workaddress_sql
+    # Section for addresses
+    if (len(addresses) > 0):
+        for a in addresses:
 
-    # Section for home address
-    if(student['email'] != alumni.email):
-        data["email"] = alumni.email
-        data["original_email"] = student['email']
-        data["home"] = True
-    if(home_address != None and len(home_address) > 0):
-        if(student['home_address1']!= home_address.address_line1):
-            data["home_address"] = home_address.address_line1
-            data["original_homeaddress"] = student['home_address1']
-            data["home"] = True
-        if(student['home_address2'] != home_address.address_line2):
-            data["home_address2"] = home_address.address_line2
-            data["original_homeaddress2"] = student['home_address2']
-            data["home"] = True
-        if(student['home_address3'] != home_address.address_line3):
-            data["home_address3"] = home_address.address_line3
-            data["original_homeaddress3"] = student['home_address3']
-            data["home"] = True
-        if(student['home_city'] != home_address.city):
-            data["home_city"] = home_address.city
-            data["original_homecity"] = student['home_city']
-            data["home"] = True
-        if(student['home_state'] != home_address.state):
-            data["home_state"] = home_address.state
-            data["original_homestate"] = student['home_state']
-            data["home"] = True
-        if(student['home_zip'] != home_address.zip):
-            data["home_zip"] = home_address.zip
-            data["original_homezip"] = student['home_zip']
-            data["home"] = True
-        if(student['home_country'] != home_address.country):
-            data["home_country"] = home_address.country
-            data["original_homecountry"] = student['home_country']
-            data["home"] = True
-        if(student['home_phone'] != home_address.phone):
-            data["home_phone"] = home_address.phone
-            data["original_homephone"] = student['home_phone']
-            data["home"] = True
+            prefix = 'home'
+            if a.aa == 'WORK':
+                prefix = 'business'
+
+            for f in Address._meta.get_fields():
+                field = f.name
+                if field not in EXCLUDE_FIELDS:
+                    key = '{}_{}'.format(prefix, field)
+                    val = getattr(a, field)
+                    if student[key] != val:
+                        data[key] = val
+                        orig_key = 'original_{}'.format(key)
+                        data[orig_key] = student[key]
+                        data[prefix] = True
 
     response = None
     if settings.DEBUG:

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 EXCLUDE_FIELDS = [
-    'id','user','updated_by', 'created_at','updated_at',
+    'aa','id','user','updated_by', 'created_at','updated_at',
     'approved_at','approved'
 ]
 
@@ -96,12 +96,10 @@ class Alumna(Base):
     maiden_name = models.CharField(max_length=32, null=True, blank=True)
     degree = models.CharField(max_length=4, null=True, blank=True)
     class_year = models.CharField(max_length=4, null=True, blank=True)
-    business_name = models.CharField(max_length=64, null=True, blank=True)
     major1 = models.CharField(max_length=4, null=True, blank=True)
     major2 = models.CharField(max_length=4, null=True, blank=True)
     major3 = models.CharField(max_length=4, null=True, blank=True)
     masters_grad_year = models.CharField(max_length=4, null=True, blank=True)
-    job_title = models.CharField(max_length=64, null=True, blank=True)
 
     def __unicode__(self):
         return u"{}, {}".format(

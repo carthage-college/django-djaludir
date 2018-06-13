@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 
-from djaludir.manager.utils import get_alumna
+from djaludir.manager.utils import get_alumna, set_alumna
 
 from djtools.utils.logging import seperator
 from djzbar.utils.informix import do_sql

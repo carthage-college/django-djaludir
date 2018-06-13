@@ -13,48 +13,48 @@
         "<b>{{data.prefix}}</b>"
     </dd>
   {% endif %}
-  {% if data.fname %}
+  {% if data.first_name %}
     <dt {{dl_dt}}>
         First Name
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_fname}}"
+        "{{data.original_first_name}}"
         to
-        "<b>{{data.fname}}</b>"
+        "<b>{{data.first_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.aname %}
+  {% if data.alt_name %}
     <dt {{dl_dt}}>
         Preferred Name
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_aname}}"
+        "{{data.original_alt_name}}"
         to
-        "<b>{{data.aname}}</b>"
+        "<b>{{data.alt_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.maidenname %}
+  {% if data.maiden_name %}
     <dt {{dl_dt}}>
         Maiden Name
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_maidenname}}"
+        "{{data.original_maiden_name}}"
         to
-        "<b>{{data.maidenname}}</b>"
+        "<b>{{data.maiden_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.lname %}
+  {% if data.last_name %}
     <dt {{dl_dt}}>
         Last Name
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_lname}}"
+        "{{data.original_last_name}}"
         to
-        "<b>{{data.lname}}</b>"
+        "<b>{{data.last_name}}</b>"
     </dd>
   {% endif %}
   {% if data.suffix %}
@@ -147,7 +147,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_mastersgradyear}}"
+        "{{data.original_masters_grad_year}}"
         to
         "<b>{{data.masters_grad_year}}</b>"
     </dd>
@@ -170,37 +170,37 @@
 {% if data.business %}
   <h3>Professional Information</h3>
   <dl {{dl_detail}}>
-  {% if data.business_name %}
+  {% if data.business_address_line1 %}
     <dt {{dl_dt}}>
-        Business Name
+        Business 1
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businessname}}"
+        "{{data.original_business_address_line1}}"
         to
-        "<b>{{data.business_name}}</b>"
+        "<b>{{data.business_address_line1}}</b>"
     </dd>
   {% endif %}
-  {% if data.job_title %}
+  {% if data.business_address_line2 %}
     <dt {{dl_dt}}>
-        Job Title
+        Business 2
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_jobtitle}}"
+        "{{data.original_business_address_line2}}"
         to
-        "<b>{{data.job_title}}</b>"
+        "<b>{{data.business_address_line2}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_address %}
+  {% if data.business_address_line3 %}
     <dt {{dl_dt}}>
-        Business Address
+        Business 3
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businessaddress}}"
+        "{{data.original_business_address_line3}}"
         to
-        "<b>{{data.business_address}}</b>"
+        "<b>{{data.business_address_line3}}</b>"
     </dd>
   {% endif %}
   {% if data.business_city %}
@@ -209,7 +209,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businesscity}}"
+        "{{data.original_business_city}}"
         to
         "<b>{{data.business_city}}</b>"
     </dd>
@@ -220,20 +220,20 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businessstate}}"
+        "{{data.original_business_state}}"
         to
         "<b>{{data.business_state}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_zip %}
+  {% if data.business_postal_code %}
     <dt {{dl_dt}}>
-        Business Zip
+        Business Postal Code
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businesszip}}"
+        "{{data.original_business_postal_code}}"
         to
-        "<b>{{data.business_zip}}</b>"
+        "<b>{{data.business_postal_code}}</b>"
     </dd>
   {% endif %}
   {% if data.business_country %}
@@ -242,7 +242,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businesscountry}}"
+        "{{data.original_business_country}}"
         to
         "<b>{{data.business_country}}</b>"
     </dd>
@@ -253,7 +253,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_businessphone}}"
+        "{{data.original_business_phone}}"
         to
         "<b>{{data.business_phone}}</b>"
     </dd>
@@ -280,42 +280,42 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homephone}}"
+        "{{data.original_home_phone}}"
         to
         "<b>{{data.home_phone}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address %}
+  {% if data.home_address_line1 %}
     <dt {{dl_dt}}>
         Home Address
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homeaddress}}"
+        "{{data.original_home_address_line1}}"
         to
-        "<b>{{data.home_address}}</b>"
+        "<b>{{data.home_address_line1}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address2 %}
+  {% if data.home_address_line2 %}
     <dt {{dl_dt}}>
         Home Address Line 2
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homeaddress2}}"
+        "{{data.original_home_address_line2}}"
         to
-        "<b>{{data.home_address2}}</b>"
+        "<b>{{data.home_address_line2}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address3 %}
+  {% if data.home_address_line3 %}
     <dt {{dl_dt}}>
         Home Address Line 3
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homeaddress3}}"
+        "{{data.original_home_address_line3}}"
         to
-        "<b>{{data.home_address3}}</b>}"
+        "<b>{{data.home_address_line3}}</b>"
     </dd>
   {% endif %}
   {% if data.home_city %}
@@ -324,7 +324,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homecity}}"
+        "{{data.original_home_city}}"
         to
         "<b>{{data.home_city}}</b>"
     </dd>
@@ -335,20 +335,20 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homestate}}"
+        "{{data.original_home_state}}"
         to
         "<b>{{data.home_state}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_zip %}
+  {% if data.home_postal_code %}
     <dt {{dl_dt}}>
-        Home Zip
+        Home Postal Code
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homezip}}"
+        "{{data.original_home_postal_code}}"
         to
-        "<b>{{data.home_zip}}</b>"
+        "<b>{{data.home_postal_code}}</b>"
     </dd>
   {% endif %}
   {% if data.home_country %}
@@ -357,7 +357,7 @@
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_homecountry}}"
+        "{{data.original_home_country}}"
         to
         "<b>{{data.home_country}}</b>"
     </dd>

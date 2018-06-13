@@ -4,14 +4,14 @@
         {
             "user_id": "744073",
             "aa": "WORK",
-            "address_line1": "1313 Mockingbird Lane",
-            "address_line2": "69th Floor",
+            "address_line1": "Morticia's Shadow",
+            "address_line2": "1313 Mockingbird Lane",
             "address_line3": "Suite 16",
             "city": "Springfield",
             "state": "ME",
-            "postal_code": "08003",
+            "postal_code": "69666",
             "country": "USA",
-            "phone": "415.901.2500",
+            "phone": "415.901.2569",
             "created_at": "2018-05-01 04:20:00",
             "updated_at": "2018-05-01 04:20:00",
             "approved_at": "2018-05-01 04:20:00",
@@ -20,7 +20,7 @@
         }
     },
     {
-        "model": "core.address", "pk": 1, "fields":
+        "model": "core.address", "pk": 2, "fields":
         {
             "user_id": "744073",
             "aa": "HOME",

@@ -276,9 +276,9 @@ ALUMNA_TEMP = '''
 ALUMNA = '''
     SELECT DISTINCT
         ids.id AS carthage_id,
-        TRIM(ids.firstname) AS fname,
-        TRIM(NVL(aname_rec.line1,"")) AS aname,
-        TRIM(ids.lastname) AS lname,
+        TRIM(ids.firstname) AS first_name,
+        TRIM(NVL(aname_rec.line1,"")) AS alt_name,
+        TRIM(ids.lastname) AS last_name,
         TRIM(ids.suffix) AS suffix,
         TRIM(INITCAP(ids.title)) AS prefix,
         TRIM(NVL(email.line1,"")) email,
@@ -286,26 +286,26 @@ ALUMNA = '''
             WHEN NVL(ids.decsd, "N") = "Y"
             THEN 1
         END AS is_deceased,
-        TRIM(NVL(maiden.lastname,"")) AS birth_lname,
+        TRIM(NVL(maiden.lastname,"")) AS birth_last_name,
         TRIM(NVL(progs.deg,"")) AS degree,
         CASE
             WHEN TRIM(progs.deg) IN ("BA","BS")
             THEN alum.cl_yr
         END AS class_year,
-        TRIM(NVL(aawork.line1, "")) AS business_name,
-        TRIM(NVL(aawork.line2,"")) AS business_address,
-        TRIM(NVL(aawork.line3,"")) AS business_address2,
+        TRIM(NVL(aawork.line1, "")) AS business_address_line1,
+        TRIM(NVL(aawork.line2,"")) AS business_address_line2,
+        TRIM(NVL(aawork.line3,"")) AS business_address_line3,
         TRIM(NVL(aawork.city,"")) AS business_city,
         TRIM(aawork.st) AS business_state,
-        TRIM(NVL(aawork.zip,"")) AS business_zip,
+        TRIM(NVL(aawork.zip,"")) AS business_postal_code,
         TRIM(aawork.ctry) AS business_country,
         TRIM(NVL(aawork.phone,"")) AS business_phone,
-        TRIM(ids.addr_line1) AS home_address1,
-        TRIM(ids.addr_line2) AS home_address2,
-        TRIM(ids.addr_line3) AS home_address3,
+        TRIM(ids.addr_line1) AS home_address_line1,
+        TRIM(ids.addr_line2) AS home_address_line2,
+        TRIM(ids.addr_line3) AS home_address_line3,
         TRIM(ids.city) AS home_city,
         TRIM(ids.st) AS home_state,
-        TRIM(ids.zip) AS home_zip,
+        TRIM(ids.zip) AS home_postal_code,
         TRIM(ids.ctry) AS home_country, TRIM(ids.phone) AS home_phone,
         TRIM(
             CASE

@@ -2,13 +2,16 @@ from django.conf import settings
 from django.test import TestCase
 
 from djaludir.core.sql import ACTIVITIES_TEMP
-from djaludir.manager.utils import get_activities
+from djaludir.manager.utils import get_activity
+from djaludir.core.models import Activity
 
 from djtools.utils.logging import seperator
 from djzbar.utils.informix import do_sql
 
 
 class ManagerUtilsActivitiesTestCase(TestCase):
+
+    fixtures = ['core/fixtures/user.json', 'core/fixtures/activity.json']
 
     def setUp(self):
         self.debug = settings.INFORMIX_DEBUG
@@ -22,12 +25,8 @@ class ManagerUtilsActivitiesTestCase(TestCase):
         print("test activities comparison")
         print(seperator())
 
-        activities = get_activities(self.cid, False)
-        athletics = get_activities(self.cid, True)
-
-        activities_temp = do_sql(
-            ACTIVITIES_TEMP(cid = self.cid), self.earl
-        ).fetchall()
+        activities = get_activity(self.cid, False)
+        athletics = get_activity(self.cid, True)
 
         activities_orig = []
 
@@ -39,6 +38,16 @@ class ManagerUtilsActivitiesTestCase(TestCase):
 
         print("activities_orig")
         print(activities_orig)
+
+        activities = Activity.objects.filter(user__id=self.cid)
+
+        activities_temp = []
+
+        for a in activities:
+            activities_temp.append((a.text,))
+
+        print("activities_temp")
+        print(activities_temp)
 
         activities_diff = []
         for temp in activities_temp:

@@ -37,7 +37,7 @@ class CoreAlumnaTestCase(TestCase):
 
         user = User.objects.get(pk=self.cid)
 
-        alumna, created = Alumna.objects.get_or_create(user = user)
+        alumna, created = Alumna.objects.get_or_create(user=user, pk=user.id)
 
         json_data = open(
             '{}/core/fixtures/alumna.json'.format(settings.ROOT_DIR)

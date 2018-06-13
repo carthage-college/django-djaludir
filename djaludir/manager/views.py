@@ -29,11 +29,11 @@ INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 @login_required
 def display(request, cid):
     # fetch information about the alumna
-    alumni = get_alumna(cid)
-    if alumni != None:
+    alumna = get_alumna(cid)
+    if alumna != None:
         activities = get_activity(cid, False)
         athletics = get_activity(cid, True)
-        relatives = get_relatives(cid)
+        relatives = get_relative(cid)
         privacy = get_privacy(cid)
     else:
         activities = None
@@ -44,7 +44,7 @@ def display(request, cid):
     return render(
         request, 'manager/display.html',
         {
-            'studentID':cid, 'person':alumni, 'activities':activities,
+            'studentID':cid, 'person':alumna, 'activities':activities,
             'athletics':athletics, 'relatives':relatives, 'privacy':privacy
         }
     )
@@ -304,11 +304,11 @@ def search(request, messageSent = False, permissionDenied = False):
 @login_required
 def edit(request, cid, success = False):
     if int(cid) == int(request.user.id) or request.user.is_superuser:
-        # Retrieve relevant information about the alumni
-        alumni = get_alumna(cid)
-        activities = get_activities(cid, False)
-        athletics = get_activities(cid, True)
-        relatives = get_relatives(cid)
+        # Retrieve relevant information about the alumna
+        alumna = get_alumna(cid)
+        activities = get_activity(cid, False)
+        athletics = get_activity(cid, True)
+        relatives = get_relative(cid)
         privacy = get_privacy(cid)
 
         # Assemble collections for the user to make choices
@@ -326,7 +326,7 @@ def edit(request, cid, success = False):
         return render(
             request,
             'manager/edit.html', {
-                'submitted':success,'studentID':cid, 'person':alumni,
+                'submitted':success,'studentID':cid, 'person':alumna,
                 'activities':activities, 'athletics':athletics,
                 'relatives':relatives, 'privacy':privacy, 'majors':majors,
                 'prefixes':prefixes, 'suffixes':suffixes,

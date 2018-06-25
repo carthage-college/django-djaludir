@@ -481,31 +481,31 @@ def email_differences(cid, request):
 
 
     # Section for personal information
-    if(student['prefix'].lower() != alumna.prefix.lower()):
+    if (student['prefix'].lower() != alumna.prefix.lower()):
         data['prefix'] = alumna.prefix
         data['original_prefix'] = student['prefix']
         data['personal'] = True
-    if(first_name != alumna.first_name):
+    if (first_name != alumna.first_name):
         data['first_name'] = alumna.first_name
         data['original_first_name'] = first_name
         data['personal'] = True
-    if(student['alt_name'] != alumna.alt_name):
+    if (student['alt_name'] != alumna.alt_name):
         data['alt_name'] = alumna.alt_name
         data['original_alt_name'] = student['alt_name']
         data['personal'] = True
-    if(student['birth_last_name'] != alumna.maiden_name):
+    if (student['birth_last_name'] != alumna.maiden_name):
         data['maiden_name'] = alumna.maiden_name
         data['original_maiden_name'] = student['birth_last_name']
         data['personal'] = True
-    if(student['last_name'] != alumna.last_name):
+    if (student['last_name'] != alumna.last_name):
         data['last_name'] = alumna.last_name
         data['original_last_name'] = student['last_name']
         data['personal'] = True
-    if(student['suffix'].lower() != alumna.suffix.lower()):
+    if (student['suffix'].lower() != alumna.suffix.lower()):
         data['suffix'] = alumna.suffix
         data['original_suffix'] = student['suffix']
         data['personal'] = True
-    if(student['email'] != alumna.email):
+    if (student['email'] != alumna.email):
         data['email'] = alumna.email
         data['original_email'] = student['email']
         data['personal'] = True

@@ -35,7 +35,7 @@
         "<b>{{data.alt_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.maiden_name %}
+  {% if data.maiden_name != data.original_maiden_name %}
     <dt {{dl_dt}}>
         Maiden Name
     </dt>
@@ -85,13 +85,15 @@
   <h3>Family</h3>
   <div>
     <div style="width:50%;float:left;">
+      <h4>Original</h4>
       <ol>
       {% for rel in data.relative_orig %}
-        <li>{{rel.0}}, {{rel.1}} ({{rel.2}})</li>
+        <li>{{rel.1}}, {{rel.0}} ({{rel.2}})</li>
       {% endfor %}
       </ol>
     </div>
     <div style="width:50%;float:left;">
+      <h4>New</h4>
       <ol>
       {% for rel in data.relative_temp %}
         <li>{{rel.last_name}}, {{rel.first_name}} ({{rel.relation_code}})</li>

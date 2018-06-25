@@ -47,9 +47,8 @@ $(document).ready(function(){
         var addedActivities = $('#activityList li').length + 1;
 
         // Create HTML for activity form
-        $('<li />')
-            .html($('<input />').attr({'type':'text','name':'activity' + addedActivities,'placeholder':'Activity Name'}))
-            .insertAfter($('#activityList li:last'));
+        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'activity' + addedActivities,'placeholder':'Activity Name'}))
+        $('#activityList').append($obj);
 
         // Update hidden activity count field
         $('input[name="activityCount"]').val(addedActivities);
@@ -57,14 +56,12 @@ $(document).ready(function(){
 
     // Attach functionality to "Add Athletic Team" button
     $('input[name="addTeam"]').click(function(){
-
         // Increment athletic counter
         var addedTeams = $('#athleticList li').length + 1;
 
         // Create HTML for athletic form
-        $('<li>')
-            .html($('<input />').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team'}))
-            .insertAfter($('#athleticList li:last'));
+        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team'}));
+        $('#athleticList').append($obj);
 
         // Update hidden athletic count field
         $('input[name="athleticCount"]').val(addedTeams);

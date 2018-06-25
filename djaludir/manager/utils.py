@@ -127,8 +127,8 @@ def set_relative(request):
         if(relRelation[-1:] == '1'):
             alumPrimary = True
 
-        if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-            relRelation = relRelation[0:-1]
+        #if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
+        #    relRelation = relRelation[0:-1]
 
         # If the relative has some value in their name and
         # a specified relationship, insert the record
@@ -445,7 +445,10 @@ def email_differences(cid, request):
 
     # Get information about the alum's relatives
     data['relative_orig'] = get_relative(cid)
-    data['relative_temp'] = Relative.objects.filter(user__id=cid, approved=False)
+    data['relative_temp'] = Relative.objects.filter(user__id=cid,approved=False)
+
+    for relative in data['relative_temp']:
+        relative.relation_code = settings.RELATIONSHIPS[relative.relation_code]
 
     # activities/athletics information
 

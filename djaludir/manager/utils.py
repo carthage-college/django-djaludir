@@ -441,20 +441,19 @@ def email_differences(cid, request):
     # Section for relatives
 
     # Get information about the alum's relatives
-    relative_org = get_relative(cid)
-    relative_new = Relative.objects.filter(user__id=cid)
+    relative_orig = get_relative(cid)
+    relative_temp = Relative.objects.filter(user__id=cid)
 
-    relatives = []
-    # compare current relatives with data from POST to determine if there
-    # were any changes or not
-    for r1 in relative_org:
-        # still not certain why we append '1' to primary relationships in the
+    orig = set()
+    temp = set()
+    for r in relative_orig:
+        # still not certain why we append '1' to primary relationships in
         # RELATIVES_ORIG sql so we strip it from here for now
-        ro = [r1.lastname, r1.firstname, r1.relcode[:-1]]
-        for r2 in relative_new:
-            rn = [r2.last_name, r2.first_name, r2.relation_code]
-            if ro != rn:
-                relatives.append(rn)
+        orig.add((r.lastname, r.firstname, r.relcode[:-1]))
+    for r in relative_temp:
+        temp.add((r.last_name, r.first_name, r.relation_code))
+
+    relatives = orig.symmetric_difference(temp)
 
     data['relatives'] = relatives
 

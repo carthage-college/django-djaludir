@@ -130,7 +130,7 @@
         <li class="ctrlHolder">
           <h3><label>Maiden Name</label></h3>
           <div>
-            <input type="text" name="maiden_name" value="{% if person.birth_last_name %}{% ifnotequal person.birth_last_name person.last_name %}({{person.birth_last_name}}){% endifnotequal %}{% endif %}">
+            <input type="text" name="maiden_name" value="{% if person.birth_last_name %}{% ifnotequal person.birth_last_name person.last_name %}{{person.birth_last_name}}{% endifnotequal %}{% endif %}">
           </div>
         </li>
         <li class="ctrlHolder">

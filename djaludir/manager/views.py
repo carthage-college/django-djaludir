@@ -315,7 +315,7 @@ def edit(request, cid, success = False):
         majors = get_majors()
         prefixes = dict([
             ('',''),('DR','Dr'),('MR','Mr'),('MRS','Mrs'),
-            ('MS','Ms'),('REV','Rev')
+            ('MS','Ms'),('Miss','Miss'),('REV','Rev')
         ])
         suffixes = ('','II','III','IV','JR','MD','PHD','SR')
         year_range = range(1900, date.today().year + 1)

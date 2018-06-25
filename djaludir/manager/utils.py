@@ -19,6 +19,9 @@ INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 
 NOW = datetime.datetime.now().strftime('%Y-%m-%d')
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def get_alumna(cid):
     """
@@ -99,7 +102,7 @@ def set_activity(request, tipo):
 
 def get_relative(cid):
     """
-    Retrieve collection of relatives (regardless of whether the alumn(a|us)
+    Retrieve collection of relatives (regardless of whether the alumna)
     is the primary or secondary relationship)
     """
 
@@ -441,21 +444,8 @@ def email_differences(cid, request):
     # Section for relatives
 
     # Get information about the alum's relatives
-    relative_orig = get_relative(cid)
-    relative_temp = Relative.objects.filter(user__id=cid)
-
-    orig = set()
-    temp = set()
-    for r in relative_orig:
-        # still not certain why we append '1' to primary relationships in
-        # RELATIVES_ORIG sql so we strip it from here for now
-        orig.add((r.lastname, r.firstname, r.relcode[:-1]))
-    for r in relative_temp:
-        temp.add((r.last_name, r.first_name, r.relation_code))
-
-    relatives = orig.symmetric_difference(temp)
-
-    data['relatives'] = relatives
+    data['relative_orig'] = get_relative(cid)
+    data['relative_temp'] = Relative.objects.filter(user__id=cid, approved=False)
 
     # activities/athletics information
 
@@ -488,6 +478,7 @@ def email_differences(cid, request):
     #
     # begin comparisions
     #
+
 
     # Section for personal information
     if(student['prefix'].lower() != alumna.prefix.lower()):

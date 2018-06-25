@@ -81,19 +81,26 @@
   {% endif %}
   </dl>
 {% endif %}
-{% if data.relatives %}
+{% if data.relative_temp %}
   <h3>Family</h3>
-  <dl {{dl_detail}}>
-  {% for rel in data.relatives %}
-    <dt {{dl_dt}}>
-        Relative
-    </dt>
-    <dd {{dl_dd}}>
-        {{rel.0}}, {{rel.1}} ({{rel.2}})
-    </dd>
-  {% endfor %}
-  </dl>
+  <div>
+    <div style="width:50%;float:left;">
+      <ol>
+      {% for rel in data.relative_orig %}
+        <li>{{rel.0}}, {{rel.1}} ({{rel.2}})</li>
+      {% endfor %}
+      </ol>
+    </div>
+    <div style="width:50%;float:left;">
+      <ol>
+      {% for rel in data.relative_temp %}
+        <li>{{rel.last_name}}, {{rel.first_name}} ({{rel.relation_code}})</li>
+      {% endfor %}
+      </ol>
+    </div>
+  </div>
 {% endif %}
+<div style="clear:both;"></div>
 {% if data.academics %}
   <h3>Academics</h3>
   <dl {{dl_detail}}>

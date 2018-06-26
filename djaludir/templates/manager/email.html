@@ -2,7 +2,7 @@
 {% if data.personal %}
   <h3>Personal Information</h3>
   <dl {{dl_detail}}>
-  {% if data.prefix %}
+  {% if data.prefix != data.original_prefix %}
     <dt {{dl_dt}}>
         Prefix
     </dt>
@@ -13,7 +13,7 @@
         "<b>{{data.prefix}}</b>"
     </dd>
   {% endif %}
-  {% if data.first_name %}
+  {% if data.first_name != data.original_first_name %}
     <dt {{dl_dt}}>
         First Name
     </dt>
@@ -24,7 +24,7 @@
         "<b>{{data.first_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.alt_name %}
+  {% if data.alt_name != data.original_alt_name %}
     <dt {{dl_dt}}>
         Preferred Name
     </dt>
@@ -46,7 +46,7 @@
         "<b>{{data.maiden_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.last_name %}
+  {% if data.last_name != data.original_last_name %}
     <dt {{dl_dt}}>
         Last Name
     </dt>
@@ -57,7 +57,7 @@
         "<b>{{data.last_name}}</b>"
     </dd>
   {% endif %}
-  {% if data.suffix %}
+  {% if data.suffix != data.original_suffix %}
     <dt {{dl_dt}}>
         Suffix
     </dt>
@@ -68,13 +68,13 @@
         "<b>{{data.suffix}}</b>"
     </dd>
   {% endif %}
-  {% if data.class_year %}
+  {% if data.class_year != data.original_class_year %}
     <dt {{dl_dt}}>
         Class Year
     </dt>
     <dd {{dl_dd}}>
         changed from
-        "{{data.original_classyear}}"
+        "{{data.original_class_year}}"
         to
         "<b>{{data.class_year}}</b>"
     </dd>
@@ -106,7 +106,18 @@
 {% if data.academics %}
   <h3>Academics</h3>
   <dl {{dl_detail}}>
-  {% if data.degree %}
+  {% if data.class_year != data.original_class_year %}
+    <dt {{dl_dt}}>
+        Class year
+    </dt>
+    <dd {{dl_dd}}>
+        changed from
+        "{{data.original_class_year}}"
+        to
+        "<b>{{data.class_year}}</b>"
+    </dd>
+  {% endif %}
+  {% if data.degree != data.original_degree %}
     <dt {{dl_dt}}>
         Degree
     </dt>
@@ -117,7 +128,7 @@
         "<b>{{data.degree}}</b>"
     </dd>
   {% endif %}
-  {% if data.major1 %}
+  {% if data.major1 != data.original_major1 %}
     <dt {{dl_dt}}>
         Major 1
     </dt>
@@ -128,7 +139,7 @@
         "<b>{{data.major1}}</b>"
     </dd>
   {% endif %}
-  {% if data.major2 %}
+  {% if data.major2 != data.original_major2 %}
     <dt {{dl_dt}}>
         Major 2
     </dt>
@@ -139,7 +150,7 @@
         "<b>{{data.major2}}</b>"
     </dd>
   {% endif %}
-  {% if data.major3 %}
+  {% if data.major3 != data.original_major3 %}
     <dt {{dl_dt}}>
         Major 3
     </dt>
@@ -150,7 +161,7 @@
         "<b>{{data.major3}}</b>"
     </dd>
   {% endif %}
-  {% if data.masters_grad_year %}
+  {% if data.masters_grad_year != data.original_masters_grad_year %}
     <dt {{dl_dt}}>
         Masters Graduation
     </dt>
@@ -179,7 +190,7 @@
 {% if data.business %}
   <h3>Professional Information</h3>
   <dl {{dl_detail}}>
-  {% if data.business_address_line1 %}
+  {% if data.business_address_line1 != data.original_business_address_line1 %}
     <dt {{dl_dt}}>
         Business 1
     </dt>
@@ -190,7 +201,7 @@
         "<b>{{data.business_address_line1}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_address_line2 %}
+  {% if data.business_address_line2 != data.original_business_address_line2 %}
     <dt {{dl_dt}}>
         Business 2
     </dt>
@@ -201,7 +212,7 @@
         "<b>{{data.business_address_line2}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_address_line3 %}
+  {% if data.business_address_line3 != data.original_business_address_line3 %}
     <dt {{dl_dt}}>
         Business 3
     </dt>
@@ -212,7 +223,7 @@
         "<b>{{data.business_address_line3}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_city %}
+  {% if data.business_city != data.original_business_city %}
     <dt {{dl_dt}}>
         Business City
     </dt>
@@ -223,7 +234,7 @@
         "<b>{{data.business_city}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_state %}
+  {% if data.business_state != data.original_business_state %}
     <dt {{dl_dt}}>
         Business State
     </dt>
@@ -234,7 +245,7 @@
         "<b>{{data.business_state}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_postal_code %}
+  {% if data.business_postal_code != data.original_business_postal_code %}
     <dt {{dl_dt}}>
         Business Postal Code
     </dt>
@@ -245,7 +256,7 @@
         "<b>{{data.business_postal_code}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_country %}
+  {% if data.business_country != data.original_business_country %}
     <dt {{dl_dt}}>
         Business Country
     </dt>
@@ -256,7 +267,7 @@
         "<b>{{data.business_country}}</b>"
     </dd>
   {% endif %}
-  {% if data.business_phone %}
+  {% if data.business_phone != data.original_business_phone %}
     <dt {{dl_dt}}>
         Business Phone
     </dt>
@@ -272,7 +283,7 @@
 {% if data.home %}
   <h3>Address</h3>
   <dl {{dl_detail}}>
-  {% if data.email %}
+  {% if data.email != data.original_email %}
     <dt {{dl_dt}}>
         Email
     </dt>
@@ -283,7 +294,7 @@
         "<b>{{data.email}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_phone %}
+  {% if data.home_phone != data.original_home_phone %}
     <dt {{dl_dt}}>
         Home Phone
     </dt>
@@ -294,7 +305,7 @@
         "<b>{{data.home_phone}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address_line1 %}
+  {% if data.home_address_line1 != data.original_home_address_line1 %}
     <dt {{dl_dt}}>
         Home Address
     </dt>
@@ -305,7 +316,7 @@
         "<b>{{data.home_address_line1}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address_line2 %}
+  {% if data.home_address_line2 != data.original_home_address_line2 %}
     <dt {{dl_dt}}>
         Home Address Line 2
     </dt>
@@ -316,7 +327,7 @@
         "<b>{{data.home_address_line2}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_address_line3 %}
+  {% if data.home_address_line3 != data.original_home_address_line3 %}
     <dt {{dl_dt}}>
         Home Address Line 3
     </dt>
@@ -327,7 +338,7 @@
         "<b>{{data.home_address_line3}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_city %}
+  {% if data.home_city != data.original_home_city %}
     <dt {{dl_dt}}>
         Home City
     </dt>
@@ -338,7 +349,7 @@
         "<b>{{data.home_city}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_state %}
+  {% if data.home_state != data.original_home_state %}
     <dt {{dl_dt}}>
         Home State
     </dt>
@@ -349,7 +360,7 @@
         "<b>{{data.home_state}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_postal_code %}
+  {% if data.home_postal_code != data.original_home_postal_code %}
     <dt {{dl_dt}}>
         Home Postal Code
     </dt>
@@ -360,7 +371,7 @@
         "<b>{{data.home_postal_code}}</b>"
     </dd>
   {% endif %}
-  {% if data.home_country %}
+  {% if data.home_country != data.original_home_country %}
     <dt {{dl_dt}}>
         Home Country
     </dt>

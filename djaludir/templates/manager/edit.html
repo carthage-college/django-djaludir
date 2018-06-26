@@ -154,14 +154,19 @@
         <li class="ctrlHolder">
           <h3><label>Class year</label></h3>
           <div>
+            {% if person.class_year and person.class_year != 0 %}
+            <b>{{person.class_year}}</b>
+            <input type="hidden" name="class_year" value="{{person.class_year}}">
+            {% else %}
             <select name="class_year">
               <option value=""></option>
               {% for year in years reversed %}
-                <option value="{{year}}" {% ifequal year person.class_year %}selected="selected"{% endifequal %}>
+                <option value="{{year}}">
                   {{year}}
                 </option>
               {% endfor %}
             </select>
+            {% endif %}
           </div>
         </li>
       </ol>

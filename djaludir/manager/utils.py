@@ -124,11 +124,8 @@ def set_relative(request):
         # we must identify if the alumna matches the first or
         # second role in the relationship
         alumPrimary = False
-        if(relRelation[-1:] == '1'):
+        if (relRelation[-1:] == '1'):
             alumPrimary = True
-
-        #if(relRelation[-1:] == '1' or relRelation[-1:] == '2'):
-        #    relRelation = relRelation[0:-1]
 
         # If the relative has some value in their name and
         # a specified relationship, insert the record
@@ -482,7 +479,6 @@ def email_differences(cid, request):
     # begin comparisions
     #
 
-
     # Section for personal information
     if (student['prefix'].lower() != alumna.prefix.lower()):
         data['prefix'] = alumna.prefix
@@ -514,8 +510,14 @@ def email_differences(cid, request):
         data['personal'] = True
 
     # Section for academics
-    major1 = major2 = major3 = ''
-    if(student['degree'] != alumna.degree):
+    major1 = ''
+    major2 = ''
+    major3 = ''
+    if (student['class_year'] != alumna.class_year):
+        data['class_year'] = alumna.class_year
+        data['original_class_year'] = student['class_year']
+        data['academics'] = True
+    if (student['degree'] != alumna.degree):
         data['degree'] = alumna.degree
         data['original_degree'] = student['degree']
         data['academics'] = True
@@ -523,7 +525,7 @@ def email_differences(cid, request):
         if m[0] == alumna.major1:
             major1 = m[1]
             break
-    if(student['major1'] != major1):
+    if (student['major1'] != major1):
         data['major1'] = major1
         data['original_major1'] = student['major1']
         data['academics'] = True
@@ -531,7 +533,7 @@ def email_differences(cid, request):
         if m[0] == alumna.major2:
             major2 = m[1]
             break
-    if(student['major2'] != major2):
+    if (student['major2'] != major2):
         data['major2'] = major2
         data['original_major2'] = student['major2']
         data['academics'] = True
@@ -539,11 +541,11 @@ def email_differences(cid, request):
         if m[0] == alumna.major3:
             major3 = m[1]
             break
-    if(student['major3'] != major3):
+    if (student['major3'] != major3):
         data['major3'] = major3
         data['original_major3'] = student['major3']
         data['academics'] = True
-    if(student['masters_grad_year'] != alumna.masters_grad_year):
+    if (student['masters_grad_year'] != alumna.masters_grad_year):
         data['masters_grad_year'] = alumna.masters_grad_year
         data['original_masters_grad_year'] = student['masters_grad_year']
         data['academics'] = True

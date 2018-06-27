@@ -147,36 +147,6 @@ RELATIVES_ORIG = '''
         (prim_id = {cid} OR sec_id = {cid})
 '''.format
 
-HOMEADDRESS_TEMP = '''
-    SELECT FIRST 1
-        TRIM(address_line1) AS address_line1,
-        TRIM(address_line2) AS address_line2,
-        TRIM(address_line3) AS address_line3, TRIM(city) AS city,
-        TRIM(state) AS state, TRIM(zip) AS zip, TRIM(country) AS country,
-        TRIM(phone) AS phone
-    FROM
-        stg_aludir_address
-    WHERE
-        id = {cid} AND aa = 'HOME' AND NVL(approved, '') = ''
-    ORDER BY
-        aa_no DESC
-'''.format
-
-WORKADDRESS_TEMP = '''
-    SELECT FIRST 1
-        TRIM(address_line1) AS address_line1,
-        TRIM(address_line2) AS address_line2,
-        TRIM(address_line3) AS address_line3, TRIM(city) AS city,
-        TRIM(state) AS state, TRIM(zip) AS zip, TRIM(country) AS country,
-        TRIM(phone) AS phone
-    FROM
-        stg_aludir_address
-    WHERE
-        id = {cid} AND aa = 'WORK' AND NVL(approved, '') = ''
-    ORDER BY
-        aa_no DESC
-'''.format
-
 ACTIVITIES = '''
     SELECT
         TRIM(invl_table.txt) AS {fieldname}
@@ -200,77 +170,6 @@ ACTIVITIES = '''
         )
     ORDER BY
         TRIM(invl_table.txt)
-'''.format
-
-ACTIVITIES_TEMP = '''
-    SELECT
-        TRIM(activityText)
-    FROM
-        stg_aludir_activity
-    WHERE
-        id = {cid} AND NVL(approved, "") = ""
-'''.format
-
-RELATIVES_TEMP = '''
-    SELECT
-        TRIM(fname) AS fname, TRIM(lname) AS lname,
-        CASE
-        WHEN
-            TRIM(relcode) = 'HW'   AND alum_primary = 'N' THEN 'Husband'
-        WHEN
-            TRIM(relcode) = 'HW'   AND alum_primary = 'Y' THEN 'Wife'
-        WHEN
-            TRIM(relcode) = 'PC'   AND alum_primary = 'N' THEN 'Parent'
-        WHEN
-            TRIM(relcode) = 'PC'   AND alum_primary = 'Y' THEN 'Child'
-        WHEN
-            TRIM(relcode) = 'GPGC' AND alum_primary = 'N' THEN 'Grandparent'
-        WHEN
-            TRIM(relcode) = 'GPGC' AND alum_primary = 'Y' THEN 'Grandchild'
-        WHEN
-            TRIM(relcode) = 'AUNN' AND alum_primary = 'N' THEN 'Aunt/Uncle'
-        WHEN
-            TRIM(relcode) = 'AUNN' AND alum_primary = 'Y' THEN 'Niece/Nephew'
-        WHEN
-            TRIM(relcode) = 'SBSB' THEN 'Sibling'
-        WHEN
-            TRIM(relcode) = 'COCO' THEN 'Cousin'
-        ELSE
-            TRIM(relcode)
-        END AS
-            relcode
-    FROM
-        stg_aludir_relative
-    WHERE
-        id = {cid} AND NVL(approved, "") = ""
-'''.format
-
-ALUMNA_TEMP = '''
-    SELECT FIRST 1
-        TRIM(fname) AS fname, TRIM(aname) AS aname, TRIM(lname) AS lname,
-        TRIM(suffix) AS suffix, TRIM(prefix) AS prefix, TRIM(email) AS email,
-        TRIM(maidenname) AS maidenname, TRIM(degree) AS degree, class_year,
-        TRIM(business_name) AS business_name, TRIM(major1.txt) AS major1,
-        TRIM(major2.txt) AS major2, TRIM(major3.txt) AS major3,
-        masters_grad_year, TRIM(job_title) AS job_title
-    FROM
-        stg_aludir_alumni alum
-    LEFT JOIN
-        major_table major1
-    ON
-        alum.major1 = major1.major
-    LEFT JOIN
-        major_table major2
-    ON
-        alum.major2 = major2.major
-    LEFT JOIN
-        major_Table major3
-    ON
-        alum.major3 = major3.major
-    WHERE
-        id = {cid} AND NVL(approved, '') = ''
-    ORDER BY
-        alum_no DESC
 '''.format
 
 ALUMNA = '''

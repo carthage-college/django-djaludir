@@ -72,6 +72,17 @@ ACTIVITY_SEARCH = '''
         TRIM(invl_table.txt)
 '''.format
 
+ACTIVITY_SEARCH_JX = '''
+SELECT
+    TRIM(attribute_type.value) as txt
+FROM
+    attribute_type
+WHERE
+    LOWER(attribute_type.value) LIKE "%{search_string}%"
+ORDER BY
+    TRIM(attribute_type.value)
+'''.format
+
 MAJORS = '''
     SELECT
         DISTINCT TRIM(major) AS major_code,

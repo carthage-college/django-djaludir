@@ -1,11 +1,9 @@
 #-- coding: utf-8 --
-from datetime import date
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.template import RequestContext, loader, Context
+from django.shortcuts import render
 
 from djaludir.core.sql import (
     ACTIVITY_SEARCH, RELATIVES_ORIG, RELATIVES_TEMP, SEARCH
@@ -20,8 +18,7 @@ from djaludir.manager.utils import (
 from djtools.utils.mail import send_mail
 from djzbar.utils.informix import do_sql
 
-import logging
-logger = logging.getLogger(__name__)
+from datetime import date
 
 INFORMIX_DEBUG = settings.INFORMIX_DEBUG
 

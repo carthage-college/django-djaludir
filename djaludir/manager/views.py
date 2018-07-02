@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
 from djaludir.core.sql import (
-    ACTIVITY_SEARCH, RELATIVES_ORIG, RELATIVES_TEMP, SEARCH
+    ACTIVITY_SEARCH, RELATIVES_ORIG, SEARCH
 )
 from djaludir.manager.utils import (
     clear_privacy, email_differences,

@@ -47,7 +47,7 @@ class Activity(Base):
     """
 
     code = models.CharField(max_length=4, null=True, blank=True)
-    text = models.CharField(max_length=32, null=True, blank=True)
+    text = models.CharField(max_length=128, null=True, blank=True)
 
     def __unicode__(self):
         return u"{}".format(self.text)

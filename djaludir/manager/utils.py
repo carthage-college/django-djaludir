@@ -3,8 +3,7 @@ from django.conf import settings
 from django.shortcuts import render
 
 from djaludir.core.sql import (
-    ACTIVITIES, ACTIVITIES_TEMP, ALUMNA, ALUMNA_TEMP, HOMEADDRESS_TEMP,
-    MAJORS, PRIVACY, RELATIVES_ORIG, RELATIVES_TEMP, WORKADDRESS_TEMP,
+    ACTIVITIES, ALUMNA, MAJORS, PRIVACY, RELATIVES_ORIG
 )
 from djaludir.core.models import (
     Activity, Address, Alumna, Relative, EXCLUDE_FIELDS

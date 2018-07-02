@@ -47,7 +47,7 @@ $(document).ready(function(){
         var addedActivities = $('#activityList li').length + 1;
 
         // Create HTML for activity form
-        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'activity' + addedActivities,'placeholder':'Activity Name'}))
+        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'activity' + addedActivities,'placeholder':'Activity Name','maxlength':'128'}))
         $('#activityList').append($obj);
 
         // Update hidden activity count field
@@ -60,7 +60,7 @@ $(document).ready(function(){
         var addedTeams = $('#athleticList li').length + 1;
 
         // Create HTML for athletic form
-        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team'}));
+        $obj = $('<li>').html($('<input>').attr({'type':'text','name':'athletic' + addedTeams,'placeholder':'Athletic Team','maxlength':'128'}));
         $('#athleticList').append($obj);
 
         // Update hidden athletic count field

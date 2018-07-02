@@ -288,7 +288,7 @@
           <ul id="activityList">
             {% for org in activities %}
               <li>
-                <input type="text"
+                <input type="text" maxlength="128"
                     name="activity{{forloop.counter}}"
                     value="{{org.activity}}">
               </li>
@@ -304,7 +304,7 @@
           <ul id="athleticList">
             {% for team in athletics %}
               <li>
-                <input type="text"
+                <input type="text" maxlength="128"
                     name="athletic{{forloop.counter}}"
                     value="{{team.sport}}">
               </li>

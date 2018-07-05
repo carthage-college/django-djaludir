@@ -68,17 +68,6 @@
         "<b>{{data.suffix}}</b>"
     </dd>
   {% endif %}
-  {% if data.class_year != data.original_class_year %}
-    <dt {{dl_dt}}>
-        Class Year
-    </dt>
-    <dd {{dl_dd}}>
-        changed from
-        "{{data.original_class_year}}"
-        to
-        "<b>{{data.class_year}}</b>"
-    </dd>
-  {% endif %}
   </dl>
 {% endif %}
 {% if data.relative_temp %}

@@ -513,8 +513,8 @@ def email_differences(cid, request):
     major2 = ''
     major3 = ''
     if (student['class_year'] != alumna.class_year):
-        data['class_year'] = alumna.class_year
-        data['original_class_year'] = student['class_year']
+        data['class_year'] = str(alumna.class_year)
+        data['original_class_year'] = str(student['class_year'])
         data['academics'] = True
     if (student['degree'] != alumna.degree):
         data['degree'] = alumna.degree

@@ -167,8 +167,11 @@ SESSION_COOKIE_NAME = ''
 SESSION_COOKIE_AGE = 86400
 # App constants
 MANAGER_RECIPIENTS = []
-# Unit Tests
-TEST_COLLEGE_ID = 0
+# Tests
+TEST_USER_ID = 0
+TEST_USER_USERNAME = ''
+TEST_USER_PASSWORD = ''
+TEST_USER_EMAIL = ''
 # Hardcoded collection of relationships because the entire collection
 # of values in rel_table are not valid for the alumni directory
 RELATIONSHIPS = dict([

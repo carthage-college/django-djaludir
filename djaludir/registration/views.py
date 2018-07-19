@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -212,42 +213,61 @@ def create_ldap(request):
                 base=settings.LDAP_BASE_PWM
             )
 
-            user = l.create(data)
-            # set session ldap_cn, why?
-            request.session['ldap_cn'] = user[0][1]['cn'][0]
-            if not settings.DEBUG:
-                # update informix cvid_rec.ldap_user
-                sql = '''
-                    UPDATE cvid_rec SET ldap_name='{}',
-                    ldap_add_date = TODAY
-                    WHERE cx_id = '{}'
-                '''.format(
-                    user[0][1]['cn'][0], user[0][1]['carthageNameID'][0]
+            try:
+                user = l.create(data)
+                # set session ldap_cn, why?
+                request.session['ldap_cn'] = user[0][1]['cn'][0]
+                if not settings.DEBUG:
+                    # update informix cvid_rec.ldap_user
+                    sql = '''
+                        UPDATE cvid_rec SET ldap_name='{}',
+                        ldap_add_date = TODAY
+                        WHERE cx_id = '{}'
+                    '''.format(
+                        user[0][1]['cn'][0], user[0][1]['carthageNameID'][0]
+                    )
+                    ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
+                # create the django user
+                djuser = l.dj_create(user)
+                data['djuser'] = djuser
+                # authenticate user
+                djuser.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, djuser)
+
+                # send email to admins
+                subject = "[LDAP][Create] {} {}".format(
+                    user[0][1]['givenName'][0],
+                    user[0][1]['sn'][0]
                 )
-                ln = do_sql(sql, key=settings.INFORMIX_DEBUG)
-            # create the django user
-            djuser = l.dj_create(user)
-            data['djuser'] = djuser
-            # authenticate user
-            djuser.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, djuser)
 
-            # send email to admins
-            subject = "[LDAP][Create] {} {}".format(
-                user[0][1]['givenName'][0],
-                user[0][1]['sn'][0]
-            )
+                if settings.DEBUG:
+                    to_list = [settings.SERVER_EMAIL]
+                else:
+                    to_list = settings.LDAP_CREATE_TO_LIST
 
-            if settings.DEBUG:
-                to_list = [settings.SERVER_EMAIL]
-            else:
-                to_list = settings.LDAP_CREATE_TO_LIST
+                send_mail(
+                    request,to_list, subject, data['mail'],
+                    'registration/create_ldap_email.html', data
+                )
+                return HttpResponseRedirect(
+                    reverse_lazy('alumni_directory_home')
+                )
+            except:
+                message = """
+                    There was an error creating your account. Verify that
+                    your password does not contain any English words like
+                    the names of months, colors, etc.
+                """
 
-            send_mail(
-                request,to_list, subject, data['mail'],
-                'registration/create_ldap_email.html', data
-            )
-            return HttpResponseRedirect(reverse_lazy('alumni_directory_home'))
+                messages.add_message(
+                    request, messages.ERROR, e, extra_tags='alert alert-danger'
+                )
+
+                return render(
+                    request,
+                    'registration/create_ldap.html', {'form':form,}
+                )
+
         else:
             return render(
                 request,

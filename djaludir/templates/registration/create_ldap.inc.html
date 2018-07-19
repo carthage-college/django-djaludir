@@ -7,5 +7,12 @@
     </div>
 </div>
 <div class="forms-container">
+    {% if messages %}
+      {% for message in messages %}
+      <div id="messages" class="{{ message.tags }}">
+        <strong>{{ message|safe }}</strong>
+      </div>
+      {% endfor %}
+    {% endif messages %}
     {% include "includes/generic_form.html" %}
 </div>

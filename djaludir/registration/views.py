@@ -252,15 +252,20 @@ def create_ldap(request):
                 return HttpResponseRedirect(
                     reverse_lazy('alumni_directory_home')
                 )
-            except:
-                message = """
-                    There was an error creating your account. Verify that
-                    your password does not contain any English words like
-                    the names of months, colors, etc.
-                """
-
+            except Exception as e:
+                if '16019' in str(e):
+                    error = """
+                        There was an error creating your account. Verify that
+                        your password does not contain any English words like
+                        the names of months, colors, etc.
+                    """
+                else:
+                    error = """
+                        There was an error creating your account. Verify that
+                        your passwords meet the criteria.
+                    """
                 messages.add_message(
-                    request, messages.ERROR, e, extra_tags='alert alert-danger'
+                    request, messages.ERROR, error, extra_tags='alert alert-danger'
                 )
 
                 return render(

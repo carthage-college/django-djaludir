@@ -20,6 +20,9 @@ from djzbar.utils.informix import do_sql
 from djtools.utils.mail import send_mail
 from djauth.LDAPManager import LDAPManager
 
+import logging
+ldap_logger = logging.getLogger('registration_logger')
+
 
 def error_mess(val):
     error = '''
@@ -253,6 +256,10 @@ def create_ldap(request):
                     reverse_lazy('alumni_directory_home')
                 )
             except Exception as e:
+
+                # log it for later
+                ldap_logger.debug('ldap error: {}\n{}'.format(e,data))
+
                 if '16019' in str(e):
                     error = """
                         There was an error creating your account. Verify that
@@ -264,6 +271,7 @@ def create_ldap(request):
                         There was an error creating your account. Verify that
                         your passwords meet the criteria.
                     """
+
                 messages.add_message(
                     request, messages.ERROR, error, extra_tags='alert alert-danger'
                 )

@@ -337,34 +337,54 @@ def modify_ldap_password(request):
                     password=settings.LDAP_PASS_PWM,
                     base=settings.LDAP_BASE_PWM
                 )
-
                 search = l.search(objects[0].id)
                 if search:
                     # now modify password
                     # modify_s() returns a tuple with status code
                     # and an empty list: (103, [])
-                    status = l.modify(
-                        search[0][0], 'userPassword',
-                        data['userPassword']
-                    )
-                    # success = 103
-                    if status[0] == 103:
-                        # success
-                        request.session['ldap_password_success'] = True
-                        # Get the user record or create one with no privileges.
-                        try:
-                            user = User.objects.get(
-                                username__exact=search[0][1]['cn'][0]
-                            )
-                        except:
-                            # Create a User object.
-                            user = l.dj_create(search)
-                        # authenticate user
-                        user.backend = 'django.contrib.auth.backends.ModelBackend'
-                        login(request, user)
-                        return HttpResponseRedirect(
-                            reverse_lazy('alumni_directory_home')
+                    try:
+                        status = l.modify(
+                            search[0][0], 'userPassword',
+                            data['userPassword']
                         )
+                        # success = 103
+                        if status[0] == 103:
+                            # success
+                            request.session['ldap_password_success'] = True
+                            # Get the user record or create one with no privileges.
+                            try:
+                                user = User.objects.get(
+                                    username__exact=search[0][1]['cn'][0]
+                                )
+                            except:
+                                # Create a User object.
+                                user = l.dj_create(search)
+                            # authenticate user
+                            user.backend = 'django.contrib.auth.backends.ModelBackend'
+                            login(request, user)
+                            return HttpResponseRedirect(
+                                reverse_lazy('alumni_directory_home')
+                            )
+                    except Exception as e:
+                        # log it for later
+                        ldap_logger.debug('ldap error: {}\n{}'.format(e,data))
+
+                        if '16019' in str(e):
+                            error = """
+                                There was an error creating your account. Verify that
+                                your password does not contain any English words like
+                                the names of months, colors, etc.
+                            """
+                        else:
+                            error = """
+                                There was an error creating your account. Verify that
+                                your passwords meet the criteria.
+                            """
+
+                        messages.add_message(
+                            request, messages.ERROR, error, extra_tags='alert alert-danger'
+                        )
+
                     else:
                         # fail
                         errors['ldap'] = "We failed to update your password."

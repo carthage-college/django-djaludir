@@ -181,19 +181,20 @@ RELATIONSHIPS = dict([
     ('AUNN2','Niece/Nephew')
 ])
 # logging
-LOG_FILEPATH = os.path.join(os.path.dirname(__file__), 'logs/')
-LOG_FILENAME = LOG_FILEPATH + 'debug.log'
+LOG_FILEPATH = os.path.join(os.path.dirname(__file__), "logs/")
+LOG_FILENAME = LOG_FILEPATH + "debug.log"
+LDAP_LOG_FILENAME = LOG_FILEPATH + 'ldap.log'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
-            'datefmt' : '%Y/%b/%d %H:%M:%S'
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%Y/%b/%d %H:%M:%S"
         },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s',
-            'datefmt' : '%Y/%b/%d %H:%M:%S'
+            'datefmt' : "%Y/%b/%d %H:%M:%S"
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -213,6 +214,15 @@ LOGGING = {
             'backupCount': 2,
             'formatter': 'standard',
         },
+        'ldap_logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'], # run logger in production
+            'filename': LDAP_LOG_FILENAME,
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
         'console':{
             'level':'INFO',
             'class':'logging.StreamHandler',
@@ -226,8 +236,8 @@ LOGGING = {
         }
     },
     'loggers': {
-        'djaludir.registration': {
-            'handlers':['logfile'],
+        'registration_logger': {
+            'handlers':['ldap_logfile'],
             'propagate': True,
             'level':'DEBUG',
         },
@@ -240,7 +250,7 @@ LOGGING = {
             'handlers':['logfile'],
             'propagate': True,
             'level':'DEBUG',
-        }
+        },
         'django': {
             'handlers':['console'],
             'propagate': True,

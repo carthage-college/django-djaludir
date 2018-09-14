@@ -226,7 +226,7 @@
           <h3><label>Degree</label></h3>
           <div>
             <input type="text" name="degree" value="{{person.degree}}"
-              placeholder="ex: BA, MBA, etc">
+              maxlength="4" placeholder="ex: BA, MBA, etc">
           </div>
         </li>
         <li class="ctrlHolder">
@@ -396,7 +396,7 @@
         <li class="ctrlHolder">
           <h3><label>Business phone</label></h3>
           <div>
-            <input type="text" name="business_phone"
+            <input type="text" name="business_phone" maxlength="12"
               value="{{person.business_phone}}">
           </div>
         </li>

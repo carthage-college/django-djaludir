@@ -1,9 +1,10 @@
 {% extends "core/home.html" %}
+{% load livewhale_api %}
 {% block title %}Send Message &mdash; {{block.super}}{% endblock %}
 
 {% block content %}
-    <p><a href="{% url 'manager_search' %}">Return to search</a></p>
-    
+    {% get_lw_content as terms blurbs 2651 %}
+    {{terms.body}}
     {% if validRecipient %}
     <form action="{% url 'send_message_user' %}" method="post">
         {% csrf_token %}

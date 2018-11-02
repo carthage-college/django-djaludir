@@ -6,7 +6,7 @@
     {% get_lw_content as terms blurbs 2651 %}
     {{terms.body}}
     {% if validRecipient %}
-    <form action="{% url 'send_message_user' %}" method="post">
+    <form action="{% url 'send_message_user' %}" method="post" class="form">
         {% csrf_token %}
         <input type="hidden" name="recipientID" value="{{recipient.id}}" />
         <fieldset>

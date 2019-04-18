@@ -7,8 +7,6 @@ import sys
 # python
 sys.path.append('/data2/python_venv/2.7/djaludir/lib/python2.7/')
 sys.path.append('/data2/python_venv/2.7/djaludir/lib/python2.7/site-packages/')
-sys.path.append('/data2/python_venv/2.7/djaludir/lib/django_projects/')
-sys.path.append('/data2/python_venv/2.7/djaludir/lib/django-djaludir/')
 # django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djaludir.settings')
 os.environ.setdefault('PYTHON_EGG_CACHE', '')

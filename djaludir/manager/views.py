@@ -149,17 +149,17 @@ def search(request, messageSent = False, permissionDenied = False):
                 if fieldname == 'activity':
                     if len(orSQL) > 0:
                         orSQL += ' OR'
-                    orSQL += ' LOWER(invl_table.txt) LIKE "%%{}%%"'.format(
+                    orSQL += u' LOWER(invl_table.txt) LIKE "%%{}%%"'.format(
                         searchterm.lower()
                     )
                 elif fieldname == 'alum.cl_yr' or fieldname == 'ids.id':
                     if len(andSQL) > 0:
                         andSQL += ' AND'
-                    andSQL += ' {} = {}'.format(fieldname, searchterm)
+                    andSQL += u' {} = {}'.format(fieldname, searchterm)
                 else:
                     if len(andSQL) > 0:
                         andSQL += ' AND'
-                    andSQL += '''
+                    andSQL += u'''
                         LOWER(TRIM({}::varchar(250))) LIKE "%%{}%%"
                     '''.format(
                         fieldname, searchterm.lower()
@@ -171,7 +171,7 @@ def search(request, messageSent = False, permissionDenied = False):
         # If search criteria includes activity or sport
         # add the involvement tables
         if 'activity' in fieldlist:
-            selectFromSQL +='''
+            selectFromSQL += u'''
                 LEFT JOIN involve_rec ON ids.id = involve_rec.id
                 LEFT JOIN invl_table ON involve_rec.invl = invl_table.invl
             '''
@@ -180,7 +180,7 @@ def search(request, messageSent = False, permissionDenied = False):
         # QUESTION - Should we check all three major fields
         # for each major specified or is sequence important?
         if 'major1.txt' in fieldlist or 'major2.txt' in fieldlist:
-            selectFromSQL += '''
+            selectFromSQL += u'''
                 LEFT JOIN
                     prog_enr_rec progs
                 ON
@@ -189,11 +189,11 @@ def search(request, messageSent = False, permissionDenied = False):
                     progs.acst = "GRAD"
             '''
             if 'major1.txt' in fieldlist:
-                selectFromSQL += '''
+                selectFromSQL += u'''
                     LEFT JOIN major_table major1 ON progs.major1 = major1.major
                 '''
             if 'major2.txt' in fieldlist:
-                selectFromSQL += '''
+                selectFromSQL += u'''
                     LEFT JOIN major_table major2 ON progs.major2 = major2.major
                 '''
 
@@ -204,7 +204,7 @@ def search(request, messageSent = False, permissionDenied = False):
             'ids.id', 'alum.cl_yr'
         ]
         if bool(set(personal) & set(fieldlist)) == True:
-            selectFromSQL += '''
+            selectFromSQL += u'''
                 LEFT JOIN
                     stg_aludir_privacy per_priv
                 ON
@@ -214,11 +214,11 @@ def search(request, messageSent = False, permissionDenied = False):
             '''
             if len(andSQL) > 0:
                 andSQL += ' AND'
-            andSQL += ' NVL(per_priv.display, "N") = "N"'
+            andSQL += u' NVL(per_priv.display, "N") = "N"'
 
         academics = ['activity', 'major1.txt', 'major2.txt']
         if bool(set(academics) & set(fieldlist)) == True:
-            selectFromSQL += '''
+            selectFromSQL += u'''
                 LEFT JOIN
                     stg_aludir_privacy acad_priv
                 ON
@@ -228,11 +228,11 @@ def search(request, messageSent = False, permissionDenied = False):
             '''
             if len(andSQL) > 0:
                 andSQL += ' AND'
-            andSQL += ' NVL(acad_priv.display, "N") = "N"'
+            andSQL += u' NVL(acad_priv.display, "N") = "N"'
 
         professional = ['job_title']
         if bool(set(professional) & set(fieldlist)) == True:
-            selectFromSQL += '''
+            selectFromSQL += u'''
                 LEFT JOIN
                     stg_aludir_privacy pro_priv
                 ON
@@ -242,11 +242,11 @@ def search(request, messageSent = False, permissionDenied = False):
             '''
             if len(andSQL) > 0:
                 andSQL += ' AND'
-            andSQL += ' NVL(pro_priv.display, "N") = "N"'
+            andSQL += u' NVL(pro_priv.display, "N") = "N"'
 
         address = ['home_city', 'home_state']
         if bool(set(address) & set(fieldlist)) == True:
-            selectFromSQL += '''
+            selectFromSQL += u'''
                 LEFT JOIN
                     stg_aludir_privacy add_priv
                 ON
@@ -256,17 +256,17 @@ def search(request, messageSent = False, permissionDenied = False):
             '''
             if len(andSQL) > 0:
                 andSQL += ' AND'
-            andSQL += ' NVL(add_priv.display, "N") = "N"'
+            andSQL += u' NVL(add_priv.display, "N") = "N"'
 
         # If search criteria were submitted, flesh out the sql query.
         # Include "and's", "or's" and sorting
         if len(andSQL + orSQL) > 0:
             if len(orSQL) > 0:
-                orSQL = '({})'.format(orSQL)
+                orSQL = u'({})'.format(orSQL)
             if len(andSQL) > 0 and len(orSQL) > 0:
 
-                andSQL = ' AND {}'.format(andSQL)
-            sql = '''
+                andSQL = u' AND {}'.format(andSQL)
+            sql = u'''
                 {}
                 WHERE
                     {} {}
